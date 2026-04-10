@@ -18,7 +18,8 @@ import {
   lucideUser,
   lucideInfo,
   lucideChevronDown,
-  lucideSettings
+  lucideSettings,
+  lucideMenu
 } from '@ng-icons/lucide';
 
 @Component({
@@ -40,6 +41,7 @@ import {
       lucideChevronRight,
       lucideLogOut,
       lucideUser,
+      lucideMenu,
       lucideInfo,
       lucideChevronDown,
       lucideSettings
