@@ -217,39 +217,33 @@
   <!-- Modals -->
   
   <!-- Sign Modal -->
-  <div *ngIf="showSignModal()" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-    <div class="bg-card w-full max-w-md rounded-2xl shadow-2xl border border-border overflow-hidden animate-in zoom-in-95 duration-200">
-      <div class="bg-secondary p-6 text-secondary-foreground text-center relative">
-        <div class="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-4 border border-white/20">
-          <ng-icon name="lucideFileCheck" class="text-3xl"></ng-icon>
+  <div *ngIf="showSignModal()" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div class="bg-card w-full max-w-md rounded-xl shadow-2xl border border-border overflow-hidden">
+      <div class="flex items-center gap-3 p-4 border-b border-border">
+        <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-primary/10">
+          <ng-icon name="lucidePenTool" class="text-xl text-primary"></ng-icon>
         </div>
-        <h3 class="font-display text-xl font-extrabold tracking-tight">Firma Digital</h3>
-        <p class="text-white/70 text-sm font-body mt-1">¿Desea aplicar su firma electrónica a este documento?</p>
+        <div>
+          <h3 class="font-display text-lg font-bold">Firmar Documento</h3>
+          <p class="text-xs text-muted-foreground font-body">Aplicar firma electrónica</p>
+        </div>
       </div>
-      <div class="p-6 space-y-4">
-        <div class="bg-muted/50 rounded-xl p-4 border border-border/50">
-          <div class="flex flex-col gap-1">
-            <span class="text-[9px] font-ui font-bold text-primary uppercase tracking-widest">Documento a firmar</span>
-            <span class="font-display font-extrabold text-foreground">{{ selectedFirma()?.id }}</span>
-            <span class="text-xs text-muted-foreground font-body">{{ selectedFirma()?.tipoDocumento }}</span>
-          </div>
+      <div class="p-4 space-y-4">
+        <div class="bg-muted/50 rounded-lg p-3 border border-border/50">
+          <p class="text-[10px] font-ui text-muted-foreground uppercase">Documento</p>
+          <p class="font-display font-bold">{{ selectedFirma()?.id }}</p>
         </div>
         
-        <div class="flex flex-col items-center gap-3 py-2">
-          <div class="w-12 h-12 rounded-full border-t-2 border-primary animate-spin"></div>
-          <p class="text-[10px] font-ui font-bold text-muted-foreground uppercase tracking-widest text-center">Iniciando componente de firma...</p>
-        </div>
-
-        <div class="flex gap-3 mt-4">
+        <div class="flex gap-3">
           <button 
             (click)="showSignModal.set(false)"
-            class="flex-1 px-4 py-3 rounded-xl border border-border hover:bg-muted font-ui font-bold text-xs uppercase tracking-widest transition-all"
+            class="flex-1 px-4 py-2 rounded-lg border border-border hover:bg-muted font-ui text-sm transition-colors"
           >
             Cancelar
           </button>
           <button 
             (click)="confirmSign()"
-            class="flex-1 bg-success text-white px-4 py-3 rounded-xl font-ui font-bold text-xs uppercase tracking-widest shadow-lg shadow-success/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+            class="flex-1 bg-primary text-white px-4 py-2 rounded-lg font-ui text-sm font-semibold hover:bg-primary/90 transition-colors"
           >
             Confirmar Firma
           </button>
@@ -259,23 +253,25 @@
   </div>
 
   <!-- Reject Modal -->
-  <div *ngIf="showRejectModal()" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-    <div class="bg-card w-full max-w-md rounded-2xl shadow-2xl border border-border overflow-hidden animate-in zoom-in-95 duration-200">
-      <div class="bg-destructive p-6 text-white text-center relative">
-        <div class="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-4 border border-white/20">
-          <ng-icon name="lucideAlertTriangle" class="text-3xl"></ng-icon>
+  <div *ngIf="showRejectModal()" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div class="bg-card w-full max-w-md rounded-xl shadow-2xl border border-border overflow-hidden">
+      <div class="flex items-center gap-3 p-4 border-b border-destructive/20 bg-destructive/5">
+        <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-destructive/10">
+          <ng-icon name="lucideAlertTriangle" class="text-xl text-destructive"></ng-icon>
         </div>
-        <h3 class="font-display text-xl font-extrabold tracking-tight">Observar Documento</h3>
-        <p class="text-white/70 text-sm font-body mt-1">Indique el motivo por el cual rechaza la firma</p>
+        <div>
+          <h3 class="font-display text-lg font-bold">Observar Documento</h3>
+          <p class="text-xs text-muted-foreground font-body">Indique el motivo del rechazo</p>
+        </div>
       </div>
-      <form (submit)="confirmReject(); $event.preventDefault()" class="p-6 space-y-4">
+      <form (submit)="confirmReject(); $event.preventDefault()" class="p-4 space-y-4">
         <div class="space-y-2">
-          <label class="font-ui text-[10px] font-bold text-destructive uppercase tracking-widest">Motivo de observación</label>
+          <label class="font-ui text-xs text-destructive font-semibold uppercase">Motivo de observación</label>
           <textarea 
             [(ngModel)]="motivoRechazo"
             name="motivo"
             placeholder="Ej: Falta firma de supervisor en anexo 4, datos incorrectos..."
-            class="w-full p-4 rounded-xl bg-muted/50 border-border focus:bg-white focus:border-destructive focus:ring-4 focus:ring-destructive/5 transition-all outline-none font-body text-sm min-h-[120px]"
+            class="w-full p-3 rounded-lg bg-muted/50 border border-border focus:border-destructive focus:ring-2 focus:ring-destructive/10 transition-all outline-none font-body text-sm min-h-[100px]"
             required
           ></textarea>
         </div>
@@ -284,14 +280,14 @@
           <button 
             (click)="showRejectModal.set(false)"
             type="button"
-            class="flex-1 px-4 py-3 rounded-xl border border-border hover:bg-muted font-ui font-bold text-xs uppercase tracking-widest transition-all"
+            class="flex-1 px-4 py-2 rounded-lg border border-border hover:bg-muted font-ui text-sm transition-colors"
           >
-            Volver
+            Cancelar
           </button>
           <button 
             type="submit"
             [disabled]="!motivoRechazo().trim()"
-            class="flex-1 bg-destructive text-white px-4 py-3 rounded-xl font-ui font-bold text-xs uppercase tracking-widest shadow-lg shadow-destructive/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+            class="flex-1 bg-destructive text-white px-4 py-2 rounded-lg font-ui text-sm font-semibold hover:bg-destructive/90 transition-colors disabled:opacity-50"
           >
             Enviar Observación
           </button>
