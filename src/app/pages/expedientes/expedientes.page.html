@@ -140,7 +140,7 @@
   </div>
 
   <div class="bg-card border-none shadow-md overflow-visible rounded-none">
-    <div class="overflow-x-auto">
+    <div class="overflow-visible">
       <table class="w-full text-left border-collapse">
         <thead class="bg-primary text-primary-foreground">
           <tr class="h-12">
@@ -183,7 +183,7 @@
                     <ng-icon name="lucideChevronDown" class="h-3 w-3"></ng-icon>
                   </button>
                   @if (openDropdownId() === exp.id) {
-                    <div class="absolute right-0 mt-1 w-48 rounded-lg border border-border bg-card shadow-lg z-10">
+                    <div class="absolute right-0 mt-1 w-48 rounded-lg border border-border bg-card shadow-lg z-50">
                       <div class="py-1">
                         @if (exp.estado === 'Registrado') {
                           <button (click)="openDerivarModal(exp); closeDropdown()" class="w-full flex items-center gap-2 px-3 py-2 text-xs font-ui hover:bg-muted text-left">
