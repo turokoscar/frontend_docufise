@@ -17,7 +17,8 @@ import {
   lucideLogOut,
   lucideUser,
   lucideInfo,
-  lucideChevronDown
+  lucideChevronDown,
+  lucideSettings
 } from '@ng-icons/lucide';
 
 @Component({
@@ -40,7 +41,8 @@ import {
       lucideLogOut,
       lucideUser,
       lucideInfo,
-      lucideChevronDown
+      lucideChevronDown,
+      lucideSettings
     })
   ],
   templateUrl: './layout.component.html',
@@ -49,7 +51,15 @@ import {
 export class LayoutComponent {
   private authService = inject(AuthService);
   user = this.authService.user;
-  menus = computed(() => this.authService.getMenus());
+  allMenus = computed(() => this.authService.getMenus());
+  
+  mainMenus = computed(() => 
+    this.allMenus().filter(m => !m.ruta.startsWith('/admin'))
+  );
+  
+  adminMenus = computed(() => 
+    this.allMenus().filter(m => m.ruta.startsWith('/admin'))
+  );
   
   collapsed = signal(false);
 
@@ -75,7 +85,8 @@ export class LayoutComponent {
       'Users': 'lucideUsers',
       'Building2': 'lucideBuilding2',
       'Shield': 'lucideShield',
-      'LayoutList': 'lucideLayoutList'
+      'LayoutList': 'lucideLayoutList',
+      'Settings': 'lucideSettings'
     };
     return icons[name] || 'lucideHome';
   }

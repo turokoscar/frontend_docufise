@@ -174,6 +174,18 @@ export class ExpedientesPage implements OnInit {
 
   totalPages = computed(() => Math.ceil(this.filteredExpedientes().length / this.itemsPerPage));
 
+  paginatedPages(): number[] {
+    const total = this.totalPages();
+    if (total <= 5) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+    // Show first, current-1, current, current+1, last
+    const current = this.currentPage();
+    if (current <= 2) return [1, 2, 3, 4, total];
+    if (current >= total - 1) return [1, total - 3, total - 2, total - 1, total];
+    return [1, current - 1, current, current + 1, total];
+  }
+
   // Handlers
   updateFilters(key: string, value: string): void {
     this.filters.update((f: any) => ({ ...f, [key]: value }));
