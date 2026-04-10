@@ -1,0 +1,308 @@
+<div class="space-y-5">
+  <!-- Breadcrumb -->
+  <nav class="flex items-center gap-2 text-xs font-ui text-muted-foreground/60">
+    <a routerLink="/" class="flex items-center gap-1.5 hover:text-primary transition-colors">
+      <ng-icon name="lucideHome" class="text-sm"></ng-icon>
+      Inicio
+    </a>
+    <ng-icon name="lucideArrowRight" class="text-[10px]"></ng-icon>
+    <a routerLink="/admin/usuarios" class="hover:text-primary transition-colors font-bold text-foreground">Administración</a>
+    <ng-icon name="lucideArrowRight" class="text-[10px]"></ng-icon>
+    <span class="font-bold text-foreground">Usuarios</span>
+  </nav>
+
+  <!-- Page Header -->
+  <div class="header-gradient-admin rounded-2xl p-6 border border-primary/10 shadow-sm relative overflow-hidden group">
+    <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/5 rounded-full blur-3xl group-hover:bg-white/10 transition-all duration-700"></div>
+    
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
+      <div class="flex items-center gap-4">
+        <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xl">
+          <ng-icon name="lucideUsers" class="text-3xl text-white"></ng-icon>
+        </div>
+        <div>
+          <h2 class="font-display text-2xl font-extrabold text-white tracking-tight">Gestión de Usuarios</h2>
+          <p class="text-sm text-white/70 font-body mt-0.5">Mantenimiento de accesos y perfiles del sistema</p>
+        </div>
+      </div>
+      
+      <div class="flex items-center gap-3">
+        <button 
+          (click)="openCreateModal()"
+          class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-secondary text-secondary-foreground font-ui font-bold text-xs uppercase tracking-widest transition-all shadow-lg shadow-secondary/20 hover:scale-[1.02] active:scale-[0.98]"
+        >
+          <ng-icon name="lucidePlus" class="text-lg"></ng-icon>
+          Nuevo Usuario
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters Section -->
+  <div class="bg-card rounded-2xl shadow-sm border border-border/50 p-4">
+    <div class="flex flex-wrap items-end gap-4">
+      <div class="flex-1 min-w-[300px] space-y-2">
+        <label class="font-ui text-[10px] font-bold text-primary uppercase tracking-widest ml-1">Buscar usuario</label>
+        <div class="relative group">
+          <ng-icon name="lucideSearch" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors"></ng-icon>
+          <input 
+            type="text" 
+            (input)="updateFilters('search', $any($event.target).value)"
+            placeholder="Nombre, usuario o correo corporativo..."
+            class="w-full pl-10 pr-4 h-11 rounded-xl bg-muted/30 border-transparent focus:bg-white focus:border-primary transition-all outline-none font-body text-sm"
+          />
+        </div>
+      </div>
+
+      <div class="w-full sm:w-[200px] space-y-2">
+        <label class="font-ui text-[10px] font-bold text-primary uppercase tracking-widest ml-1">Rol</label>
+        <div class="relative font-body text-sm">
+          <select 
+            (change)="updateFilters('rol', $any($event.target).value)"
+            class="w-full pl-4 pr-10 h-11 rounded-xl bg-muted/30 border-transparent outline-none appearance-none cursor-pointer"
+          >
+            <option value="all">Todos los roles</option>
+            @for (rol of roles; track rol) {
+              <option [value]="rol">{{ rol }}</option>
+            }
+          </select>
+          <ng-icon name="lucideChevronDown" class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground"></ng-icon>
+        </div>
+      </div>
+
+      <div class="w-full sm:w-[200px] space-y-2">
+        <label class="font-ui text-[10px] font-bold text-primary uppercase tracking-widest ml-1">Área</label>
+        <div class="relative font-body text-sm">
+          <select 
+            (change)="updateFilters('area', $any($event.target).value)"
+            class="w-full pl-4 pr-10 h-11 rounded-xl bg-muted/30 border-transparent outline-none appearance-none cursor-pointer"
+          >
+            <option value="all">Todas las áreas</option>
+            @for (area of areas; track area) {
+              <option [value]="area">{{ area }}</option>
+            }
+          </select>
+          <ng-icon name="lucideChevronDown" class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground"></ng-icon>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table Section -->
+  <div class="bg-card rounded-2xl shadow-xl border border-border/50 overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead class="bg-primary text-white">
+          <tr class="h-12">
+            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest">Nombre y Usuario</th>
+            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest">Contacto</th>
+            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest">Área</th>
+            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest">Rol</th>
+            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest text-center">Estado</th>
+            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-border/30 font-body text-sm">
+          @for (user of filteredUsuarios(); track user.id) {
+            <tr class="group hover:bg-primary/5 transition-colors">
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center font-display font-bold text-primary">
+                    {{ user.nombre.charAt(0) }}
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="font-bold text-foreground">{{ user.nombre }}</span>
+                    <span class="text-[10px] font-ui text-muted-foreground uppercase tracking-widest">{{ user.usuario }}</span>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-2 text-muted-foreground italic">
+                  <ng-icon name="lucideMail" class="text-xs"></ng-icon>
+                  {{ user.correo }}
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-2">
+                  <ng-icon name="lucideBuilding2" class="text-primary/40"></ng-icon>
+                  <span class="font-semibold text-foreground/80">{{ user.area }}</span>
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <span [class]="getRoleBadgeClass(user.rol)">{{ user.rol }}</span>
+              </td>
+              <td class="px-6 py-4 text-center">
+                <span 
+                  [ngClass]="user.activo ? 'bg-success/15 text-success' : 'bg-muted text-muted-foreground'"
+                  class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest"
+                >
+                  {{ user.activo ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td class="px-6 py-4 text-right">
+                <div class="flex items-center justify-end gap-1">
+                  <button 
+                    (click)="openEditModal(user)"
+                    class="p-2 rounded-lg hover:bg-blue-100 text-blue-600 transition-colors"
+                    title="Editar"
+                  >
+                    <ng-icon name="lucidePencil" class="text-lg"></ng-icon>
+                  </button>
+                  <button 
+                    (click)="toggleStatus(user)"
+                    class="p-2 rounded-lg hover:bg-success/10 text-success transition-colors"
+                    [title]="user.activo ? 'Desactivar' : 'Activar'"
+                  >
+                    <ng-icon [name]="user.activo ? 'lucideUserCheck' : 'lucideUserX'" class="text-lg"></ng-icon>
+                  </button>
+                  <button 
+                    (click)="deleteUsuario(user)"
+                    class="p-2 rounded-lg hover:bg-red-100 text-red-600 transition-colors"
+                    title="Eliminar"
+                  >
+                    <ng-icon name="lucideTrash2" class="text-lg"></ng-icon>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="px-6 py-12 text-center">
+                <div class="flex flex-col items-center gap-3 opacity-40">
+                  <ng-icon name="lucideSearch" class="text-5xl"></ng-icon>
+                  <p class="font-display text-lg font-bold">No se encontraron usuarios</p>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal Admin Usuarios -->
+  @if (showModal()) {
+    <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+      <div class="bg-card w-full max-w-lg rounded-2xl shadow-2xl border border-border overflow-hidden animate-in zoom-in-95 duration-200">
+        <div class="header-gradient-admin p-6 text-white text-center relative">
+          <div class="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-4 border border-white/20">
+            <ng-icon name="lucideUsers" class="text-3xl"></ng-icon>
+          </div>
+          <h3 class="font-display text-xl font-extrabold tracking-tight">
+            {{ editingUsuario() ? 'Actualizar Perfil' : 'Registro de Nuevo Usuario' }}
+          </h3>
+          <p class="text-white/70 text-sm font-body mt-1">Llene los datos del usuario para el control de acceso</p>
+        </div>
+        
+        <form (submit)="saveUsuario(); $event.preventDefault()" class="p-6 space-y-4 font-body">
+          <div class="grid grid-cols-2 gap-4">
+            <div class="col-span-2 space-y-2">
+              <label class="font-ui text-[10px] font-bold text-primary uppercase tracking-widest ml-1">Nombre Completo</label>
+              <input 
+                type="text" 
+                [(ngModel)]="formData.nombre" 
+                name="nombre"
+                required
+                class="w-full px-4 h-11 rounded-xl bg-muted/50 border-transparent focus:bg-white focus:border-primary transition-all outline-none"
+              />
+            </div>
+            
+            <div class="space-y-2">
+              <label class="font-ui text-[10px] font-bold text-primary uppercase tracking-widest ml-1">Nombre de Usuario</label>
+              <div class="relative">
+                <ng-icon name="lucideInfo" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"></ng-icon>
+                <input 
+                  type="text" 
+                  [(ngModel)]="formData.usuario" 
+                  name="usuario" 
+                  required
+                  class="w-full pl-10 pr-4 h-11 rounded-xl bg-muted/50 border-transparent focus:bg-white focus:border-primary transition-all outline-none"
+                />
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <label class="font-ui text-[10px] font-bold text-primary uppercase tracking-widest ml-1">Correo FISE</label>
+              <div class="relative">
+                <ng-icon name="lucideMail" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs"></ng-icon>
+                <input 
+                  type="email" 
+                  [(ngModel)]="formData.correo" 
+                  name="correo" 
+                  required
+                  class="w-full pl-10 pr-4 h-11 rounded-xl bg-muted/50 border-transparent focus:bg-white focus:border-primary transition-all outline-none"
+                />
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <label class="font-ui text-[10px] font-bold text-primary uppercase tracking-widest ml-1">Área Institucional</label>
+              <div class="relative">
+                <select 
+                  [(ngModel)]="formData.area" 
+                  name="area" 
+                  class="w-full pl-4 pr-10 h-11 rounded-xl bg-muted/50 border-transparent outline-none appearance-none"
+                >
+                  @for (area of areas; track area) {
+                    <option [value]="area">{{ area }}</option>
+                  }
+                </select>
+                <ng-icon name="lucideChevronDown" class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground"></ng-icon>
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <label class="font-ui text-[10px] font-bold text-primary uppercase tracking-widest ml-1">Rol de Acceso</label>
+              <div class="relative">
+                <select 
+                  [(ngModel)]="formData.rol" 
+                  name="rol" 
+                  class="w-full pl-4 pr-10 h-11 rounded-xl bg-muted/50 border-transparent outline-none appearance-none font-bold"
+                >
+                  @for (rol of roles; track rol) {
+                    <option [value]="rol">{{ rol }}</option>
+                  }
+                </select>
+                <ng-icon name="lucideChevronDown" class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground"></ng-icon>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3 py-2 px-1">
+            <input type="checkbox" [(ngModel)]="formData.activo" name="activo" id="mactivo" class="w-4 h-4 rounded text-primary border-border focus:ring-primary">
+            <label for="mactivo" class="font-ui text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Habilitar acceso al sistema</label>
+          </div>
+
+          <div class="flex gap-3 pt-4">
+            <button 
+              (click)="showModal.set(false)"
+              type="button"
+              class="flex-1 px-4 py-3 rounded-xl border border-border hover:bg-muted font-ui font-bold text-xs uppercase tracking-widest transition-all"
+            >
+              Cancelar
+            </button>
+            <button 
+              type="submit"
+              class="flex-1 header-gradient-admin text-white px-4 py-3 rounded-xl font-ui font-bold text-xs uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+            >
+              Guardar Usuario
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>
+
+<!-- Toast Notification -->
+@if (showToast()) {
+  <div 
+    class="fixed top-4 right-4 z-[200] px-4 py-3 rounded-xl shadow-lg font-ui text-sm flex items-center gap-2"
+    [class.bg-success]="toastType() === 'success'"
+    [class.text-success-foreground]="toastType() === 'success'"
+    [class.bg-destructive]="toastType() === 'error'"
+    [class.text-destructive-foreground]="toastType() === 'error'"
+  >
+    {{ toastMessage() }}
+  </div>
+}

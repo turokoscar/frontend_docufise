@@ -1,0 +1,53 @@
+:host {
+  display: block;
+}
+
+/* Gradient sub-header specific to the module */
+.header-gradient-sub {
+  background: linear-gradient(135deg, 
+    hsl(216 60% 30%) 0%, 
+    hsl(216 60% 45%) 100%
+  );
+}
+
+/* Animated pulses and effects */
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .5; }
+}
+
+/* Table transitions */
+tbody tr {
+  transition: all 0.2s ease;
+}
+
+tbody tr:hover {
+  transform: translateX(4px);
+}
+
+/* Custom scrollbar for table if data is long */
+.overflow-x-auto::-webkit-scrollbar {
+  height: 6px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: hsl(var(--primary) / 0.2);
+  border-radius: 10px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary) / 0.5);
+}
+
+/* Button hover effects */
+button:not(:disabled):active {
+  transform: scale(0.95);
+}

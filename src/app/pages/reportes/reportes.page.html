@@ -1,0 +1,155 @@
+<div class="space-y-5">
+  <!-- Breadcrumb -->
+  <nav class="flex items-center gap-2 text-xs font-ui text-muted-foreground/60">
+    <a routerLink="/" class="flex items-center gap-1.5 hover:text-primary transition-colors">
+      <ng-icon name="lucideHome" class="text-sm"></ng-icon>
+      Inicio
+    </a>
+    <ng-icon name="lucideArrowRight" class="text-[10px]"></ng-icon>
+    <span class="font-bold text-foreground">Panel Ejecutivo</span>
+  </nav>
+
+  <!-- Page Header -->
+  <div class="header-gradient-reportes rounded-2xl p-6 border border-primary/10 shadow-sm relative overflow-hidden group">
+    <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/5 rounded-full blur-3xl group-hover:bg-white/10 transition-all duration-700"></div>
+    
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
+      <div class="flex items-center gap-4">
+        <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xl">
+          <ng-icon name="lucideBarChart3" class="text-3xl text-white"></ng-icon>
+        </div>
+        <div>
+          <h2 class="font-display text-2xl font-extrabold text-white tracking-tight">Panel Ejecutivo</h2>
+          <p class="text-sm text-white/70 font-body mt-0.5">Indicadores de gestión y estadísticas institucionales</p>
+        </div>
+      </div>
+      
+      <div class="flex items-center gap-3">
+        <button 
+          (click)="exportToExcel()"
+          class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-ui font-bold text-xs uppercase tracking-widest transition-all border border-white/10 hover:border-white/30 backdrop-blur-sm"
+        >
+          <ng-icon name="lucideFileSpreadsheet" class="text-lg"></ng-icon>
+          Exportar Reporte
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI Strip -->
+  <div class="section-accent flex items-center gap-2 mb-1">
+    <h3 class="font-ui text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Estado de la Gestión</h3>
+  </div>
+  <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+    @for (stat of datosReporte(); track stat.estado) {
+      <div class="bg-card border-none shadow-sm rounded-2xl overflow-hidden relative group kpi-glow transition-all duration-300">
+        <div class="p-4 flex items-center gap-4">
+          <div 
+            class="flex items-center justify-center w-12 h-12 rounded-xl" 
+            [style.backgroundColor]="stat.color + '15'"
+          >
+            <div class="w-6 h-6 rounded-full border-2" [style.borderColor]="stat.color"></div>
+          </div>
+          <div>
+            <p class="text-2xl font-display font-extrabold leading-none mb-1" [style.color]="stat.color">
+              {{ stat.cantidad }}
+            </p>
+            <p class="text-[10px] font-ui font-bold text-muted-foreground uppercase tracking-widest">{{ stat.estado }}</p>
+          </div>
+        </div>
+        <div class="absolute bottom-0 left-0 right-0 h-1" [style.backgroundColor]="stat.color"></div>
+      </div>
+    }
+  </div>
+
+  <!-- Charts Layout -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
+    <!-- Chart 1: Distribución (Pie) -->
+    <div class="bg-card rounded-2xl shadow-sm border border-border/50 p-6 flex flex-col h-[450px]">
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-3">
+          <div class="p-2 rounded-lg bg-primary/10">
+            <ng-icon name="lucidePieChart" class="text-lg text-primary"></ng-icon>
+          </div>
+          <div>
+            <h3 class="font-display text-lg font-extrabold text-foreground">Distribución de Estados</h3>
+            <p class="text-[10px] font-ui font-bold text-muted-foreground uppercase tracking-widest">Global del sistema</p>
+          </div>
+        </div>
+        <ng-icon name="lucideInfo" class="text-muted-foreground/40 hover:text-primary cursor-help"></ng-icon>
+      </div>
+      
+      <div class="flex-1 relative pb-4">
+        <canvas 
+          baseChart 
+          [data]="pieChartData" 
+          [options]="pieChartOptions" 
+          [type]="pieChartType"
+        ></canvas>
+      </div>
+    </div>
+
+    <!-- Chart 2: Tendencia (Bar) -->
+    <div class="bg-card rounded-2xl shadow-sm border border-border/50 p-6 flex flex-col h-[450px]">
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-3">
+          <div class="p-2 rounded-lg bg-success/10">
+            <ng-icon name="lucideTrendingUp" class="text-lg text-success"></ng-icon>
+          </div>
+          <div>
+            <h3 class="font-display text-lg font-extrabold text-foreground">Tendencia Mensual</h3>
+            <p class="text-[10px] font-ui font-bold text-muted-foreground uppercase tracking-widest">Semestre Actual</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+            <div class="flex items-center gap-1.5 mr-2">
+              <div class="w-2.5 h-2.5 rounded bg-primary"></div>
+              <span class="text-[9px] font-ui font-bold text-muted-foreground">EXP</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <div class="w-2.5 h-2.5 rounded bg-success"></div>
+              <span class="text-[9px] font-ui font-bold text-muted-foreground">FIR</span>
+            </div>
+        </div>
+      </div>
+      
+      <div class="flex-1 relative pb-4">
+        <canvas 
+          baseChart 
+          [data]="barChartData" 
+          [options]="barChartOptions" 
+          [type]="barChartType"
+        ></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Additional Stats Section -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
+      <div class="bg-card border border-border rounded-2xl p-6 flex items-center gap-4 group hover:border-primary/50 transition-all">
+          <div class="w-14 h-14 rounded-2xl bg-muted group-hover:bg-primary/5 flex items-center justify-center transition-all">
+              <ng-icon name="lucideLayoutGrid" class="text-2xl text-muted-foreground/40 group-hover:text-primary"></ng-icon>
+          </div>
+          <div>
+              <p class="text-[10px] font-ui font-bold text-muted-foreground uppercase tracking-widest">Sede Central</p>
+              <h4 class="font-display text-xl font-extrabold text-foreground">Principal FISE</h4>
+              <div class="flex items-center gap-2 mt-1">
+                  <span class="text-[11px] font-body text-success font-bold">+12% vs mes ant.</span>
+              </div>
+          </div>
+      </div>
+  </div>
+</div>
+
+<!-- Toast Notification -->
+@if (showToast()) {
+  <div 
+    class="fixed top-4 right-4 z-[200] px-4 py-3 rounded-xl shadow-lg font-ui text-sm flex items-center gap-2"
+    [class.bg-success]="toastType() === 'success'"
+    [class.text-success-foreground]="toastType() === 'success'"
+    [class.bg-destructive]="toastType() === 'error'"
+    [class.text-destructive-foreground]="toastType() === 'error'"
+  >
+    {{ toastMessage() }}
+  </div>
+}

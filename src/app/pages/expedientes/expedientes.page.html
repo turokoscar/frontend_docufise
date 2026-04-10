@@ -1,0 +1,559 @@
+<div class="space-y-5">
+  <!-- Breadcrumb -->
+  <nav class="flex items-center gap-2 text-xs font-ui text-muted-foreground/60">
+    <a routerLink="/" class="flex items-center gap-1.5 hover:text-primary transition-colors">
+      <ng-icon name="lucideHome" class="text-sm"></ng-icon>
+      Inicio
+    </a>
+    <ng-icon name="lucideArrowRight" class="text-[10px]"></ng-icon>
+    <span class="font-bold text-foreground">Gestión de Expedientes</span>
+  </nav>
+
+  <!-- Page Header -->
+  <div class="header-gradient-sub rounded-2xl p-6 border border-primary/10 shadow-sm relative overflow-hidden group">
+    <!-- Subtle bg decoration -->
+    <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/5 rounded-full blur-3xl group-hover:bg-white/10 transition-all duration-700"></div>
+    
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
+      <div class="flex items-center gap-4">
+        <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xl">
+          <ng-icon name="lucideFileText" class="text-3xl text-white"></ng-icon>
+        </div>
+        <div>
+          <h2 class="font-display text-2xl font-extrabold text-white tracking-tight">Gestión de Expedientes</h2>
+          <p class="text-sm text-white/70 font-body mt-0.5">Administración y seguimiento de la bandeja de documentos</p>
+        </div>
+      </div>
+      
+      <div class="flex items-center gap-3">
+        <button 
+          (click)="exportToExcel()"
+          class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-ui font-bold text-xs uppercase tracking-widest transition-all border border-white/10 hover:border-white/30 backdrop-blur-sm"
+        >
+          <ng-icon name="lucideFileSpreadsheet" class="text-lg"></ng-icon>
+          Exportar Excel
+        </button>
+        
+        <button 
+          (click)="openNewForm()"
+          class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-secondary text-secondary-foreground font-ui font-bold text-xs uppercase tracking-widest transition-all shadow-lg shadow-secondary/20 hover:scale-[1.02] active:scale-[0.98]"
+        >
+          <ng-icon name="lucidePlus" class="text-lg"></ng-icon>
+          Nuevo Expediente
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI Strip -->
+  <div class="section-accent flex items-center gap-2 mb-1">
+    <h3 class="font-ui text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Estado de la Bandeja</h3>
+  </div>
+  <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+    @for (kpi of kpis(); track kpi.label) {
+      <div class="bg-card border-none shadow-sm rounded-2xl overflow-hidden relative group kpi-glow transition-all duration-300">
+        <div class="p-4 flex items-center gap-4">
+          <div 
+            class="flex items-center justify-center w-12 h-12 rounded-xl transition-transform group-hover:scale-110" 
+            [style.backgroundColor]="kpi.color + '15'"
+          >
+            <ng-icon [name]="kpi.icon" class="text-2xl" [style.color]="kpi.color"></ng-icon>
+          </div>
+          <div>
+            <p class="text-2xl font-display font-extrabold leading-none mb-1" [style.color]="kpi.color">
+              {{ kpi.value }}
+            </p>
+            <p class="text-[10px] font-ui font-bold text-muted-foreground uppercase tracking-widest">{{ kpi.label }}</p>
+          </div>
+        </div>
+        <div class="absolute bottom-0 left-0 right-0 h-1" [style.backgroundColor]="kpi.color"></div>
+      </div>
+    }
+  </div>
+
+  <!-- Filters Section -->
+  <div class="section-accent flex items-center gap-2 mt-4 mb-1">
+    <h3 class="font-ui text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Filtros Avanzados</h3>
+    <ng-icon name="lucideHelpCircle" class="text-muted-foreground/40 text-xs" title="Busque por numeración, elaborador o tipo de documento"></ng-icon>
+  </div>
+  <div class="bg-card rounded-2xl shadow-sm border border-border/50 p-4">
+    <div class="flex flex-wrap items-end gap-4">
+      <!-- Search -->
+      <div class="flex-1 min-w-[240px] space-y-2">
+        <label class="font-ui text-[10px] font-bold text-primary uppercase tracking-widest ml-1">Búsqueda rápida</label>
+        <div class="relative group">
+          <ng-icon name="lucideSearch" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors"></ng-icon>
+          <input 
+            type="text" 
+            (input)="updateFilters('search', $any($event.target).value)"
+            placeholder="Numeración, elaborador..."
+            class="w-full pl-10 pr-4 h-11 rounded-xl bg-muted/30 border-transparent focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none font-body text-sm"
+          />
+        </div>
+      </div>
+
+      <!-- Tipo Select -->
+      <div class="w-full sm:w-[220px] space-y-2">
+        <label class="font-ui text-[10px] font-bold text-primary uppercase tracking-widest ml-1">Tipo de documento</label>
+        <div class="relative">
+          <select 
+            (change)="updateFilters('tipo', $any($event.target).value)"
+            class="w-full pl-4 pr-10 h-11 rounded-xl bg-muted/30 border-transparent focus:bg-white focus:border-primary transition-all outline-none font-body text-sm appearance-none cursor-pointer"
+          >
+            <option value="all">Todos los tipos</option>
+            @for (tipo of tiposDocumento; track tipo) {
+              <option [value]="tipo">{{ tipo }}</option>
+            }
+          </select>
+          <ng-icon name="lucideChevronDown" class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground"></ng-icon>
+        </div>
+      </div>
+
+      <!-- Estado Select -->
+      <div class="w-full sm:w-[200px] space-y-2">
+        <label class="font-ui text-[10px] font-bold text-primary uppercase tracking-widest ml-1">Estado</label>
+        <div class="relative">
+          <select 
+            (change)="updateFilters('estado', $any($event.target).value)"
+            class="w-full pl-4 pr-10 h-11 rounded-xl bg-muted/30 border-transparent focus:bg-white focus:border-primary transition-all outline-none font-body text-sm appearance-none cursor-pointer"
+          >
+            <option value="all">Todos los estados</option>
+            <option value="Registrado">Registrado</option>
+            <option value="Ingresado">Ingresado</option>
+            <option value="Pendiente">Pendiente</option>
+            <option value="Observado">Observado</option>
+            <option value="Firmado">Firmado</option>
+          </select>
+          <ng-icon name="lucideChevronDown" class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground"></ng-icon>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table Section -->
+  <div class="flex items-center justify-between mt-6 mb-1">
+    <div class="section-accent flex items-center gap-2">
+      <h3 class="font-ui text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Listado de Expedientes</h3>
+    </div>
+    <p class="font-body text-[10px] text-muted-foreground italic">
+      Mostrando <strong>{{ (currentPage() - 1) * itemsPerPage + 1 }}</strong> – 
+      <strong>{{ Math.min(currentPage() * itemsPerPage, filteredExpedientes().length) }}</strong> 
+      de {{ filteredExpedientes().length }} resultados
+    </p>
+  </div>
+
+  <div class="bg-card rounded-2xl shadow-xl border border-border/50 overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead class="bg-primary text-white">
+          <tr class="h-12">
+            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest">Numeración</th>
+            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest">Tipo Documento</th>
+            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest">Elaborado por</th>
+            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest">Fecha Registro</th>
+            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest text-center">Estado</th>
+            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-border/30">
+          @for (exp of paginatedExpedientes(); track exp.id; let i = $index) {
+            <tr class="group hover:bg-primary/5 transition-colors" [ngClass]="{'bg-muted/10': i % 2 !== 0}">
+              <td class="px-6 py-4">
+                <div class="flex flex-col">
+                  <span class="font-display font-bold text-primary text-sm">{{ exp.numeracion }}</span>
+                  <span class="text-[9px] font-ui text-muted-foreground uppercase tracking-tighter">{{ exp.id }}</span>
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-2">
+                  <ng-icon name="lucideFileText" class="text-muted-foreground"></ng-icon>
+                  <span class="font-body text-sm">{{ exp.tipoDocumento }}</span>
+                </div>
+              </td>
+              <td class="px-6 py-4 font-body text-sm font-semibold text-foreground/80">{{ exp.elaboradoPor }}</td>
+              <td class="px-6 py-4 font-body text-sm text-muted-foreground italic">{{ exp.fechaElaboracion }}</td>
+              <td class="px-6 py-4 text-center">
+                <span [class]="getEstadoBadgeClass(exp.estado)">{{ exp.estado }}</span>
+              </td>
+              <td class="px-6 py-4 text-right">
+                <div class="flex items-center justify-end gap-1">
+                  @if (exp.estado === 'Registrado') {
+                    <button 
+                      (click)="openDerivarModal(exp)"
+                      class="p-2 rounded-lg hover:bg-primary/10 text-primary transition-colors"
+                      title="Derivar expediente"
+                    >
+                      <ng-icon name="lucideSend" class="text-lg"></ng-icon>
+                    </button>
+                  }
+                  <button 
+                    (click)="openEditForm(exp)"
+                    [disabled]="!canEdit(exp)"
+                    class="p-2 rounded-lg hover:bg-blue-100 text-blue-600 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                    title="Editar"
+                  >
+                    <ng-icon name="lucidePencil" class="text-lg"></ng-icon>
+                  </button>
+                  <button 
+                    (click)="deleteExpediente(exp)"
+                    [disabled]="!canEdit(exp)"
+                    class="p-2 rounded-lg hover:bg-red-100 text-red-600 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                    title="Eliminar"
+                  >
+                    <ng-icon name="lucideTrash2" class="text-lg"></ng-icon>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="px-6 py-12 text-center">
+                <div class="flex flex-col items-center gap-3">
+                  <div class="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
+                    <ng-icon name="lucideSearch" class="text-3xl text-muted-foreground/40"></ng-icon>
+                  </div>
+                  <p class="font-display text-lg font-bold text-muted-foreground">No se encontraron expedientes</p>
+                  <p class="font-body text-sm text-muted-foreground/60 max-w-[300px]">Intente ajustar los filtros de búsqueda para encontrar lo que busca.</p>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="px-6 py-4 bg-muted/20 border-t border-border/50 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <p class="text-[10px] font-ui font-bold text-muted-foreground uppercase tracking-widest">
+        Total: {{ filteredExpedientes().length }} registros
+      </p>
+      
+      <div class="flex items-center gap-2">
+        <button 
+          (click)="setPage(currentPage() - 1)"
+          [disabled]="currentPage() === 1"
+          class="flex items-center justify-center h-9 w-9 rounded-xl border border-border bg-white text-muted-foreground hover:bg-primary/5 hover:text-primary transition-all disabled:opacity-30 disabled:pointer-events-none shadow-sm"
+        >
+          <ng-icon name="lucideChevronDown" class="rotate-90"></ng-icon>
+        </button>
+        
+        <div class="flex items-center gap-1">
+          @for (page of [1, 2, 3]; track page) {
+            <button 
+              *ngIf="page <= totalPages()"
+              (click)="setPage(page)"
+              class="h-9 w-9 rounded-xl font-display text-sm font-bold transition-all border shadow-sm"
+              [ngClass]="page === currentPage() ? 'bg-primary text-white border-primary shadow-primary/20' : 'bg-white text-foreground border-border hover:border-primary/50'"
+            >
+              {{ page }}
+            </button>
+          }
+          <span *ngIf="totalPages() > 3" class="px-2 text-muted-foreground">...</span>
+          <button 
+            *ngIf="totalPages() > 3"
+            (click)="setPage(totalPages())"
+            class="h-9 w-9 rounded-xl font-display text-sm font-bold transition-all border shadow-sm border-border bg-white"
+          >
+            {{ totalPages() }}
+          </button>
+        </div>
+
+        <button 
+          (click)="setPage(currentPage() + 1)"
+          [disabled]="currentPage() === totalPages() || totalPages() === 0"
+          class="flex items-center justify-center h-9 w-9 rounded-xl border border-border bg-white text-muted-foreground hover:bg-primary/5 hover:text-primary transition-all disabled:opacity-30 disabled:pointer-events-none shadow-sm"
+        >
+          <ng-icon name="lucideChevronDown" class="-rotate-90"></ng-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Notification -->
+@if (showToast()) {
+  <div 
+    class="fixed top-4 right-4 z-50 px-4 py-3 rounded-xl shadow-lg font-ui text-sm flex items-center gap-2"
+    [class.bg-success]="toastType() === 'success'"
+    [class.text-success-foreground]="toastType() === 'success'"
+    [class.bg-destructive]="toastType() === 'error'"
+    [class.text-destructive-foreground]="toastType() === 'error'"
+  >
+    <ng-icon [name]="toastType() === 'success' ? 'lucideCheck' : 'lucideAlertTriangle'" class="text-lg"></ng-icon>
+    {{ toastMessage() }}
+  </div>
+}
+
+<!-- Modal Create/Edit Expediente -->
+@if (showModal()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" (click)="closeModal()"></div>
+    <div class="relative bg-card rounded-2xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+      <!-- Modal Header -->
+      <div class="flex items-center gap-3 p-6 border-b border-border">
+        <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10">
+          <ng-icon name="lucideFileText" class="text-2xl text-primary"></ng-icon>
+        </div>
+        <div>
+          <h3 class="font-display text-lg font-bold">{{ editingExpediente() ? 'Actualizar Expediente' : 'Gestión Documentaria' }}</h3>
+          <p class="text-xs text-muted-foreground font-body mt-0.5">
+            {{ editingExpediente() ? 'Editando ' + editingExpediente()?.numeracion : 'Complete los campos para registrar un nuevo expediente' }}
+          </p>
+        </div>
+        <button (click)="closeModal()" class="ml-auto p-2 rounded-lg hover:bg-muted transition-colors">
+          <ng-icon name="lucideX" class="text-lg"></ng-icon>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 space-y-5">
+        <!-- Datos generados automáticamente -->
+        <div>
+          <div class="flex items-center gap-2 mb-3">
+            <ng-icon name="lucideInfo" class="text-muted-foreground text-sm"></ng-icon>
+            <p class="text-[11px] font-ui font-semibold text-muted-foreground uppercase tracking-wider">Datos generados automáticamente</p>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-muted/30 rounded-lg p-4 border border-border/50">
+            <div class="space-y-1.5">
+              <label class="font-ui text-foreground text-[11px] uppercase tracking-wider">Numeración</label>
+              <input 
+                disabled 
+                [value]="autoNumeracion" 
+                class="font-body bg-background text-muted-foreground h-9 text-sm rounded-lg px-3 border border-border disabled:opacity-100"
+              />
+            </div>
+            <div class="space-y-1.5">
+              <label class="font-ui text-foreground text-[11px] uppercase tracking-wider">Fecha elaboración</label>
+              <input 
+                disabled 
+                [value]="autoFechaElab" 
+                class="font-body bg-background text-muted-foreground h-9 text-sm rounded-lg px-3 border border-border disabled:opacity-100"
+              />
+            </div>
+            <div class="space-y-1.5">
+              <label class="font-ui text-foreground text-[11px] uppercase tracking-wider">Fecha y hora envío</label>
+              <input 
+                disabled 
+                [value]="autoFechaEnvio" 
+                class="font-body bg-background text-muted-foreground h-9 text-sm rounded-lg px-3 border border-border disabled:opacity-100"
+              />
+            </div>
+          </div>
+        </div>
+
+        <hr class="border-border" />
+
+        <!-- Datos del expediente -->
+        <div>
+          <div class="flex items-center gap-2 mb-3">
+            <ng-icon name="lucidePencil" class="text-primary text-sm"></ng-icon>
+            <p class="text-[11px] font-ui font-semibold text-muted-foreground uppercase tracking-wider">Datos del expediente</p>
+          </div>
+          <div class="space-y-4">
+            <div class="space-y-2">
+              <label class="font-ui text-foreground text-xs uppercase tracking-wider">Tipo documento <span class="text-destructive">*</span></label>
+              <select 
+                [value]="formTipoDoc()" 
+                (change)="formTipoDoc.set($any($event.target).value)"
+                class="w-full h-11 rounded-xl bg-muted/30 border-border focus:bg-white focus:border-primary transition-all outline-none font-body text-sm"
+              >
+                <option value="">Seleccione tipo de documento...</option>
+                @for (tipo of tiposDocumento; track tipo) {
+                  <option [value]="tipo">{{ tipo }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="space-y-2">
+              <label class="font-ui text-foreground text-xs uppercase tracking-wider">Elaborado por <span class="text-destructive">*</span></label>
+              <select 
+                [value]="formElaborado()" 
+                (change)="formElaborado.set($any($event.target).value)"
+                class="w-full h-11 rounded-xl bg-muted/30 border-border focus:bg-white focus:border-primary transition-all outline-none font-body text-sm"
+              >
+                <option value="">Seleccione elaborador...</option>
+                @for (elab of elaboradores; track elab) {
+                  <option [value]="elab">{{ elab }}</option>
+                }
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <hr class="border-border" />
+
+        <!-- Archivo adjunto -->
+        <div>
+          <div class="flex items-center gap-2 mb-3">
+            <ng-icon name="lucideUpload" class="text-secondary text-sm"></ng-icon>
+            <p class="text-[11px] font-ui font-semibold text-muted-foreground uppercase tracking-wider">Archivo adjunto</p>
+          </div>
+          <div class="border-2 border-dashed border-border rounded-xl p-5 text-center hover:border-secondary hover:bg-secondary/5 transition-all cursor-pointer group">
+            <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-muted mx-auto mb-2 group-hover:bg-secondary/10 transition-colors">
+              <ng-icon name="lucideUpload" class="text-2xl text-muted-foreground group-hover:text-secondary"></ng-icon>
+            </div>
+            <p class="text-sm text-muted-foreground font-body">
+              Arrastre el archivo aquí o <span class="text-secondary font-semibold">haga clic para seleccionar</span>
+            </p>
+            <p class="text-[11px] text-muted-foreground/70 font-body mt-1">PDF, DOC, DOCX (máx. 10MB)</p>
+          </div>
+        </div>
+
+        <!-- Motivo de rechazo (si existe) -->
+        @if (editingExpediente()?.motivoRechazo) {
+          <div class="bg-destructive/5 border border-destructive/20 rounded-xl p-4">
+            <div class="flex items-center gap-2 mb-1">
+              <ng-icon name="lucideAlertTriangle" class="text-destructive"></ng-icon>
+              <p class="text-xs font-ui font-semibold text-destructive">Motivo de observación</p>
+            </div>
+            <p class="text-sm font-body text-destructive/80 ml-6">{{ editingExpediente()?.motivoRechazo }}</p>
+          </div>
+        }
+
+        <!-- Footer -->
+        <div class="flex justify-end gap-3 pt-3 border-t border-border">
+          <button 
+            (click)="closeModal()" 
+            class="px-4 py-2.5 rounded-xl border border-border hover:bg-muted font-ui text-sm transition-colors"
+          >
+            Cancelar
+          </button>
+          <button 
+            (click)="saveExpediente()" 
+            class="px-4 py-2.5 rounded-xl bg-primary text-primary-foreground font-ui text-sm font-semibold transition-all shadow-sm flex items-center gap-2"
+          >
+            <ng-icon name="lucideFileText" class="text-lg"></ng-icon>
+            {{ editingExpediente() ? 'Actualizar' : 'Registrar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Modal Derivar Expediente -->
+@if (showDerivarModal()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" (click)="closeDerivarModal()"></div>
+    <div class="relative bg-card rounded-2xl shadow-2xl w-full max-w-md mx-4">
+      <!-- Modal Header -->
+      <div class="flex items-center gap-3 p-6 border-b border-border">
+        <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10">
+          <ng-icon name="lucideSend" class="text-2xl text-primary"></ng-icon>
+        </div>
+        <div>
+          <h3 class="font-display text-lg font-bold">Derivar Expediente</h3>
+          <p class="text-xs text-muted-foreground font-body mt-0.5">Asignar expediente a un área y usuario destino</p>
+        </div>
+        <button (click)="closeDerivarModal()" class="ml-auto p-2 rounded-lg hover:bg-muted transition-colors">
+          <ng-icon name="lucideX" class="text-lg"></ng-icon>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 space-y-5">
+        <!-- Información del expediente -->
+        <div>
+          <div class="flex items-center gap-2 mb-3">
+            <ng-icon name="lucideInfo" class="text-muted-foreground text-sm"></ng-icon>
+            <p class="text-[11px] font-ui font-semibold text-muted-foreground uppercase tracking-wider">Información del expediente</p>
+          </div>
+          <div class="bg-primary/5 border border-primary/10 rounded-xl p-4">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <p class="text-[11px] font-ui text-muted-foreground uppercase tracking-wider">Expediente</p>
+                <p class="text-sm font-body font-semibold text-primary">{{ derivandoExpediente()?.numeracion }}</p>
+              </div>
+              <div>
+                <p class="text-[11px] font-ui text-muted-foreground uppercase tracking-wider">Tipo</p>
+                <p class="text-sm font-body">{{ derivandoExpediente()?.tipoDocumento }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <hr class="border-border" />
+
+        <!-- Destino de derivación -->
+        <div>
+          <div class="flex items-center gap-2 mb-3">
+            <ng-icon name="lucideSend" class="text-primary text-sm"></ng-icon>
+            <p class="text-[11px] font-ui font-semibold text-muted-foreground uppercase tracking-wider">Destino de derivación</p>
+          </div>
+          <div class="space-y-4">
+            <div class="space-y-2">
+              <label class="font-ui text-foreground text-xs uppercase tracking-wider">Área destino <span class="text-destructive">*</span></label>
+              <select 
+                [value]="derivarArea()" 
+                (change)="onAreaChange($any($event.target).value)"
+                class="w-full h-11 rounded-xl bg-muted/30 border-border focus:bg-white focus:border-primary transition-all outline-none font-body text-sm"
+              >
+                <option value="">Seleccione área...</option>
+                @for (area of areasDestino; track area) {
+                  <option [value]="area">{{ area }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="space-y-2">
+              <label class="font-ui text-foreground text-xs uppercase tracking-wider">Usuario destino <span class="text-destructive">*</span></label>
+              <select 
+                [value]="derivarUsuario()" 
+                (change)="derivarUsuario.set($any($event.target).value)"
+                [disabled]="!derivarArea()"
+                class="w-full h-11 rounded-xl bg-muted/30 border-border focus:bg-white focus:border-primary transition-all outline-none font-body text-sm disabled:opacity-50"
+              >
+                <option value="">Seleccione usuario...</option>
+                @for (usuario of usuariosDisponibles; track usuario) {
+                  <option [value]="usuario">{{ usuario }}</option>
+                }
+              </select>
+              @if (!derivarArea()) {
+                <p class="text-[11px] text-muted-foreground/60 font-body flex items-center gap-1">
+                  <ng-icon name="lucideHelpCircle" class="text-xs"></ng-icon> 
+                  Seleccione primero un área para ver los usuarios disponibles
+                </p>
+              }
+            </div>
+
+            <div class="space-y-2">
+              <label class="font-ui text-foreground text-xs uppercase tracking-wider">Enviado por</label>
+              <input 
+                disabled 
+                [value]="derivandoExpediente()?.elaboradoPor" 
+                class="font-body bg-muted/50 text-muted-foreground h-9 text-sm rounded-lg px-3 border border-border disabled:opacity-100"
+              />
+            </div>
+
+            <div class="space-y-2">
+              <label class="font-ui text-foreground text-xs uppercase tracking-wider">Observaciones</label>
+              <textarea 
+                [value]="derivarObs()" 
+                (input)="derivarObs.set($any($event.target).value)"
+                placeholder="Observaciones adicionales para el destinatario..."
+                class="font-body min-h-[100px] rounded-xl bg-muted/30 border-border focus:bg-white focus:border-primary transition-all outline-none w-full p-3"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="flex justify-end gap-3 pt-3 border-t border-border">
+          <button 
+            (click)="closeDerivarModal()" 
+            class="px-4 py-2.5 rounded-xl border border-border hover:bg-muted font-ui text-sm transition-colors"
+          >
+            Cancelar
+          </button>
+          <button 
+            (click)="confirmarDerivacion()" 
+            class="px-4 py-2.5 rounded-xl bg-primary text-primary-foreground font-ui text-sm font-semibold transition-all shadow-sm flex items-center gap-2"
+          >
+            <ng-icon name="lucideSend" class="text-lg"></ng-icon>
+            Confirmar Derivación
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

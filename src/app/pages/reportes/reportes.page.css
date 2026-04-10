@@ -1,0 +1,38 @@
+:host {
+  display: block;
+}
+
+/* Gradient sub-header specific to Reportes (Teal/Blue) */
+.header-gradient-reportes {
+  background: linear-gradient(135deg, 
+    hsl(184 87% 35%) 0%, 
+    hsl(216 60% 42%) 100%
+  );
+}
+
+/* KPI hover glows */
+.kpi-glow:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px -10px hsl(var(--primary) / 0.15);
+}
+
+/* Chart containers */
+canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Animations for loading charts */
+.animate-in {
+  animation: slideUp 0.5s ease-out forwards;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Legend styling via CSS if needed, but Chart.js usually handles it */
+.chart-legend-custom {
+  @apply flex flex-wrap gap-3 mt-4 justify-center;
+}

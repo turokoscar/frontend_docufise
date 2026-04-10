@@ -1,0 +1,218 @@
+<div class="space-y-5">
+  <!-- Breadcrumb -->
+  <nav class="flex items-center gap-2 text-xs font-ui text-muted-foreground/60">
+    <a routerLink="/" class="flex items-center gap-1.5 hover:text-primary transition-colors">
+      <ng-icon name="lucideHome" class="text-sm"></ng-icon>
+      Inicio
+    </a>
+    <ng-icon name="lucideArrowRight" class="text-[10px]"></ng-icon>
+    <a routerLink="/admin/usuarios" class="hover:text-primary transition-colors font-bold text-foreground">Administración</a>
+    <ng-icon name="lucideArrowRight" class="text-[10px]"></ng-icon>
+    <span class="font-bold text-foreground">Roles</span>
+  </nav>
+
+  <!-- Page Header -->
+  <div class="header-gradient-admin rounded-2xl p-6 border border-primary/10 shadow-sm relative overflow-hidden group">
+    <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/5 rounded-full blur-3xl group-hover:bg-white/10 transition-all duration-700"></div>
+    
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
+      <div class="flex items-center gap-4">
+        <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xl">
+          <ng-icon name="lucideShield" class="text-3xl text-white"></ng-icon>
+        </div>
+        <div>
+          <h2 class="font-display text-2xl font-extrabold text-white tracking-tight">Gestión de Roles</h2>
+          <p class="text-sm text-white/70 font-body mt-0.5">Definición de perfiles y niveles de permiso</p>
+        </div>
+      </div>
+      
+      <div class="flex items-center gap-3">
+        <button 
+          (click)="openCreateModal()"
+          class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-secondary text-secondary-foreground font-ui font-bold text-xs uppercase tracking-widest transition-all shadow-lg shadow-secondary/20 hover:scale-[1.02] active:scale-[0.98]"
+        >
+          <ng-icon name="lucidePlus" class="text-lg"></ng-icon>
+          Nuevo Rol
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters Section -->
+  <div class="bg-card rounded-2xl shadow-sm border border-border/50 p-4">
+    <div class="relative group">
+      <ng-icon name="lucideSearch" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors"></ng-icon>
+      <input 
+        type="text" 
+        (input)="searchTerm.set($any($event.target).value)"
+        placeholder="Buscar por nombre o descripción de rol..."
+        class="w-full pl-10 pr-4 h-11 rounded-xl bg-muted/30 border-transparent focus:bg-white focus:border-primary transition-all outline-none font-body text-sm"
+      />
+    </div>
+  </div>
+
+  <!-- Table Section -->
+  <div class="bg-card rounded-2xl shadow-xl border border-border/50 overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead class="bg-primary text-white">
+          <tr class="h-12 border-b border-white/10">
+            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest">Cód. Rol</th>
+            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest">Nombre del Rol</th>
+            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest">Descripción / Alcance</th>
+            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest">Accesos permitidos</th>
+            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-border/30 font-body text-sm">
+          @for (rol of filteredRoles(); track rol.id) {
+            <tr class="group hover:bg-primary/5 transition-colors">
+              <td class="px-6 py-4">
+                <span class="font-display font-bold text-primary text-sm">{{ rol.id }}</span>
+              </td>
+              <td class="px-6 py-4 font-bold text-foreground">
+                <div class="flex items-center gap-2">
+                  <ng-icon name="lucideShield" class="text-success"></ng-icon>
+                  {{ rol.nombre }}
+                </div>
+              </td>
+              <td class="px-6 py-4 text-muted-foreground italic max-w-xs leading-relaxed">
+                {{ rol.descripcion }}
+              </td>
+              <td class="px-6 py-4">
+                <div class="flex flex-wrap gap-1">
+                  @for (menuName of getMenuNames(rol.menus).split(', '); track menuName) {
+                    <span class="bg-primary/5 text-primary text-[9px] font-ui font-bold px-1.5 py-0.5 rounded border border-primary/10">
+                      {{ menuName }}
+                    </span>
+                  }
+                </div>
+              </td>
+              <td class="px-6 py-4 text-right">
+                <div class="flex items-center justify-end gap-1">
+                  <button 
+                    (click)="openEditModal(rol)"
+                    class="p-2 rounded-lg hover:bg-blue-100 text-blue-600 transition-colors"
+                  >
+                    <ng-icon name="lucidePencil" class="text-lg"></ng-icon>
+                  </button>
+                  <button 
+                    (click)="deleteRol(rol)"
+                    class="p-2 rounded-lg hover:bg-red-100 text-red-600 transition-colors"
+                  >
+                    <ng-icon name="lucideTrash2" class="text-lg"></ng-icon>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="5" class="px-6 py-12 text-center">
+                <div class="flex flex-col items-center gap-3 opacity-40">
+                  <ng-icon name="lucideShield" class="text-5xl"></ng-icon>
+                  <p class="font-display text-lg font-bold">No se encontraron roles configurados</p>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal Admin Roles -->
+  @if (showModal()) {
+    <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+      <div class="bg-card w-full max-w-xl rounded-2xl shadow-2xl border border-border overflow-hidden animate-in zoom-in-95 duration-200">
+        <div class="header-gradient-admin p-6 text-white text-center relative">
+          <div class="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-4 border border-white/20">
+            <ng-icon name="lucideShield" class="text-3xl"></ng-icon>
+          </div>
+          <h3 class="font-display text-xl font-extrabold tracking-tight">
+            {{ editingRol() ? 'Configurar Rol' : 'Nuevo Perfil de Usuario' }}
+          </h3>
+          <p class="text-white/70 text-sm font-body mt-1">Definición de permisos y accesos directos</p>
+        </div>
+        
+        <form (submit)="saveRol(); $event.preventDefault()" class="p-6 space-y-4 font-body">
+          <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-2">
+              <label class="font-ui text-[10px] font-bold text-primary uppercase tracking-widest ml-1">Nombre Identificador</label>
+              <input 
+                type="text" 
+                [(ngModel)]="formData.nombre" 
+                name="nombre"
+                required
+                placeholder="Ej: Auditor"
+                class="w-full px-4 h-11 rounded-xl bg-muted/50 border-transparent focus:bg-white focus:border-primary transition-all outline-none font-bold"
+              />
+            </div>
+            
+            <div class="space-y-2">
+              <label class="font-ui text-[10px] font-bold text-primary uppercase tracking-widest ml-1">Descripción del Rol</label>
+              <input 
+                type="text" 
+                [(ngModel)]="formData.descripcion" 
+                name="descripcion" 
+                placeholder="Ej: Acceso a consulta de expedientes..."
+                class="w-full px-4 h-11 rounded-xl bg-muted/50 border-transparent focus:bg-white focus:border-primary transition-all outline-none"
+              />
+            </div>
+          </div>
+
+          <div class="space-y-2 pt-2">
+            <label class="font-ui text-[10px] font-bold text-primary uppercase tracking-widest ml-1 flex items-center gap-2">
+              <ng-icon name="lucideListChecks"></ng-icon>
+              Menús y Módulos Permitidos
+            </label>
+            <div class="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-1 bg-muted/20 border border-border/50 rounded-xl">
+              @for (menu of allMenus; track menu.id) {
+                <button 
+                  type="button"
+                  (click)="toggleMenuSelection(menu.id)"
+                  class="flex items-center gap-3 p-3 rounded-lg border transition-all text-left group"
+                  [ngClass]="formData.menus.includes(menu.id) ? 'bg-primary/10 border-primary text-primary shadow-sm' : 'bg-white border-border hover:border-primary/30 text-muted-foreground'"
+                >
+                  <div class="w-4 h-4 rounded border flex items-center justify-center transition-colors"
+                       [ngClass]="formData.menus.includes(menu.id) ? 'bg-primary border-primary' : 'bg-white border-border group-hover:border-primary'">
+                    <ng-icon *ngIf="formData.menus.includes(menu.id)" name="lucideCheckCircle2" class="text-[10px] text-white"></ng-icon>
+                  </div>
+                  <span class="text-xs font-semibold">{{ menu.nombre }}</span>
+                </button>
+              }
+            </div>
+          </div>
+
+          <div class="flex gap-3 pt-4">
+            <button 
+              (click)="showModal.set(false)"
+              type="button"
+              class="flex-1 px-4 py-3 rounded-xl border border-border hover:bg-muted font-ui font-bold text-xs uppercase tracking-widest transition-all"
+            >
+              Cancelar
+            </button>
+            <button 
+              type="submit"
+              class="flex-1 header-gradient-admin text-white px-4 py-3 rounded-xl font-ui font-bold text-xs uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+            >
+              Guardar Rol
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>
+
+<!-- Toast Notification -->
+@if (showToast()) {
+  <div 
+    class="fixed top-4 right-4 z-[200] px-4 py-3 rounded-xl shadow-lg font-ui text-sm flex items-center gap-2"
+    [class.bg-success]="toastType() === 'success'"
+    [class.text-success-foreground]="toastType() === 'success'"
+    [class.bg-destructive]="toastType() === 'error'"
+    [class.text-destructive-foreground]="toastType() === 'error'"
+  >
+    {{ toastMessage() }}
+  </div>
+}

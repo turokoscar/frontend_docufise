@@ -1,0 +1,237 @@
+<div class="space-y-5">
+  <!-- Breadcrumb -->
+  <nav class="flex items-center gap-2 text-xs font-ui text-muted-foreground/60">
+    <a routerLink="/" class="flex items-center gap-1.5 hover:text-primary transition-colors">
+      <ng-icon name="lucideHome" class="text-sm"></ng-icon>
+      Inicio
+    </a>
+    <ng-icon name="lucideArrowRight" class="text-[10px]"></ng-icon>
+    <a routerLink="/admin/usuarios" class="hover:text-primary transition-colors font-bold text-foreground">Administración</a>
+    <ng-icon name="lucideArrowRight" class="text-[10px]"></ng-icon>
+    <span class="font-bold text-foreground">Menús</span>
+  </nav>
+
+  <!-- Page Header -->
+  <div class="header-gradient-admin rounded-2xl p-6 border border-primary/10 shadow-sm relative overflow-hidden group">
+    <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/5 rounded-full blur-3xl group-hover:bg-white/10 transition-all duration-700"></div>
+    
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
+      <div class="flex items-center gap-4">
+        <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xl">
+          <ng-icon name="lucideLayoutList" class="text-3xl text-white"></ng-icon>
+        </div>
+        <div>
+          <h2 class="font-display text-2xl font-extrabold text-white tracking-tight">Gestión de Menús</h2>
+          <p class="text-sm text-white/70 font-body mt-0.5">Configuración de la estructura de navegación</p>
+        </div>
+      </div>
+      
+      <div class="flex items-center gap-3">
+        <button 
+          (click)="openCreateModal()"
+          class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-secondary text-secondary-foreground font-ui font-bold text-xs uppercase tracking-widest transition-all shadow-lg shadow-secondary/20 hover:scale-[1.02] active:scale-[0.98]"
+        >
+          <ng-icon name="lucidePlus" class="text-lg"></ng-icon>
+          Nuevo Menú
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters Section -->
+  <div class="bg-card rounded-2xl shadow-sm border border-border/50 p-4">
+    <div class="relative group">
+      <ng-icon name="lucideSearch" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors"></ng-icon>
+      <input 
+        type="text" 
+        (input)="searchTerm.set($any($event.target).value)"
+        placeholder="Buscar por nombre, ruta o icono..."
+        class="w-full pl-10 pr-4 h-11 rounded-xl bg-muted/30 border-transparent focus:bg-white focus:border-primary transition-all outline-none font-body text-sm"
+      />
+    </div>
+  </div>
+
+  <!-- Table Section -->
+  <div class="bg-card rounded-2xl shadow-xl border border-border/50 overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead class="bg-primary text-white">
+          <tr class="h-12 border-b border-white/10">
+            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest text-center">Orden</th>
+            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest">Nombre / Etiqueta</th>
+            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest">Ruta (RouterLink)</th>
+            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest text-center">Icono</th>
+            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest text-center">Estado</th>
+            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-border/30 font-body text-sm">
+          @for (menu of filteredMenus(); track menu.id) {
+            <tr class="group hover:bg-primary/5 transition-colors">
+              <td class="px-6 py-4 text-center">
+                <span class="w-8 h-8 rounded-lg bg-muted flex items-center justify-center font-display font-bold text-xs mx-auto">
+                  {{ menu.orden }}
+                </span>
+              </td>
+              <td class="px-6 py-4 font-bold text-foreground">
+                {{ menu.nombre }}
+              </td>
+              <td class="px-6 py-4">
+                <code class="bg-muted/50 px-2 py-0.5 rounded text-[11px] text-primary font-mono border border-border/50">
+                  {{ menu.ruta }}
+                </code>
+              </td>
+              <td class="px-6 py-4 text-center">
+                <div class="w-10 h-10 rounded-xl bg-primary/5 border border-primary/10 flex items-center justify-center mx-auto text-primary">
+                  <ng-icon [name]="'luc' + menu.icono" class="text-xl"></ng-icon>
+                </div>
+              </td>
+              <td class="px-6 py-4 text-center">
+                <span 
+                  [ngClass]="menu.activo ? 'bg-success/15 text-success' : 'bg-muted text-muted-foreground'"
+                  class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest border border-current/20"
+                >
+                  {{ menu.activo ? 'Visible' : 'Oculto' }}
+                </span>
+              </td>
+              <td class="px-6 py-4 text-right">
+                <div class="flex items-center justify-end gap-1">
+                  <button 
+                    (click)="openEditModal(menu)"
+                    class="p-2 rounded-lg hover:bg-blue-100 text-blue-600 transition-colors"
+                  >
+                    <ng-icon name="lucidePencil" class="text-lg"></ng-icon>
+                  </button>
+                  <button 
+                    (click)="toggleStatus(menu)"
+                    class="p-2 rounded-lg hover:bg-success/10 text-success transition-colors"
+                  >
+                    <ng-icon [name]="menu.activo ? 'lucideCheckCircle2' : 'lucideXCircle'" class="text-lg"></ng-icon>
+                  </button>
+                  <button 
+                    (click)="deleteMenu(menu)"
+                    class="p-2 rounded-lg hover:bg-red-100 text-red-600 transition-colors"
+                  >
+                    <ng-icon name="lucideTrash2" class="text-lg"></ng-icon>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="px-6 py-12 text-center">
+                <div class="flex flex-col items-center gap-3 opacity-40">
+                  <ng-icon name="lucideLayoutList" class="text-5xl"></ng-icon>
+                  <p class="font-display text-lg font-bold">No hay opciones de menú configuradas</p>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal Admin Menús -->
+  @if (showModal()) {
+    <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+      <div class="bg-card w-full max-w-lg rounded-2xl shadow-2xl border border-border overflow-hidden animate-in zoom-in-95 duration-200">
+        <div class="header-gradient-admin p-6 text-white text-center relative">
+          <div class="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-4 border border-white/20">
+            <ng-icon name="lucideLayoutList" class="text-3xl"></ng-icon>
+          </div>
+          <h3 class="font-display text-xl font-extrabold tracking-tight">
+            {{ editingMenu() ? 'Editar Acceso' : 'Nuevo Acceso al Sistema' }}
+          </h3>
+          <p class="text-white/70 text-sm font-body mt-1">Configuración de elementos de navegación</p>
+        </div>
+        
+        <form (submit)="saveMenu(); $event.preventDefault()" class="p-6 space-y-4 font-body">
+          <div class="grid grid-cols-2 gap-4">
+            <div class="col-span-2 space-y-2">
+              <label class="font-ui text-[10px] font-bold text-primary uppercase tracking-widest ml-1">Nombre / Etiqueta</label>
+              <input 
+                type="text" 
+                [(ngModel)]="formData.nombre" 
+                name="nombre"
+                required
+                placeholder="Ej: Dashboard Técnico"
+                class="w-full px-4 h-11 rounded-xl bg-muted/50 border-transparent focus:bg-white focus:border-primary transition-all outline-none"
+              />
+            </div>
+            
+            <div class="space-y-2">
+              <label class="font-ui text-[10px] font-bold text-primary uppercase tracking-widest ml-1">Ruta Interna</label>
+              <input 
+                type="text" 
+                [(ngModel)]="formData.ruta" 
+                name="ruta" 
+                required
+                placeholder="Ej: /reportes/tecnicos"
+                class="w-full px-4 h-11 rounded-xl bg-muted/50 border-transparent focus:bg-white focus:border-primary transition-all outline-none font-mono text-xs"
+              />
+            </div>
+
+            <div class="space-y-2">
+              <label class="font-ui text-[10px] font-bold text-primary uppercase tracking-widest ml-1">Icono (Lucide)</label>
+              <div class="relative">
+                <ng-icon [name]="'luc' + formData.icono" class="absolute left-3 top-1/2 -translate-y-1/2 text-primary" *ngIf="formData.icono"></ng-icon>
+                <input 
+                  type="text" 
+                  [(ngModel)]="formData.icono" 
+                  name="icono" 
+                  placeholder="Ej: BarChart3"
+                  class="w-full pl-10 pr-4 h-11 rounded-xl bg-muted/50 border-transparent focus:bg-white focus:border-primary transition-all outline-none"
+                />
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <label class="font-ui text-[10px] font-bold text-primary uppercase tracking-widest ml-1">Orden de Aparición</label>
+              <input 
+                type="number" 
+                [(ngModel)]="formData.orden" 
+                name="orden" 
+                class="w-full px-4 h-11 rounded-xl bg-muted/50 border-transparent focus:bg-white focus:border-primary transition-all outline-none"
+              />
+            </div>
+
+            <div class="flex items-center gap-3 py-2 px-1 col-span-2">
+              <input type="checkbox" [(ngModel)]="formData.activo" name="activo" id="mactivo" class="w-4 h-4 rounded text-primary border-border focus:ring-primary">
+              <label for="mactivo" class="font-ui text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Visible en barra lateral</label>
+            </div>
+          </div>
+
+          <div class="flex gap-3 pt-4">
+            <button 
+              (click)="showModal.set(false)"
+              type="button"
+              class="flex-1 px-4 py-3 rounded-xl border border-border hover:bg-muted font-ui font-bold text-xs uppercase tracking-widest transition-all"
+            >
+              Cancelar
+            </button>
+            <button 
+              type="submit"
+              class="flex-1 header-gradient-admin text-white px-4 py-3 rounded-xl font-ui font-bold text-xs uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+            >
+              Guardar Menú
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>
+
+<!-- Toast Notification -->
+@if (showToast()) {
+  <div 
+    class="fixed top-4 right-4 z-[200] px-4 py-3 rounded-xl shadow-lg font-ui text-sm flex items-center gap-2"
+    [class.bg-success]="toastType() === 'success'"
+    [class.text-success-foreground]="toastType() === 'success'"
+    [class.bg-destructive]="toastType() === 'error'"
+    [class.text-destructive-foreground]="toastType() === 'error'"
+  >
+    {{ toastMessage() }}
+  </div>
+}

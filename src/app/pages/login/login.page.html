@@ -1,0 +1,143 @@
+<div class="min-h-screen flex bg-background">
+  <!-- Panel Izquierdo (Imagen + Gradiente) -->
+  <div class="hidden lg:flex lg:w-[48%] relative overflow-hidden items-end">
+    <!-- Background image -->
+    <img src="/assets/login-bg.jpg" alt="" class="absolute inset-0 w-full h-full object-cover">
+    <!-- Institutional gradient overlay -->
+    <div class="absolute inset-0 bg-gradient-to-t from-primary/95 via-primary/70 to-primary/40"></div>
+    
+    <div class="relative z-10 p-12 pb-16 w-full space-y-8">
+      <div>
+        <span class="inline-block px-4 py-1.5 rounded-full border border-secondary/60 text-secondary text-[10px] font-ui tracking-widest uppercase mb-6 bg-secondary/5 backdrop-blur-sm">
+          Sistema Institucional
+        </span>
+        <h2 class="font-display text-4xl font-extrabold text-white leading-tight">
+          DocuFISE <span class="text-secondary">2026</span>
+        </h2>
+        <p class="mt-4 text-white/70 font-body text-base max-w-md leading-relaxed">
+          Sistema Integrado de Gestión de Expedientes y Firmas. Plataforma centralizada para la gestión documental institucional del FISE.
+        </p>
+      </div>
+      <div class="flex items-center gap-3 pt-4 border-t border-white/10">
+        <div class="w-8 h-1 bg-secondary rounded-full"></div>
+        <span class="text-white/50 text-[10px] font-ui tracking-[0.2em] uppercase">
+          Gestión de Confianza
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel Derecho (Formulario) -->
+  <div class="flex-1 flex flex-col bg-background">
+    <div class="flex-1 flex items-center justify-center p-8">
+      <div class="w-full max-w-md space-y-8">
+        <div class="text-center">
+          <img src="/assets/fise-logo.png" alt="FISE" class="h-20 mx-auto mb-6">
+          <h1 class="font-display text-2xl font-extrabold text-foreground tracking-tight">Iniciar Sesión</h1>
+          <p class="mt-1 text-muted-foreground font-body text-sm">Bienvenido al ecosistema digital DocuFISE.</p>
+        </div>
+
+        <form (submit)="handleSubmit(); $event.preventDefault()" class="space-y-5">
+          <!-- Alerta de Error -->
+          <div *ngIf="error()" class="bg-destructive/10 border border-destructive/20 text-destructive rounded-xl p-3 text-xs font-ui text-center animate-in fade-in slide-in-from-top-1 duration-300">
+            <div class="flex items-center justify-center gap-2">
+              <ng-icon name="lucideInfo" class="text-base"></ng-icon>
+              <span class="font-bold uppercase tracking-wider">{{ error() }}</span>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <label for="usuario" class="font-ui text-[10px] font-bold tracking-widest uppercase text-primary ml-1">Usuario</label>
+            <div class="relative group">
+              <div class="absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 text-muted-foreground group-focus-within:text-primary transition-colors">
+                <ng-icon name="lucideUser" class="text-lg"></ng-icon>
+              </div>
+              <input
+                id="usuario"
+                type="text"
+                placeholder="Ingrese su usuario"
+                [(ngModel)]="usuario"
+                name="usuario"
+                class="w-full pl-12 pr-4 h-12 rounded-xl bg-muted/30 border-border focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none font-body text-sm"
+              />
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <div class="flex items-center justify-between px-1">
+              <label for="contrasena" class="font-ui text-[10px] font-bold tracking-widest uppercase text-primary">Contraseña</label>
+              <button class="text-[10px] text-primary hover:underline font-bold uppercase tracking-wider">¿Olvidó su contraseña?</button>
+            </div>
+            <div class="relative group">
+              <div class="absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 text-muted-foreground group-focus-within:text-primary transition-colors">
+                <ng-icon name="lucideLock" class="text-lg"></ng-icon>
+              </div>
+              <input
+                id="contrasena"
+                [type]="showPassword() ? 'text' : 'password'"
+                placeholder="••••••••••••"
+                [(ngModel)]="contrasena"
+                name="contrasena"
+                class="w-full pl-12 pr-12 h-12 rounded-xl bg-muted/30 border-border focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none font-body text-sm"
+              />
+              <button
+                type="button"
+                (click)="togglePassword()"
+                class="absolute right-3 top-1/2 -translate-y-1/2 h-10 w-10 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+                [title]="showPassword() ? 'Ocultar contraseña' : 'Ver contraseña'"
+              >
+                <ng-icon [name]="showPassword() ? 'lucideEyeOff' : 'lucideEye'" class="text-lg"></ng-icon>
+              </button>
+            </div>
+          </div>
+
+          <button 
+            type="submit" 
+            class="w-full header-gradient text-white font-ui font-bold text-sm tracking-widest uppercase h-12 rounded-xl flex items-center justify-center gap-3 shadow-lg hover:shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+          >
+            Ingresar
+            <ng-icon name="lucideArrowRight" class="text-lg"></ng-icon>
+          </button>
+        </form>
+
+        <!-- Accesos rápidos -->
+        <div class="bg-muted/30 border border-border rounded-2xl p-5 space-y-4">
+          <div class="flex items-center gap-2 text-[10px] font-ui font-bold text-muted-foreground uppercase tracking-widest">
+            <ng-icon name="lucideInfo" class="text-sm"></ng-icon>
+            Credenciales de prueba
+          </div>
+          <div class="grid grid-cols-3 gap-3">
+            @for (u of [
+              { user: 'admin', pass: 'admin', label: 'Admin' },
+              { user: 'ctd', pass: 'ctd', label: 'CTD' },
+              { user: 'firmante', pass: 'firmante', label: 'Firmante' }
+            ]; track u.user) {
+              <button
+                type="button"
+                (click)="quickLogin(u.user, u.pass)"
+                class="flex flex-col items-center justify-center p-3 rounded-xl border border-border bg-white hover:bg-primary/5 hover:border-primary/30 transition-all group group-hover:scale-105"
+              >
+                <span class="text-[10px] font-bold text-primary uppercase tracking-tighter">{{ u.label }}</span>
+                <span class="text-[9px] text-muted-foreground font-body">{{ u.user }}/{{ u.pass }}</span>
+              </button>
+            }
+          </div>
+        </div>
+
+        <p class="text-center text-[10px] text-muted-foreground font-ui font-bold uppercase tracking-wider pt-2">
+          ¿Necesita asistencia técnica? 
+          <span class="text-primary cursor-pointer hover:underline">Centro de Ayuda</span>
+        </p>
+      </div>
+    </div>
+
+    <!-- Footer de Login -->
+    <div class="flex items-center justify-between px-8 py-4 border-t border-border bg-muted/20">
+      <div class="flex items-center gap-2">
+        <div class="w-2.5 h-2.5 rounded-full bg-success animate-pulse shadow-[0_0_8px_rgba(15,191,144,0.4)]"></div>
+        <span class="text-[10px] font-ui font-bold text-slate-500 uppercase tracking-widest">Servidor Activo · INIA</span>
+      </div>
+      <span class="text-[10px] font-ui font-bold text-slate-400 uppercase tracking-widest">DocuFISE V2.0</span>
+    </div>
+  </div>
+</div>

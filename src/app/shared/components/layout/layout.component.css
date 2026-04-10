@@ -1,0 +1,37 @@
+.sidebar-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background: #2C5AAB;
+  border-radius: 10px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb:hover {
+  background: #0FAEBF;
+}
+
+/* Transitions for sub-labels and text */
+.invisible {
+  opacity: 0;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+/* Sidebar active link styling */
+.active-link {
+  @apply bg-[#2C5AAB]/30 text-white shadow-[inset_0_0_15px_rgba(44,90,171,0.2)];
+  border-left: 3px solid hsl(var(--secondary));
+}
+
+.active-link .active-indicator {
+  @apply opacity-100;
+}
+
+/* Main background pattern fine-tuning */
+.page-pattern {
+  background-attachment: fixed;
+}

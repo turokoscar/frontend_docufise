@@ -1,0 +1,67 @@
+:host {
+  display: block;
+}
+
+/* Gradient sub-header specific to Firmas (Purplish/Blue) */
+.header-gradient-firmas {
+  background: linear-gradient(135deg, 
+    hsl(216 60% 42%) 0%, 
+    hsl(190 70% 45%) 100%
+  );
+}
+
+/* Modal animations */
+.animate-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.zoom-in-95 {
+  animation: zoomIn 0.2s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes zoomIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Table hover effects */
+tbody tr {
+  transition: all 0.2s ease;
+}
+
+tbody tr:hover {
+  transform: translateX(4px);
+}
+
+/* Custom scrollbar for table */
+.overflow-x-auto::-webkit-scrollbar {
+  height: 6px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: hsl(var(--primary) / 0.2);
+  border-radius: 10px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary) / 0.5);
+}
+
+/* Spinner for signing */
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
