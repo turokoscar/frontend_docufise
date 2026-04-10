@@ -1,4 +1,4 @@
-<div class="space-y-5">
+<div class="space-y-5" (click)="closeDropdown()">
   <!-- Breadcrumb -->
   <nav class="flex items-center gap-2 text-xs font-ui text-muted-foreground/60">
     <a routerLink="/" class="flex items-center gap-1.5 hover:text-primary transition-colors">
@@ -173,32 +173,35 @@
                 <span [class]="getEstadoBadgeClass(exp.estado)">{{ exp.estado }}</span>
               </td>
               <td class="px-6 py-4 text-right">
-                <div class="relative inline-block group">
+                <div class="relative">
                   <button 
+                    (click)="toggleDropdown(exp.id, $event)"
                     class="inline-flex items-center gap-1 h-8 px-3 rounded-lg border border-border bg-background hover:bg-muted font-ui text-xs transition-colors"
+                    [class.bg-muted]="openDropdownId() === exp.id"
                   >
                     Opciones
                     <ng-icon name="lucideChevronDown" class="h-3 w-3"></ng-icon>
                   </button>
-                  <!-- Dropdown menu (hidden, shown on hover) -->
-                  <div class="absolute right-0 mt-1 w-48 rounded-lg border border-border bg-card shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
-                    <div class="py-1">
-                      @if (exp.estado === 'Registrado') {
-                        <button (click)="openDerivarModal(exp)" class="w-full flex items-center gap-2 px-3 py-2 text-xs font-ui hover:bg-muted text-left">
-                          <ng-icon name="lucideSend" class="h-4 w-4 text-primary"></ng-icon>
-                          Derivar expediente
+                  @if (openDropdownId() === exp.id) {
+                    <div class="absolute right-0 mt-1 w-48 rounded-lg border border-border bg-card shadow-lg z-10">
+                      <div class="py-1">
+                        @if (exp.estado === 'Registrado') {
+                          <button (click)="openDerivarModal(exp); closeDropdown()" class="w-full flex items-center gap-2 px-3 py-2 text-xs font-ui hover:bg-muted text-left">
+                            <ng-icon name="lucideSend" class="h-4 w-4 text-primary"></ng-icon>
+                            Derivar expediente
+                          </button>
+                        }
+                        <button (click)="openEditForm(exp); closeDropdown()" [disabled]="!canEdit(exp)" class="w-full flex items-center gap-2 px-3 py-2 text-xs font-ui hover:bg-muted text-left disabled:opacity-50">
+                          <ng-icon name="lucidePencil" class="h-4 w-4 text-secondary"></ng-icon>
+                          Actualizar expediente
                         </button>
-                      }
-                      <button (click)="openEditForm(exp)" [disabled]="!canEdit(exp)" class="w-full flex items-center gap-2 px-3 py-2 text-xs font-ui hover:bg-muted text-left disabled:opacity-50">
-                        <ng-icon name="lucidePencil" class="h-4 w-4 text-secondary"></ng-icon>
-                        Actualizar expediente
-                      </button>
-                      <button (click)="deleteExpediente(exp)" [disabled]="!canEdit(exp)" class="w-full flex items-center gap-2 px-3 py-2 text-xs font-ui hover:bg-muted text-destructive text-left disabled:opacity-50">
-                        <ng-icon name="lucideTrash2" class="h-4 w-4"></ng-icon>
-                        Eliminar expediente
-                      </button>
+                        <button (click)="deleteExpediente(exp); closeDropdown()" [disabled]="!canEdit(exp)" class="w-full flex items-center gap-2 px-3 py-2 text-xs font-ui hover:bg-muted text-destructive text-left disabled:opacity-50">
+                          <ng-icon name="lucideTrash2" class="h-4 w-4"></ng-icon>
+                          Eliminar expediente
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  }
                 </div>
               </td>
             </tr>

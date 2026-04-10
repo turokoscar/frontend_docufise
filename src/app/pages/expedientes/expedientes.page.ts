@@ -64,6 +64,9 @@ export class ExpedientesPage implements OnInit {
   showDerivarModal = signal(false);
   editingExpediente = signal<Expediente | null>(null);
   derivandoExpediente = signal<Expediente | null>(null);
+  
+  // Dropdown state
+  openDropdownId = signal<string | null>(null);
 
   // Form fields
   formTipoDoc = signal('');
@@ -91,10 +94,19 @@ export class ExpedientesPage implements OnInit {
   currentPage = signal(1);
   itemsPerPage = 10;
 
-  ngOnInit(): void {
-    this.allExpedientes.set([...this.dataService.expedientesMock]);
+ngOnInit(): void {
+    this.allExpedientes.set(this.dataService.expedientesMock);
   }
-
+  
+  toggleDropdown(id: string, event: Event): void {
+    event.stopPropagation();
+    this.openDropdownId.update(current => current === id ? null : id);
+  }
+  
+closeDropdown(): void {
+    this.openDropdownId.set(null);
+  }
+  
   private showNotification(message: string, type: 'success' | 'error' = 'success'): void {
     this.toastMessage.set(message);
     this.toastType.set(type);
