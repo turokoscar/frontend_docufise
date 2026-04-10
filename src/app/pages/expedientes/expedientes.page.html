@@ -146,9 +146,10 @@
           <tr class="h-12">
             <th class="px-6 font-ui text-xs font-bold uppercase tracking-wider">Numeración</th>
             <th class="px-6 font-ui text-xs font-bold uppercase tracking-wider">Tipo Documento</th>
-            <th class="px-6 font-ui text-xs font-bold uppercase tracking-wider">Elaborado por</th>
-            <th class="px-6 font-ui text-xs font-bold uppercase tracking-wider">Fecha Registro</th>
-            <th class="px-6 font-ui text-xs font-bold uppercase tracking-wider text-center">Estado</th>
+<th class="px-6 font-ui text-xs font-bold uppercase tracking-wider">Elaborado por</th>
+              <th class="px-6 font-ui text-xs font-bold uppercase tracking-wider">Enviado por</th>
+              <th class="px-6 font-ui text-xs font-bold uppercase tracking-wider">Fecha Registro</th>
+              <th class="px-6 font-ui text-xs font-bold uppercase tracking-wider text-center">Estado</th>
             <th class="px-6 font-ui text-xs font-bold uppercase tracking-wider text-right">Acciones</th>
           </tr>
         </thead>
@@ -168,6 +169,7 @@
                 </div>
               </td>
               <td class="px-6 py-4 font-body text-sm font-semibold text-foreground">{{ exp.elaboradoPor }}</td>
+              <td class="px-6 py-4 font-body text-sm text-muted-foreground">{{ exp.enviadoPor || '-' }}</td>
               <td class="px-6 py-4 font-body text-sm text-muted-foreground tabular-nums">{{ exp.fechaElaboracion }}</td>
               <td class="px-6 py-4 text-center">
                 <span [class]="getEstadoBadgeClass(exp.estado)">{{ exp.estado }}</span>
@@ -207,7 +209,7 @@
             </tr>
           } @empty {
             <tr>
-              <td colspan="6" class="px-6 py-12 text-center">
+              <td colspan="7" class="px-6 py-12 text-center">
                 <div class="flex flex-col items-center gap-3">
                   <div class="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
                     <ng-icon name="lucideSearch" class="text-3xl text-muted-foreground/40"></ng-icon>
