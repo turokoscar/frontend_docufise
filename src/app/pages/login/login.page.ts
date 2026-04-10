@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -10,6 +10,7 @@ import { lucideUser, lucideLock, lucideEye, lucideEyeOff, lucideArrowRight, luci
 @Component({
   selector: 'app-login',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, FormsModule, NgIconComponent],
   providers: [
     provideIcons({ lucideUser, lucideLock, lucideEye, lucideEyeOff, lucideArrowRight, lucideInfo })

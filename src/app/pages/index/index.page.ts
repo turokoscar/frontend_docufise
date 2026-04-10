@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { DataService } from '../../core/services/data.service';
@@ -6,6 +6,7 @@ import { DataService } from '../../core/services/data.service';
 @Component({
   selector: 'app-index',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="min-h-screen bg-background flex items-center justify-center page-pattern">
       <div class="flex flex-col items-center gap-4 animate-pulse">
