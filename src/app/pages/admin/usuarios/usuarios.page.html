@@ -12,17 +12,18 @@
   </nav>
 
   <!-- Page Header -->
-  <div class="header-gradient-admin rounded-2xl p-6 border border-primary/10 shadow-sm relative overflow-hidden group">
-    <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/5 rounded-full blur-3xl group-hover:bg-white/10 transition-all duration-700"></div>
+  <div class="bg-card border border-primary/10 shadow-sm relative overflow-hidden">
+    <!-- Subtle gradient bg - exactly like Prototipo -->
+    <div class="absolute inset-0 bg-gradient-to-r from-primary/5 via-primary/3 to-transparent"></div>
     
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
       <div class="flex items-center gap-4">
-        <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xl">
-          <ng-icon name="lucideUsers" class="text-3xl text-white"></ng-icon>
+        <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 backdrop-blur-md border border-primary/10">
+          <ng-icon name="lucideUsers" class="text-3xl text-primary"></ng-icon>
         </div>
         <div>
-          <h2 class="font-display text-2xl font-extrabold text-white tracking-tight">Gestión de Usuarios</h2>
-          <p class="text-sm text-white/70 font-body mt-0.5">Mantenimiento de accesos y perfiles del sistema</p>
+          <h2 class="font-display text-2xl font-extrabold text-foreground tracking-tight">Gestión de Usuarios</h2>
+          <p class="text-sm text-muted-foreground font-body mt-0.5">Mantenimiento de accesos y perfiles del sistema</p>
         </div>
       </div>
       
@@ -39,7 +40,7 @@
   </div>
 
   <!-- Filters Section -->
-  <div class="bg-card rounded-2xl shadow-sm border border-border/50 p-4">
+  <div class="bg-card border-none shadow-sm p-4">
     <div class="flex flex-wrap items-end gap-4">
       <div class="flex-1 min-w-[300px] space-y-2">
         <label class="font-ui text-[10px] font-bold text-primary uppercase tracking-widest ml-1">Buscar usuario</label>
@@ -89,10 +90,10 @@
   </div>
 
   <!-- Table Section -->
-  <div class="bg-card rounded-2xl shadow-xl border border-border/50 overflow-hidden">
+  <div class="bg-card border-none shadow-md overflow-hidden rounded-none">
     <div class="overflow-x-auto">
       <table class="w-full text-left border-collapse">
-        <thead class="bg-primary text-white">
+        <thead class="bg-primary text-primary-foreground">
           <tr class="h-12">
             <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest">Nombre y Usuario</th>
             <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest">Contacto</th>
@@ -184,7 +185,7 @@
   @if (showModal()) {
     <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
       <div class="bg-card w-full max-w-lg rounded-2xl shadow-2xl border border-border overflow-hidden animate-in zoom-in-95 duration-200">
-        <div class="header-gradient-admin p-6 text-white text-center relative">
+        <div class="bg-primary p-6 text-primary-foreground text-center relative">
           <div class="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-4 border border-white/20">
             <ng-icon name="lucideUsers" class="text-3xl"></ng-icon>
           </div>
@@ -283,7 +284,7 @@
             </button>
             <button 
               type="submit"
-              class="flex-1 header-gradient-admin text-white px-4 py-3 rounded-xl font-ui font-bold text-xs uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+              class="flex-1 bg-primary text-primary-foreground px-4 py-3 rounded-xl font-ui font-bold text-xs uppercase tracking-widest shadow-sm hover:bg-primary/90 transition-all"
             >
               Guardar Usuario
             </button>

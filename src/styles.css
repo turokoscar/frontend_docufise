@@ -173,3 +173,86 @@
     );
   }
 }
+
+/* ===========================================
+   MODERN CSS - Container Queries
+   https://skills.sh/tailwind-css-patterns
+   =========================================== */
+@layer utilities {
+  /* Container query utilities */
+  .container-query {
+    container-type: inline-size;
+  }
+  
+  @container (inline-size < 40ch) {
+    .cq-sm\:flex-col { flex-direction: column; }
+    .cq-sm\:w-full { width: 100%; }
+    .cq-sm\:text-sm { font-size: 0.875rem; }
+  }
+  
+  @container (inline-size >= 40ch) {
+    .cq-lg\:flex-row { flex-direction: row; }
+    .cq-lg\:w-auto { width: auto; }
+    .cq-lg\:text-base { font-size: 1rem; }
+  }
+}
+
+/* ===========================================
+   RESPONSIVE BREAKPOINTS (Custom)
+   =========================================== */
+@layer utilities {
+  /* Mobile-first: ya usa sm:, md:, lg:, xl:, 2xl: por defecto */
+  
+  /* Breakpoints personalizados si son necesarios */
+  @media (width <= 320px) {
+    .\:xs\:hidden { display: none; }
+    .\:xs\:block { display: block; }
+    .\:xs\:text-xs { font-size: 0.75rem; }
+  }
+}
+
+/* ===========================================
+   CSS CUSTOM PROPERTIES - Utilidades
+   =========================================== */
+@layer base {
+  :root {
+    /* Fluid typography scale */
+    --text-xs: 0.75rem;
+    --text-sm: 0.875rem;
+    --text-base: 1rem;
+    --text-lg: 1.125rem;
+    --text-xl: 1.25rem;
+    --text-2xl: 1.5rem;
+    
+    /* Spacing scale */
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-6: 1.5rem;
+    --space-8: 2rem;
+    
+    /* Transitions */
+    --transition-fast: 150ms ease;
+    --transition-normal: 200ms ease;
+    --transition-slow: 300ms ease;
+  }
+}
+
+/* ===========================================
+   ACCESSIBILITY - Focus & reduced motion
+   =========================================== */
+@layer base {
+  *:focus-visible {
+    outline: 2px solid hsl(var(--primary));
+    outline-offset: 2px;
+  }
+  
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}

@@ -90,7 +90,16 @@ module.exports = {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },
+      // Container queries support
+      containerType: {
+        DEFAULT: "inline-size",
+        "inline": "inline-size",
+        "normal": "normal",
+        "size": "size",
+      },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    require("tailwindcss-animate"),
+  ],
 }

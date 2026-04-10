@@ -11,17 +11,17 @@
 
   <!-- Page Header -->
   <div class="header-gradient-sub rounded-2xl p-6 border border-primary/10 shadow-sm relative overflow-hidden group">
-    <!-- Subtle bg decoration -->
-    <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/5 rounded-full blur-3xl group-hover:bg-white/10 transition-all duration-700"></div>
+    <!-- Subtle gradient bg - exactly like Prototipo -->
+    <div class="absolute inset-0 bg-gradient-to-r from-primary/5 via-primary/3 to-transparent"></div>
     
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
       <div class="flex items-center gap-4">
-        <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xl">
-          <ng-icon name="lucideFileText" class="text-3xl text-white"></ng-icon>
+        <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 backdrop-blur-md border border-primary/10">
+          <ng-icon name="lucideFileText" class="text-3xl text-primary"></ng-icon>
         </div>
         <div>
-          <h2 class="font-display text-2xl font-extrabold text-white tracking-tight">Gestión de Expedientes</h2>
-          <p class="text-sm text-white/70 font-body mt-0.5">Administración y seguimiento de la bandeja de documentos</p>
+          <h2 class="font-display text-2xl font-extrabold text-foreground tracking-tight">Gestión de Expedientes</h2>
+          <p class="text-sm text-muted-foreground font-body mt-0.5">Administración y seguimiento de la bandeja de documentos</p>
         </div>
       </div>
       
@@ -51,7 +51,7 @@
   </div>
   <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
     @for (kpi of kpis(); track kpi.label) {
-      <div class="bg-card border-none shadow-sm rounded-2xl overflow-hidden relative group kpi-glow transition-all duration-300">
+      <div class="bg-card border-none shadow-sm overflow-hidden relative group kpi-glow transition-all duration-200">
         <div class="p-4 flex items-center gap-4">
           <div 
             class="flex items-center justify-center w-12 h-12 rounded-xl transition-transform group-hover:scale-110" 
@@ -76,7 +76,7 @@
     <h3 class="font-ui text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Filtros Avanzados</h3>
     <ng-icon name="lucideHelpCircle" class="text-muted-foreground/40 text-xs" title="Busque por numeración, elaborador o tipo de documento"></ng-icon>
   </div>
-  <div class="bg-card rounded-2xl shadow-sm border border-border/50 p-4">
+  <div class="bg-card border-none shadow-sm p-4">
     <div class="flex flex-wrap items-end gap-4">
       <!-- Search -->
       <div class="flex-1 min-w-[240px] space-y-2">
@@ -142,25 +142,25 @@
     </p>
   </div>
 
-  <div class="bg-card rounded-2xl shadow-xl border border-border/50 overflow-hidden">
+  <div class="bg-card border-none shadow-md overflow-hidden rounded-none">
     <div class="overflow-x-auto">
       <table class="w-full text-left border-collapse">
-        <thead class="bg-primary text-white">
+        <thead class="bg-primary text-primary-foreground">
           <tr class="h-12">
-            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest">Numeración</th>
-            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest">Tipo Documento</th>
-            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest">Elaborado por</th>
-            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest">Fecha Registro</th>
-            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest text-center">Estado</th>
-            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest text-right">Acciones</th>
+            <th class="px-6 font-ui text-xs font-bold uppercase tracking-wider">Numeración</th>
+            <th class="px-6 font-ui text-xs font-bold uppercase tracking-wider">Tipo Documento</th>
+            <th class="px-6 font-ui text-xs font-bold uppercase tracking-wider">Elaborado por</th>
+            <th class="px-6 font-ui text-xs font-bold uppercase tracking-wider">Fecha Registro</th>
+            <th class="px-6 font-ui text-xs font-bold uppercase tracking-wider text-center">Estado</th>
+            <th class="px-6 font-ui text-xs font-bold uppercase tracking-wider text-right">Acciones</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-border/30">
           @for (exp of paginatedExpedientes(); track exp.id; let i = $index) {
-            <tr class="group hover:bg-primary/5 transition-colors" [ngClass]="{'bg-muted/10': i % 2 !== 0}">
+            <tr class="group hover:bg-primary/5 transition-colors" [ngClass]="{'bg-muted/20': i % 2 !== 0}">
               <td class="px-6 py-4">
                 <div class="flex flex-col">
-                  <span class="font-display font-bold text-primary text-sm">{{ exp.numeracion }}</span>
+                  <span class="font-ui font-semibold text-primary text-sm">{{ exp.numeracion }}</span>
                   <span class="text-[9px] font-ui text-muted-foreground uppercase tracking-tighter">{{ exp.id }}</span>
                 </div>
               </td>
@@ -170,8 +170,8 @@
                   <span class="font-body text-sm">{{ exp.tipoDocumento }}</span>
                 </div>
               </td>
-              <td class="px-6 py-4 font-body text-sm font-semibold text-foreground/80">{{ exp.elaboradoPor }}</td>
-              <td class="px-6 py-4 font-body text-sm text-muted-foreground italic">{{ exp.fechaElaboracion }}</td>
+              <td class="px-6 py-4 font-body text-sm font-semibold text-foreground">{{ exp.elaboradoPor }}</td>
+              <td class="px-6 py-4 font-body text-sm text-muted-foreground tabular-nums">{{ exp.fechaElaboracion }}</td>
               <td class="px-6 py-4 text-center">
                 <span [class]="getEstadoBadgeClass(exp.estado)">{{ exp.estado }}</span>
               </td>
