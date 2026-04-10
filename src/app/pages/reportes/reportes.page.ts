@@ -62,6 +62,14 @@ export class ReportesPage implements OnInit {
     setTimeout(() => this.showToast.set(false), 3000);
   }
 
+  recentActivity = [
+    { action: 'Expediente firmado', detail: '001-2026-FISE', time: 'Hace 2h', type: 'success' },
+    { action: 'Nuevo expediente registrado', detail: '012-2026-FISE', time: 'Hace 4h', type: 'info' },
+    { action: 'Firma pendiente', detail: 'FIR-008', time: 'Hace 5h', type: 'warning' },
+    { action: 'Documento observado', detail: 'FIR-005', time: 'Hace 1d', type: 'error' },
+    { action: 'Expediente derivado', detail: '006-2026-FISE', time: 'Hace 1d', type: 'info' },
+  ];
+
   kpis = computed(() => {
     const exp = this.allExpedientes();
     const firmas = this.allFirmas();

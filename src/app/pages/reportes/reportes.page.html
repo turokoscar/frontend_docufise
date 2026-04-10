@@ -13,26 +13,23 @@
 
   <!-- KPI Strip -->
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-    @for (kpi of kpis(); track kpi.label) {
-      <div class="bg-card border-none shadow-md overflow-hidden relative group transition-all duration-200">
-        <div class="p-4 flex items-center justify-between">
-          <div>
-            <p class="text-xs font-ui text-muted-foreground uppercase tracking-wider">{{ kpi.label }}</p>
-            <p class="text-2xl font-display font-extrabold mt-1" [style.color]="kpi.color">{{ kpi.value }}</p>
-            <div class="flex items-center gap-1 mt-1">
-              <ng-icon name="lucideTrendingUp" class="h-3.5 w-3.5" [style.color]="kpi.color"></ng-icon>
-              <span class="text-xs font-ui" [style.color]="kpi.color">+25%</span>
-              <span class="text-xs text-muted-foreground">vs mes anterior</span>
-            </div>
-          </div>
+    @for (stat of datosReporte(); track stat.estado) {
+      <div class="bg-card border-none shadow-sm overflow-hidden relative group kpi-glow transition-all duration-200">
+        <div class="p-4 flex items-center gap-4">
           <div 
             class="flex items-center justify-center w-12 h-12 rounded-xl" 
-            [style.backgroundColor]="kpi.color + '12'"
+            [style.backgroundColor]="stat.color + '15'"
           >
-            <ng-icon [name]="kpi.icon" class="h-6 w-6" [style.color]="kpi.color"></ng-icon>
+            <div class="w-6 h-6 rounded-full border-2" [style.borderColor]="stat.color"></div>
+          </div>
+          <div>
+            <p class="text-2xl font-display font-extrabold leading-none mb-1" [style.color]="stat.color">
+              {{ stat.cantidad }}
+            </p>
+            <p class="text-[10px] font-ui font-bold text-muted-foreground uppercase tracking-widest">{{ stat.estado }}</p>
           </div>
         </div>
-        <div class="absolute bottom-0 left-0 right-0 h-1 rounded-b-lg" [style.backgroundColor]="kpi.color"></div>
+        <div class="absolute bottom-0 left-0 right-0 h-1" [style.backgroundColor]="stat.color"></div>
       </div>
     }
   </div>
