@@ -17,7 +17,9 @@ import {
   lucideCheckCircle2,
   lucideClock,
   lucideAlertTriangle,
-  lucideSend
+  lucideSend,
+  lucideActivity,
+  lucideFileText
 } from '@ng-icons/lucide';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
@@ -32,7 +34,8 @@ import * as XLSX from 'xlsx';
     provideIcons({ 
       lucideHome, lucideBarChart3, lucideFileSpreadsheet, lucideArrowRight, 
       lucideInfo, lucideTrendingUp, lucidePieChart, lucideLayoutGrid,
-      lucideFile, lucideCheckCircle2, lucideClock, lucideAlertTriangle, lucideSend
+      lucideFile, lucideCheckCircle2, lucideClock, lucideAlertTriangle, lucideSend,
+      lucideActivity, lucideFileText
     })
   ],
   templateUrl: './reportes.page.html',

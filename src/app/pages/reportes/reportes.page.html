@@ -1,47 +1,18 @@
-<div class="space-y-5">
-  <!-- Breadcrumb -->
-  <nav class="flex items-center gap-2 text-xs font-ui text-muted-foreground/60">
-    <a routerLink="/" class="flex items-center gap-1.5 hover:text-primary transition-colors">
-      <ng-icon name="lucideHome" class="text-sm"></ng-icon>
-      Inicio
-    </a>
-    <ng-icon name="lucideArrowRight" class="text-[10px]"></ng-icon>
-    <span class="font-bold text-foreground">Panel Ejecutivo</span>
-  </nav>
-
-  <!-- Page Header -->
-  <div class="header-gradient-reportes rounded-2xl p-6 border border-primary/10 shadow-sm relative overflow-hidden group">
-    <!-- Subtle gradient bg - exactly like Prototipo -->
-    <div class="absolute inset-0 bg-gradient-to-r from-primary/5 via-primary/3 to-transparent"></div>
-    
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
-      <div class="flex items-center gap-4">
-        <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 backdrop-blur-md border border-primary/10">
-          <ng-icon name="lucideBarChart3" class="text-3xl text-primary"></ng-icon>
-        </div>
-        <div>
-          <h2 class="font-display text-2xl font-extrabold text-foreground tracking-tight">Panel Ejecutivo</h2>
-          <p class="text-sm text-muted-foreground font-body mt-0.5">Indicadores de gestión y estadísticas institucionales</p>
-        </div>
-      </div>
-      
-      <div class="flex items-center gap-3">
-        <button 
-          (click)="exportToExcel()"
-          class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-ui font-bold text-xs uppercase tracking-widest transition-all border border-primary/20 hover:border-primary/30 shadow-sm"
-        >
-          <ng-icon name="lucideFileSpreadsheet" class="text-lg"></ng-icon>
-          Exportar Reporte
-        </button>
-      </div>
+<div class="space-y-6">
+  <!-- Header (sin breadcrumb como Prototipo) -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="font-display text-2xl font-extrabold text-foreground">Panel Ejecutivo</h2>
+      <p class="text-sm text-muted-foreground font-body mt-1">Resumen general del sistema DocuFISE — Abril 2026</p>
+    </div>
+    <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-border bg-background font-ui text-xs gap-1.5">
+      <ng-icon name="lucideActivity" class="h-3.5 w-3.5 text-success"></ng-icon>
+      Datos en tiempo real
     </div>
   </div>
 
   <!-- KPI Strip -->
-  <div class="section-accent flex items-center gap-2 mb-1">
-    <h3 class="font-ui text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Estado de la Gestión</h3>
-  </div>
-  <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
     @for (stat of datosReporte(); track stat.estado) {
       <div class="bg-card border-none shadow-sm overflow-hidden relative group kpi-glow transition-all duration-200">
         <div class="p-4 flex items-center gap-4">
