@@ -10,36 +10,33 @@
   </nav>
 
   <!-- Page Header -->
-  <div class="header-gradient-sub rounded-2xl p-6 border border-primary/10 shadow-sm relative overflow-hidden group">
-    <!-- Subtle gradient bg - exactly like Prototipo -->
-    <div class="absolute inset-0 bg-gradient-to-r from-primary/5 via-primary/3 to-transparent"></div>
-    
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
+  <div class="bg-gradient-to-r from-primary/5 via-primary/3 to-transparent rounded-xl p-5 border border-primary/10">
+    <div class="flex items-center justify-between">
       <div class="flex items-center gap-4">
-        <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 backdrop-blur-md border border-primary/10">
-          <ng-icon name="lucideFileText" class="text-3xl text-primary"></ng-icon>
+        <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10">
+          <ng-icon name="lucideFileText" class="h-6 w-6 text-primary"></ng-icon>
         </div>
         <div>
-          <h2 class="font-display text-2xl font-extrabold text-foreground tracking-tight">Gestión de Expedientes</h2>
-          <p class="text-sm text-muted-foreground font-body mt-0.5">Administración y seguimiento de la bandeja de documentos</p>
+          <h2 class="font-display text-2xl font-extrabold text-foreground">Gestión de Expedientes</h2>
+          <p class="text-sm text-muted-foreground font-body mt-0.5">Registro, clasificación y derivación de documentos</p>
         </div>
       </div>
       
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2">
         <button 
           (click)="exportToExcel()"
-          class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-ui font-bold text-xs uppercase tracking-widest transition-all border border-white/10 hover:border-white/30 backdrop-blur-sm"
+          class="flex items-center gap-2 px-4 py-2 rounded-xl border border-input bg-background hover:bg-accent hover:text-accent-foreground font-ui text-xs transition-colors"
         >
-          <ng-icon name="lucideFileSpreadsheet" class="text-lg"></ng-icon>
+          <ng-icon name="lucideFileSpreadsheet" class="h-4 w-4"></ng-icon>
           Exportar Excel
         </button>
         
         <button 
           (click)="openNewForm()"
-          class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-secondary text-secondary-foreground font-ui font-bold text-xs uppercase tracking-widest transition-all shadow-lg shadow-secondary/20 hover:scale-[1.02] active:scale-[0.98]"
+          class="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 font-ui text-xs shadow-md hover:shadow-lg transition-shadow"
         >
-          <ng-icon name="lucidePlus" class="text-lg"></ng-icon>
-          Nuevo Expediente
+          <ng-icon name="lucidePlus" class="h-4 w-4"></ng-icon>
+          Añadir nuevo
         </button>
       </div>
     </div>
