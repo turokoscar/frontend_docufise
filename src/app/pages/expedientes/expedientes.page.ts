@@ -207,10 +207,10 @@ closeDropdown(): void {
   getEstadoBadgeClass(estado: EstadoExpediente): string {
     const styles: Record<EstadoExpediente, string> = {
       'Registrado': 'bg-[#3B7DCC]/15 text-[#3B7DCC] border border-[#3B7DCC]/30',
-      'Ingresado': 'bg-primary/15 text-primary border border-primary/30',
-      'Pendiente': 'bg-warning/15 text-[hsl(var(--warning))] border border-warning/30',
-      'Observado': 'bg-destructive/15 text-destructive border border-destructive/30',
-      'Firmado': 'bg-success/15 text-[hsl(var(--success))] border border-success/30',
+      'Ingresado': 'bg-[#2C5AAB]/15 text-[#2C5AAB] border border-[#2C5AAB]/30',
+      'Pendiente': 'bg-[#F2B801]/15 text-[#F2B801] border border-[#F2B801]/30',
+      'Observado': 'bg-[#AB2741]/15 text-[#AB2741] border border-[#AB2741]/30',
+      'Firmado': 'bg-[#0FBF90]/15 text-[#0FBF90] border border-[#0FBF90]/30',
     };
     return `font-ui text-[11px] font-semibold px-2 py-0.5 rounded-full ${styles[estado]}`;
   }

@@ -154,7 +154,7 @@
         </thead>
         <tbody class="divide-y divide-border/30">
           @for (exp of paginatedExpedientes(); track exp.id; let i = $index) {
-            <tr class="group hover:bg-primary/5 transition-colors" [ngClass]="{'bg-muted/20': i % 2 !== 0}">
+            <tr class="hover:bg-primary/5 transition-colors" [ngClass]="{'bg-muted/20': i % 2 !== 0}">
               <td class="px-6 py-4">
                 <div class="flex flex-col">
                   <span class="font-ui font-semibold text-primary text-sm">{{ exp.numeracion }}</span>
