@@ -19,7 +19,8 @@ import {
   lucideAlertTriangle,
   lucideSend,
   lucideActivity,
-  lucideFileText
+  lucideFileText,
+  lucidePenTool
 } from '@ng-icons/lucide';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
@@ -35,7 +36,7 @@ import * as XLSX from 'xlsx';
       lucideHome, lucideBarChart3, lucideFileSpreadsheet, lucideArrowRight, 
       lucideInfo, lucideTrendingUp, lucidePieChart, lucideLayoutGrid,
       lucideFile, lucideCheckCircle2, lucideClock, lucideAlertTriangle, lucideSend,
-      lucideActivity, lucideFileText
+      lucideActivity, lucideFileText, lucidePenTool
     })
   ],
   templateUrl: './reportes.page.html',
@@ -63,13 +64,17 @@ export class ReportesPage implements OnInit {
 
   kpis = computed(() => {
     const exp = this.allExpedientes();
+    const firmas = this.allFirmas();
     const count = (s: EstadoExpediente) => exp.filter(e => e.estado === s).length;
+    const countFirmas = (s: string) => firmas.filter((f: any) => f.estado === s).length;
+    const firmasFirmadas = countFirmas('Firmado');
+    const totalFirmas = firmas.length;
+    const tasaFirma = totalFirmas > 0 ? Math.round((firmasFirmadas / totalFirmas) * 100) : 0;
     return [
-      { label: 'Total Expedientes', value: exp.length, icon: 'lucideFile', color: '#2C5AAB' },
-      { label: 'Firmados', value: count('Firmado'), icon: 'lucideCheckCircle2', color: '#0FBF90' },
-      { label: 'Pendientes', value: count('Pendiente'), icon: 'lucideClock', color: '#F2B801' },
-      { label: 'En Proceso', value: count('Ingresado') + count('Registrado'), icon: 'lucideSend', color: '#3B7DCC' },
-      { label: 'Observados', value: count('Observado'), icon: 'lucideAlertTriangle', color: '#AB2741' },
+      { label: 'Total Expedientes', value: exp.length, icon: 'lucideFileText', color: '#2C5AAB' },
+      { label: 'Firmas Completadas', value: firmasFirmadas, icon: 'lucidePenTool', color: '#0FBF90' },
+      { label: 'Pendientes de Firma', value: countFirmas('Pendiente'), icon: 'lucideClock', color: '#F2B801' },
+      { label: 'Tasa de Firma', value: tasaFirma + '%', icon: 'lucideTrendingUp', color: '#0FAEBF' },
     ];
   });
 
