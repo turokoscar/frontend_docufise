@@ -92,6 +92,10 @@ export class ApiService {
     return this.http.get<ApiResponse<MenuApi[]>>(`${this.baseUrl}/menus`);
   }
 
+  getMenusByRol(rolId: number): Observable<ApiResponse<MenuApi[]>> {
+    return this.http.get<ApiResponse<MenuApi[]>>(`${this.baseUrl}/menus/rol/${rolId}`);
+  }
+
   // Tipos de Documento
   getTiposDocumento(): Observable<ApiResponse<TipoDocumento[]>> {
     return this.http.get<ApiResponse<TipoDocumento[]>>(`${this.baseUrl}/tipos-documento`);
@@ -185,6 +189,7 @@ export interface LoginResponse {
   nombreCompleto: string;
   correo: string;
   rol: string;
+  rolId: number;
   area: string;
 }
 

@@ -10,6 +10,7 @@ export interface UsuarioSistema {
   correo: string;
   area: string;
   rol: string;
+  rolId?: number;
   activo: boolean;
 }
 

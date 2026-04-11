@@ -28,7 +28,7 @@ export class AuthService {
         const user = JSON.parse(userJson);
         this.tokenSignal.set(token);
         this.userSignal.set(user);
-        this.catalogService.loadAll();
+        this.catalogService.loadAll(user.rolId);
       } catch {
         this.clearSession();
       }
@@ -59,6 +59,7 @@ export class AuthService {
       nombre: data.nombreCompleto,
       correo: data.correo,
       rol: data.rol,
+      rolId: data.rolId,
       area: data.area
     }));
     this.tokenSignal.set(data.token);
@@ -68,11 +69,12 @@ export class AuthService {
       nombre: data.nombreCompleto,
       correo: data.correo,
       rol: data.rol,
+      rolId: data.rolId,
       area: data.area
     });
     
-    // Cargar catálogos DESPUÉS de tener token
-    this.catalogService.loadAll();
+    // Cargar catálogos DESPUÉS de tener token, pasando rolId
+    this.catalogService.loadAll(data.rolId);
   }
 
   logout(): void {
@@ -139,5 +141,6 @@ interface UsuarioInfo {
   nombre: string;
   correo: string;
   rol: string;
+  rolId: number;
   area: string;
 }
