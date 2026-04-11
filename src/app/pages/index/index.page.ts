@@ -32,7 +32,8 @@ export class IndexPage implements OnInit {
   ngOnInit(): void {
     const user = this.authService.user();
     if (user) {
-      const defaultRoute = this.dataService.getDefaultRouteByRol(user.rol);
+      const rol = user.rol as 'CTD' | 'Firmante' | 'Administrador';
+      const defaultRoute = this.dataService.getDefaultRouteByRol(rol);
       this.router.navigate([defaultRoute]);
     } else {
       this.router.navigate(['/login']);

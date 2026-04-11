@@ -9,9 +9,19 @@ import {
   EstadoExpediente,
   RolUsuario
 } from '../models/user.model';
+import { CatalogService } from './catalog.service';
 
 @Injectable({ providedIn: 'root' })
 export class DataService {
+  
+  constructor(private catalogService: CatalogService) {
+    this.catalogService.loadAll();
+  }
+  
+  get catalog(): CatalogService {
+    return this.catalogService;
+  }
+  
   readonly menusMock: MenuSistema[] = [
     { id: "MNU-01", nombre: "Panel Ejecutivo", ruta: "/reportes", icono: "BarChart3", orden: 1, activo: true },
     { id: "MNU-02", nombre: "Gestión de Expedientes", ruta: "/expedientes", icono: "FileText", orden: 2, activo: true },
@@ -126,14 +136,37 @@ export class DataService {
     { estado: "Firmado", cantidad: 4, color: "#0FBF90" },
   ];
 
-  getMenusByRol(rol: RolUsuario): MenuSistema[] {
-    const rolData = this.rolesMock.find(r => r.nombre === rol);
-    if (!rolData) return [];
-    return this.menusMock.filter(m => rolData.menus.includes(m.id) && m.activo);
+  getMenusByRol(rol: RolUsuario | string): MenuSistema[] {
+    return this.catalog.getMenusByRol(String(rol)).map(m => ({
+      id: String(m.id),
+      nombre: m.nombre,
+      ruta: m.ruta,
+      icono: m.icono,
+      orden: m.orden,
+      activo: m.activo
+    }));
   }
 
-  getDefaultRouteByRol(rol: RolUsuario): string {
-    const menus = this.getMenusByRol(rol);
-    return menus.length > 0 ? menus[0].ruta : '/login';
+  getDefaultRouteByRol(rol: RolUsuario | string): string {
+    return this.catalog.getDefaultRouteByRol(String(rol));
+  }
+
+  // Helper para acceder a los catálogos directamente
+  get areas(): AreaSistema[] {
+    return this.catalog.areas().map(a => ({
+      id: String(a.id),
+      nombre: a.nombre,
+      descripcion: a.descripcion,
+      activo: a.activo
+    }));
+  }
+
+  get roles(): RolSistema[] {
+    return this.catalog.roles().map(r => ({
+      id: String(r.id),
+      nombre: r.nombre as RolUsuario,
+      descripcion: r.descripcion,
+      menus: []
+    }));
   }
 }

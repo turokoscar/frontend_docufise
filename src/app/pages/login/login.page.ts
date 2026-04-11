@@ -28,7 +28,7 @@ export class LoginPage {
   showPassword = signal(false);
   error = signal('');
 
-  handleSubmit(): void {
+  async handleSubmit(): Promise<void> {
     this.error.set('');
     
     if (!this.usuario || !this.contrasena) {
@@ -36,12 +36,13 @@ export class LoginPage {
       return;
     }
 
-    const success = this.authService.login(this.usuario, this.contrasena);
+    const success = await this.authService.login(this.usuario, this.contrasena);
     
     if (success) {
       const user = this.authService.user();
       if (user) {
-        const route = this.dataService.getDefaultRouteByRol(user.rol);
+        const rol = user.rol as 'CTD' | 'Firmante' | 'Administrador';
+        const route = this.dataService.getDefaultRouteByRol(rol);
         this.router.navigate([route]);
       }
     } else {

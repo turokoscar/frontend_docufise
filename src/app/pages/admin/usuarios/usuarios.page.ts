@@ -64,11 +64,11 @@ export class UsuariosPage implements OnInit {
   });
 
   // Form Fields (linked to modal)
-  formData = {
+  formData: any = {
     nombre: '',
     usuario: '',
     correo: '',
-    rol: 'Firmante' as RolUsuario,
+    rol: 'Firmante',
     area: '',
     activo: true
   };
@@ -121,7 +121,7 @@ export class UsuariosPage implements OnInit {
 
   openEditModal(user: UsuarioSistema): void {
     this.editingUsuario.set(user);
-    this.formData = { ...user };
+    this.formData = { ...user } as unknown as UsuarioSistema;
     this.showModal.set(true);
   }
 

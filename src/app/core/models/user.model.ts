@@ -3,13 +3,13 @@ export type EstadoExpediente = 'Registrado' | 'Ingresado' | 'Pendiente' | 'Obser
 export type RolUsuario = 'CTD' | 'Firmante' | 'Administrador';
 
 export interface UsuarioSistema {
-  id: string;
+  id: string | number;
   usuario: string;
-  contrasena: string;
+  contrasena?: string;
   nombre: string;
   correo: string;
   area: string;
-  rol: RolUsuario;
+  rol: string;
   activo: boolean;
 }
 
@@ -22,7 +22,7 @@ export interface AreaSistema {
 
 export interface RolSistema {
   id: string;
-  nombre: RolUsuario;
+  nombre: string;
   descripcion: string;
   menus: string[];
 }
