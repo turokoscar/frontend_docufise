@@ -1,6 +1,6 @@
 import { Component, signal, computed, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DataService } from '../../core/services/data.service';
+import { DocumentoService } from '../../core/services/documento.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Expediente, EstadoExpediente } from '../../core/models/user.model';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
@@ -43,13 +43,23 @@ import * as XLSX from 'xlsx';
   styleUrl: './reportes.page.css'
 })
 export class ReportesPage implements OnInit {
-  private dataService = inject(DataService);
+  private documentoService = inject(DocumentoService);
   private authService = inject(AuthService);
 
   user = this.authService.user;
-  private allExpedientes = signal<Expediente[]>(this.dataService.expedientesMock);
-  private allFirmas = signal(this.dataService.firmasMock);
-
+  private allExpedientes = signal<Expediente[]>([]);
+  
+  constructor() {
+    // Load from API for reports
+    this.documentoService.loadAll();
+    const sync = setInterval(() => {
+      const docs = this.documentoService.documentos();
+      if (docs.length > 0) {
+        this.allExpedientes.set([...docs]);
+        clearInterval(sync);
+      }
+    }, 500);
+  }
   // Toast
   toastMessage = signal('');
   toastType = signal<'success' | 'error'>('success');
@@ -72,11 +82,10 @@ export class ReportesPage implements OnInit {
 
   kpis = computed(() => {
     const exp = this.allExpedientes();
-    const firmas = this.allFirmas();
     const count = (s: EstadoExpediente) => exp.filter(e => e.estado === s).length;
-    const countFirmas = (s: string) => firmas.filter((f: any) => f.estado === s).length;
+    const countFirmas = (s: string) => exp.filter((f: any) => f.estado === s).length;
     const firmasFirmadas = countFirmas('Firmado');
-    const totalFirmas = firmas.length;
+    const totalFirmas = exp.length;
     const tasaFirma = totalFirmas > 0 ? Math.round((firmasFirmadas / totalFirmas) * 100) : 0;
     return [
       { label: 'Total Expedientes', value: exp.length, icon: 'lucideFileText', color: '#2C5AAB' },
@@ -145,8 +154,7 @@ export class ReportesPage implements OnInit {
   public barChartType: ChartType = 'bar';
 
   ngOnInit(): void {
-    this.allExpedientes.set(this.dataService.expedientesMock);
-    this.allFirmas.set(this.dataService.firmasMock);
+    // Los datos ya se cargan en el constructor desde API
   }
 
   get pieChartData(): ChartData<'pie', number[], string | string[]> {

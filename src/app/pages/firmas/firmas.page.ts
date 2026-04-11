@@ -1,7 +1,8 @@
 import { Component, signal, computed, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { DataService } from '../../core/services/data.service';
+import { FirmaService } from '../../core/services/firma.service';
+import { CatalogService } from '../../core/services/catalog.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Firma, EstadoExpediente } from '../../core/models/user.model';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
@@ -46,14 +47,16 @@ import * as XLSX from 'xlsx';
   styleUrl: './firmas.page.css'
 })
 export class FirmasPage implements OnInit {
-  private dataService = inject(DataService);
+  private firmaService = inject(FirmaService);
+  private catalogService = inject(CatalogService);
   private authService = inject(AuthService);
 
   user = this.authService.user;
-  tiposDocumento = this.dataService.tiposDocumento;
+  get tiposDocumento() { return this.catalogService.tiposDocumento(); }
   
   // State
   allFirmas = signal<Firma[]>([]);
+  loading = this.firmaService.loading;
   selectedFirma = signal<Firma | null>(null);
   showSignModal = signal(false);
   showRejectModal = signal(false);
@@ -76,7 +79,17 @@ export class FirmasPage implements OnInit {
   itemsPerPage = 10;
 
   ngOnInit(): void {
-    this.allFirmas.set([...this.dataService.firmasMock]);
+    // Cargar firmas desde API
+    this.firmaService.loadAll();
+    
+    // Sincronizar con señal local
+    const sync = setInterval(() => {
+      const firmas = this.firmaService.firmas();
+      if (firmas.length > 0) {
+        this.allFirmas.set([...firmas]);
+        clearInterval(sync);
+      }
+    }, 500);
   }
 
   private showNotification(message: string, type: 'success' | 'error' = 'success'): void {

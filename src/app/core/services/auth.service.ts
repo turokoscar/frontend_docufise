@@ -93,7 +93,14 @@ export class AuthService {
   getMenus(): MenuSistema[] {
     const user = this.userSignal();
     if (!user) return [];
-    return this.catalogService.getMenusByRol(user.rol);
+    return this.catalogService.getMenusByRol(user.rol).map(m => ({
+      id: String(m.id),
+      nombre: m.nombre,
+      ruta: m.ruta,
+      icono: m.icono,
+      orden: m.orden,
+      activo: m.activo
+    }));
   }
 
   hasAccess(ruta: string): boolean {

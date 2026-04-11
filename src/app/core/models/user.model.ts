@@ -43,7 +43,7 @@ export interface Expediente {
   elaboradoPor: string;
   enviadoPor: string;
   fechaElaboracion: string;
-  fechaHoraEnvio: string;
+  fechaHoraEnvio?: string;
   estado: EstadoExpediente;
   archivoOriginal?: string;
   archivoFirmado?: string;

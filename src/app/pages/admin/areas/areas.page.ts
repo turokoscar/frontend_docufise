@@ -1,7 +1,7 @@
 import { Component, signal, computed, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { DataService } from '../../../core/services/data.service';
+import { CatalogService } from '../../../core/services/catalog.service';
 import { AreaSistema } from '../../../core/models/user.model';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { 
@@ -35,10 +35,10 @@ import {
   styleUrl: './areas.page.css'
 })
 export class AreasPage implements OnInit {
-  private dataService = inject(DataService);
+  private catalogService = inject(CatalogService);
 
-  // State
-  areas = signal<AreaSistema[]>([]);
+  // State - usa CatalogService
+  get allAreas() { return this.catalogService.areas(); }
   showModal = signal(false);
   editingArea = signal<AreaSistema | null>(null);
 
@@ -65,7 +65,8 @@ export class AreasPage implements OnInit {
   };
 
   ngOnInit(): void {
-    this.areas.set(this.dataService.areasMock);
+    // Áreas se cargan desde CatalogService (API)
+    //elshacer está disponible a través del getter this.areas
   }
 
   filteredAreas = computed(() => {

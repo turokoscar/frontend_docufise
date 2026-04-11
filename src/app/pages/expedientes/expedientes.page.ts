@@ -154,7 +154,7 @@ closeDropdown(): void {
 
   get autoFechaEnvio(): string {
     const editing = this.editingExpediente();
-    if (editing) return editing.fechaHoraEnvio;
+    if (editing?.fechaHoraEnvio) return editing.fechaHoraEnvio;
     const now = new Date();
     return `${now.toISOString().split('T')[0]} ${now.toTimeString().slice(0, 5)}`;
   }
