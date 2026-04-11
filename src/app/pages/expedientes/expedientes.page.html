@@ -98,8 +98,8 @@
             class="w-full pl-4 pr-10 h-10 rounded-lg bg-muted/30 border-transparent focus:bg-white focus:border-primary transition-all outline-none font-body text-sm appearance-none cursor-pointer"
           >
             <option value="all">Todos los tipos</option>
-            @for (tipo of tiposDocumento; track tipo) {
-              <option [value]="tipo">{{ tipo }}</option>
+            @for (tipo of tiposDocumento; track tipo.id) {
+              <option [value]="tipo.nombre">{{ tipo.nombre }}</option>
             }
           </select>
           <ng-icon name="lucideChevronDown" class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground"></ng-icon>
@@ -321,8 +321,8 @@
                 class="w-full h-10 rounded-lg bg-muted/50 border-border focus:bg-white focus:border-primary transition-all outline-none font-body text-sm"
               >
                 <option value="">Seleccione tipo de documento...</option>
-                @for (tipo of tiposDocumento; track tipo) {
-                  <option [value]="tipo">{{ tipo }}</option>
+                @for (tipo of tiposDocumento; track tipo.id) {
+                  <option [value]="tipo.nombre">{{ tipo.nombre }}</option>
                 }
               </select>
             </div>

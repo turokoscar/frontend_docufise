@@ -108,6 +108,20 @@ export class AuthService {
     return menus.some(m => ruta.startsWith(m.ruta));
   }
 
+  getDefaultRoute(): string {
+    const user = this.userSignal();
+    if (!user) return '/login';
+    
+    // Map rol to default route
+    const rolRouteMap: Record<string, string> = {
+      'CTD': '/expedientes',
+      'FIRMANTE': '/firmas',
+      'ADMINISTRADOR': '/reportes'
+    };
+    
+    return rolRouteMap[user.rol] || '/expedientes';
+  }
+
   refreshToken(): void {
     this.apiService.refreshToken().subscribe({
       next: (response) => {

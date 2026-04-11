@@ -1,8 +1,7 @@
 import { Component, signal, computed, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CatalogService } from '../../../core/services/catalog.service';
-import { AreaSistema } from '../../../core/models/user.model';
+import { CatalogService, AreaSistema } from '../../../core/services/catalog.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { 
   lucideHome, 
@@ -70,7 +69,7 @@ export class AreasPage implements OnInit {
   }
 
   filteredAreas = computed(() => {
-    let result = this.areas();
+    let result = this.allAreas;
     const s = this.searchTerm().toLowerCase();
     if (s) {
       result = result.filter((a: AreaSistema) => 
@@ -102,31 +101,20 @@ export class AreasPage implements OnInit {
       this.showNotification('Complete todos los campos obligatorios', 'error');
       return;
     }
-    const editing = this.editingArea();
-    if (editing) {
-      this.areas.update((prev: AreaSistema[]) => 
-        prev.map((a: AreaSistema) => a.id === editing.id ? { ...a, ...this.formData } : a)
-      );
-      this.showNotification('Área actualizada exitosamente', 'success');
-    } else {
-      const newId = `AREA-${(this.areas().length + 1).toString().padStart(2, '0')}`;
-      this.areas.update((prev: AreaSistema[]) => [...prev, { ...this.formData, id: newId } as AreaSistema]);
-      this.showNotification('Área registrada exitosamente', 'success');
-    }
+    // TODO: Implementar API call para create/update
+    this.showNotification('Área guardada (API no implementada)', 'success');
     this.showModal.set(false);
   }
 
   toggleStatus(area: AreaSistema): void {
-    this.areas.update(prev => 
-      prev.map(a => a.id === area.id ? { ...a, activo: !a.activo } : a)
-    );
-    this.showNotification(`Área ${area.activo ? 'desactivada' : 'activada'} exitosamente`, 'success');
+    // TODO: Implementar API call para toggle
+    this.showNotification(`Área ${area.activo ? 'desactivada' : 'activada'} (API no implementada)`, 'success');
   }
 
   deleteArea(area: AreaSistema): void {
     if (confirm(`¿Está seguro de eliminar el área ${area.nombre}?`)) {
-      this.areas.update(prev => prev.filter(a => a.id !== area.id));
-      this.showNotification('Área eliminada', 'error');
+      // TODO: Implementar API call para delete
+      this.showNotification('Área eliminada (API no implementada)', 'error');
     }
   }
 }

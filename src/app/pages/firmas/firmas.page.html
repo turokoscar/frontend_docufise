@@ -88,8 +88,8 @@
             class="w-full pl-4 pr-10 h-11 rounded-xl bg-muted/30 border-transparent outline-none appearance-none cursor-pointer font-body text-sm"
           >
             <option value="all">Todos los tipos</option>
-            @for (tipo of tiposDocumento; track tipo) {
-              <option [value]="tipo">{{ tipo }}</option>
+            @for (tipo of tiposDocumento; track tipo.id) {
+              <option [value]="tipo.nombre">{{ tipo.nombre }}</option>
             }
           </select>
           <ng-icon name="lucideChevronDown" class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground"></ng-icon>
