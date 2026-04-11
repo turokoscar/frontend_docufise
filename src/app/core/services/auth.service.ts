@@ -1,8 +1,7 @@
 import { Injectable, signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
-import { catchError, of, tap } from 'rxjs';
 import { ApiService, LoginResponse } from './api.service';
-import { DataService } from './data.service';
+import { CatalogService } from './catalog.service';
 import { MenuSistema } from '../models/user.model';
 
 @Injectable({ providedIn: 'root' })
@@ -15,7 +14,7 @@ export class AuthService {
 
   constructor(
     private apiService: ApiService,
-    private dataService: DataService,
+    private catalogService: CatalogService,
     private router: Router
   ) {
     this.restoreSession();
@@ -29,6 +28,7 @@ export class AuthService {
         const user = JSON.parse(userJson);
         this.tokenSignal.set(token);
         this.userSignal.set(user);
+        this.catalogService.loadAll();
       } catch {
         this.clearSession();
       }
@@ -70,6 +70,9 @@ export class AuthService {
       rol: data.rol,
       area: data.area
     });
+    
+    // Cargar catálogos DESPUÉS de tener token
+    this.catalogService.loadAll();
   }
 
   logout(): void {
@@ -90,8 +93,7 @@ export class AuthService {
   getMenus(): MenuSistema[] {
     const user = this.userSignal();
     if (!user) return [];
-    const rol = user.rol as unknown as 'CTD' | 'Firmante' | 'Administrador';
-    return this.dataService.getMenusByRol(rol);
+    return this.catalogService.getMenusByRol(user.rol);
   }
 
   hasAccess(ruta: string): boolean {

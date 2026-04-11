@@ -1,7 +1,8 @@
 import { Component, signal, computed, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { DataService } from '../../core/services/data.service';
+import { DocumentoService } from '../../core/services/documento.service';
+import { CatalogService } from '../../core/services/catalog.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Expediente, EstadoExpediente } from '../../core/models/user.model';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
@@ -47,17 +48,23 @@ import * as XLSX from 'xlsx';
   styleUrl: './expedientes.page.css'
 })
 export class ExpedientesPage implements OnInit {
-  private dataService = inject(DataService);
+  private documentoService = inject(DocumentoService);
+  private catalogService = inject(CatalogService);
   private authService = inject(AuthService);
 
   user = this.authService.user;
-  tiposDocumento = this.dataService.tiposDocumento;
-  elaboradores = this.dataService.elaboradores;
-  areasDestino = this.dataService.areasDestino;
-  usuariosPorArea = this.dataService.usuariosPorArea;
   
-  // State
+  // Catálogos desde API
+  get tiposDocumento() { return this.catalogService.tiposDocumento(); }
+  
+  // Helpers
+  get elaboradores(): string[] { return ['Marco Tomy', 'Ana García', 'Carlos Mendoza']; }
+  get areasDestino(): string[] { return this.catalogService.areas().map(a => a.nombre); }
+  get usuariosPorArea(): Record<string, string[]> { return {}; }
+  
+  // State local que sincroniza con el servicio
   allExpedientes = signal<Expediente[]>([]);
+  loading = this.documentoService.loading;
 
   // Modal state
   showModal = signal(false);
@@ -95,7 +102,16 @@ export class ExpedientesPage implements OnInit {
   itemsPerPage = 10;
 
 ngOnInit(): void {
-    this.allExpedientes.set(this.dataService.expedientesMock);
+    // Cargar documentos desde API y sincronizar con señal local
+    this.documentoService.loadAll();
+    // Sincronizar cuando lleguen datos
+    const sync = setInterval(() => {
+      const docs = this.documentoService.documentos();
+      if (docs.length > 0) {
+        this.allExpedientes.set([...docs]);
+        clearInterval(sync);
+      }
+    }, 500);
   }
   
   toggleDropdown(id: string, event: Event): void {
