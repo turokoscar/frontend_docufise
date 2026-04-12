@@ -1,10 +1,18 @@
-import { Component, input, output, signal } from '@angular/core';
+import { Component, input, output, signal, forwardRef, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-ui-input',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => UiInputComponent),
+      multi: true
+    }
+  ],
   template: `
     <div class="space-y-1.5 w-full">
       <label *ngIf="label()" class="font-ui text-[10px] font-bold text-[#64748B] uppercase tracking-widest ml-1">
@@ -16,12 +24,12 @@ import { CommonModule } from '@angular/common';
         </div>
         <input
           [type]="type()"
-          [value]="value()"
           [placeholder]="placeholder()"
-          [disabled]="disabled()"
+          [disabled]="isDisabled()"
           [class]="inputClasses()"
+          [value]="displayValue()"
           (input)="onInput($event)"
-          (blur)="onBlur.emit()"
+          (blur)="onBlurEvent()"
         />
         <div class="absolute right-4 top-1/2 -translate-y-1/2">
           <ng-content select="[trailing]"></ng-content>
@@ -30,11 +38,11 @@ import { CommonModule } from '@angular/common';
     </div>
   `
 })
-export class UiInputComponent {
+export class UiInputComponent implements ControlValueAccessor {
   label = input<string>('');
   placeholder = input<string>('');
   type = input<string>('text');
-  value = input<any>('');
+  value = input<string>('');
   disabled = input<boolean>(false);
   required = input<boolean>(false);
   icon = input<boolean>(false);
@@ -43,9 +51,53 @@ export class UiInputComponent {
   onValueChange = output<any>();
   onBlur = output<void>();
 
+  isDisabled = signal(false);
+  private internalValue = signal('');
+
+  private onChange: (value: any) => void = () => {};
+  private onTouched: () => void = () => {};
+
+  constructor() {
+    effect(() => {
+      const inputVal = this.value();
+      if (inputVal !== undefined && inputVal !== null) {
+        this.internalValue.set(inputVal);
+        this.displayValue.set(inputVal);
+      }
+    }, { allowSignalWrites: true });
+  }
+
+  displayValue = signal('');
+
+  writeValue(value: any): void {
+    const val = value ?? '';
+    this.internalValue.set(val);
+    this.displayValue.set(val);
+  }
+
+  registerOnChange(fn: (value: any) => void): void {
+    this.onChange = fn;
+  }
+
+  registerOnTouched(fn: () => void): void {
+    this.onTouched = fn;
+  }
+
+  setDisabledState(isDisabled: boolean): void {
+    this.isDisabled.set(isDisabled);
+  }
+
   onInput(event: Event): void {
     const val = (event.target as HTMLInputElement).value;
+    this.internalValue.set(val);
+    this.displayValue.set(val);
+    this.onChange(val);
     this.onValueChange.emit(val);
+  }
+
+  onBlurEvent(): void {
+    this.onTouched();
+    this.onBlur.emit();
   }
 
   protected inputClasses(): string {

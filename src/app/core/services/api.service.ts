@@ -16,7 +16,7 @@ import {
 } from '../models/documento.model';
 import { Firma, FirmasParams } from '../models/firma.model';
 import { LoginResponse, SesionResponse } from '../models/auth.model';
-import { environment } from '../../../environments/environment';
+import { ConfigService } from './config.service';
 
 export interface UploadProgress {
   loaded: number;
@@ -26,9 +26,11 @@ export interface UploadProgress {
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
-  private readonly baseUrl = environment.apiUrl;
+  private readonly baseUrl: string;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private configService: ConfigService) {
+    this.baseUrl = this.configService.getApiUrl();
+  }
 
   // Auth endpoints
   login(usuario: string, contrasena: string): Observable<LoginResponse> {

@@ -1,6 +1,7 @@
 import { Component, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { 
@@ -42,6 +43,7 @@ import { UiInputComponent } from '../../shared/components/ui/input/input.compone
 })
 export class LoginPage {
   private authService = inject(AuthService);
+  private router = inject(Router);
 
   usuario = '';
   contrasena = '';
@@ -64,7 +66,9 @@ export class LoginPage {
 
     this.authService.login(this.usuario, this.contrasena).then((success: boolean) => {
       this.loading.set(false);
-      if (!success) {
+      if (success) {
+        this.router.navigate([this.authService.getDefaultRoute()]);
+      } else {
         this.error.set('Error de autenticación: verifique sus credenciales');
       }
     }).catch((err: any) => {
