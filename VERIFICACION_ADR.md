@@ -27,66 +27,45 @@
 | OBSERVADO | #AB2741 | #AB2741 | ✅ |
 | FIRMADO | #0FBF90 | #0FBF90 | ✅ |
 
-## 3. MÓDULO GESTIÓN DE EXPEDIENTES (HU 1.1 - 1.2)
+## 3. ESTANDARIZACIÓN DE COMPONENTES (ADR ítem 3.0) - [NUEVO ANALISIS]
+
+| Requisito | Estado | Observaciones |
+|-----------|--------|---------------|
+| Macro-componentes (Headers, KPI) | ⚠️ Parcial | Implementados pero requieren desacoplamiento de lógica local. |
+| Componentes Atómicos (Buttons, Badges) | ❌ Pendiente | Se usan clases de Tailwind directamente en el HTML. |
+| Formularios Reutilizables (Inputs, Select) | ❌ Pendiente | Definiciones manuales en cada página. |
+| Overlays (Modales, Dropdowns) | ❌ Pendiente | Implementados con lógica local (showModal) en vez de componentes base. |
+
+## 4. MÓDULO GESTIÓN DE EXPEDIENTES (HU 1.1 - 1.2)
 
 | Requisito ADR | Estado | Observaciones |
 |--------------|--------|---------------|
 | Tabla 10 reg/página | ✅ | `itemsPerPage = 10` |
-| Columnas: Numeración, Tipo, Elaborado, Enviado, Fecha | ✅ | Columna "Enviado por" añadida |
-| Botón "Añadir nuevo" Azul #2C5AAB | ✅ | `bg-primary` |
+| Columnas: Numeración, Tipo, Elaborado, Enviado, Fecha | ✅ | Columna "Enviado por" añadida en backend, falta en tabla visual. |
+| Botones "Añadir nuevo" Azul #2C5AAB | ⚠️ Parcial | El diseño cumple, pero no usa un componente base `UiButton`. |
 | Botones Actualizar/Eliminar según estado | ✅ | `canEdit()` implementado |
 | Estado inicial REGISTRADO | ✅ | Automatizado |
-| Derivación → estado INGRESADO | ✅ | Implementado en derivar() |
-| Botones bloqueados al derivar | ✅ | controlado por canEdit() |
 
-## 4. MÓDULO GESTIÓN DE FIRMAS (HU 2.1 - 2.2)
+## 5. MÓDULO GESTIÓN DE FIRMAS (HU 2.1 - 2.2)
 
 | Requisito ADR | Estado | Observaciones |
 |--------------|--------|---------------|
 | Tabla filtrada por usuario | ✅ | Filtrado por usuario logueado |
 | Columnas: Elaborado, Tipo, Estado, Fecha-Hora | ✅ | Diseño pixel-perfect |
-| Botón Descargar archivo | ✅ | Con cambio de estado automático |
-| Cambio INGRESADO → PENDIENTE al descargar | ✅ | Centralizado en el backend |
-| Toast "Se ha descargado..." | ✅ | Con colores institucionales |
+| Cambio INGRESADO → PENDIENTE al descargar | ⚠️ Pendiente | Falta integrar evento de descarga con actualización de estado. |
 | Botón Rechazar con motivo | ✅ | Implementado con auditoría |
-| Cambio OBSERVADO al rechazar | ✅ | Finalizado |
 
-## 5. MÓDULO REPORTES (HU 3.1)
+## RESUMEN DE CUMPLIMIENTO (SITUACIONAL)
 
-| Requisito ADR | Estado | Observaciones |
-|--------------|--------|---------------|
-| Gráfico barras por estado | ✅ | Existe |
-| Colores por estado en gráfico | ✅ | Revisado |
-| Gráfico circular "%" | ✅ | Existe |
+| Categoría | Cumplimiento | Observación |
+|-----------|-------------|-------------|
+| Estética Visual | 95% | Los colores y fuentes coinciden con el ADR. |
+| Arquitectura Interna | 40% | Alta deuda técnica por falta de componentes reutilizables. |
+| Funcionalidad | 85% | Flujos principales operativos pero con código acoplado. |
 
-## 6. AUTENTICACIÓN (HU 0.1)
+## ACCIONES PRIORITARIAS (ROADMAP DE ESTANDARIZACIÓN)
 
-| Requisito ADR | Estado | Observaciones |
-|--------------|--------|---------------|
-| Logo tamaño mínimo 1.75cm | ✅ | Ajustado a 1.75cm (h-16) |
-| Fondo claro→logo original, oscuro→blanco | ✅ | Implementado |
-| Título Poppins Bold | ✅ | `font-display` |
-| Campos New Order | ✅ | `font-ui` |
-| Botón Ingresar Azul/Turquesa | ✅ | \#2C5AAB aplicado |
-| Alertas Rojo #AB2741 | ✅ | \#AB2741 aplicado |
-
-## RESUMEN DE CUMPLIMIENTO
-
-| Categoría | Cumplimiento |
-|-----------|-------------|
-| Tipografía | 100% |
-| Paleta de colores | 100% |
-| Badges de estado | 100% |
-| Tabla Expedientes | 100% |
-| Flujo estados | 100% |
-| Firmas | 100% |
-| Reportes | 100% |
-| Login | 100% |
-
-## ACCIONES PENDIENTES
-
-1. Agregar columna "Enviado por" en tabla Expedientes
-2. Implementar cambio INGRESADO → PENDIENTE al descargar
-3. Mensajes toast con colores ADR específicos
-4. Revisar logo login y colores de botón
-5. Completar lógica de filtros en Firmas por usuario
+1.  **FASE 1 (Componentes Atómicos)**: Implementar `UiButton`, `UiBadge` y `UiInput` para eliminar el uso directo de Tailwind en páginas.
+2.  **FASE 2 (Modales Standalone)**: Extraer los formularios de registro y derivación de `expedientes.page.html` a componentes independientes.
+3.  **FASE 3 (Lógica de Descarga)**: Implementar el cambio automático de estado `INGRESADO` a `PENDIENTE` al descargar documentos.
+4.  **FASE 4 (Refactor Tablas)**: Crear un componente de tabla base para uniformizar las cabeceras y paginación en todo el sistema.

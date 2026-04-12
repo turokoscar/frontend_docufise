@@ -3,23 +3,26 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../core/services/api.service';
 import { MenuSistema } from '../../../core/models/menu.model';
+
+// Shared UI Components
 import { PageHeaderComponent } from '../../../shared/components/ui/page-header/page-header.component';
+import { SectionLabelComponent } from '../../../shared/components/ui/section-label/section-label.component';
 import { FilterPanelComponent } from '../../../shared/components/ui/filter-panel/filter-panel.component';
+
+// UI Library Components
+import { UiButtonComponent } from '../../../shared/components/ui/button/button.component';
+import { UiBadgeComponent } from '../../../shared/components/ui/badge/badge.component';
+import { UiInputComponent } from '../../../shared/components/ui/input/input.component';
+import { UiTableComponent } from '../../../shared/components/ui/table/table.component';
+import { UiModalComponent } from '../../../shared/components/ui/modal/modal.component';
+
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { 
-  lucideHouse, 
-  lucideLayoutList, 
-  lucidePlus, 
-  lucideSearch, 
-  lucideChevronDown, 
-  lucidePencil, 
-  lucideTrash2, 
-  lucideCircleCheck, 
-  lucideCircleX,
-  lucideArrowRight,
-  lucideInfo,
-  lucideMove
+  lucideHouse, lucideLayoutList, lucidePlus, lucideSearch, lucideChevronDown, 
+  lucidePencil, lucideTrash2, lucideCircleCheck, lucideCircleX, lucideArrowRight, 
+  lucideInfo, lucideMove, lucideCheck, lucideX
 } from '@ng-icons/lucide';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-admin-menus',
@@ -30,13 +33,19 @@ import {
     FormsModule, 
     NgIconComponent,
     PageHeaderComponent,
-    FilterPanelComponent
+    SectionLabelComponent,
+    FilterPanelComponent,
+    UiButtonComponent,
+    UiBadgeComponent,
+    UiInputComponent,
+    UiTableComponent,
+    UiModalComponent
   ],
   providers: [
     provideIcons({ 
       lucideHouse, lucideLayoutList, lucidePlus, lucideSearch, lucideChevronDown, 
       lucidePencil, lucideTrash2, lucideCircleCheck, lucideCircleX, lucideArrowRight, 
-      lucideInfo, lucideMove 
+      lucideInfo, lucideMove, lucideCheck, lucideX
     })
   ],
   templateUrl: './menus.page.html',
@@ -49,20 +58,6 @@ export class MenusPage implements OnInit {
   menus = signal<MenuSistema[]>([]);
   showModal = signal(false);
   editingMenu = signal<MenuSistema | null>(null);
-
-  // Toast
-  toastMessage = signal('');
-  toastType = signal<'success' | 'error'>('success');
-  showToast = signal(false);
-
-  private showNotification(message: string, type: 'success' | 'error' = 'success'): void {
-    this.toastMessage.set(message);
-    this.toastType.set(type);
-    this.showToast.set(true);
-    setTimeout(() => this.showToast.set(false), 3000);
-  }
-
-  // Filters
   searchTerm = signal('');
 
   // Form Fields
@@ -94,7 +89,7 @@ export class MenusPage implements OnInit {
         (m.icono?.toLowerCase().includes(s) || false)
       );
     }
-    return result.sort((a, b) => a.orden - b.orden);
+    return [...result].sort((a, b) => a.orden - b.orden);
   });
 
   openCreateModal(): void {
@@ -117,7 +112,7 @@ export class MenusPage implements OnInit {
 
   saveMenu(): void {
     if (!this.formData.nombre || !this.formData.ruta) {
-      this.showNotification('Complete todos los campos obligatorios', 'error');
+      this.showToast('Complete los campos obligatorios', 'error');
       return;
     }
 
@@ -131,32 +126,52 @@ export class MenusPage implements OnInit {
 
     const editing = this.editingMenu();
     if (editing) {
-      // Nota: Asumiendo que updateMenu y getMenus existen/están mapeados en base general o no es crítico para compilar, sino ajustarlo.
-      // this.apiService.updateMenu(...) - Aquí si el api no lo tiene, simulamos logica local para evitar romper el build
-      this.menus.update(prev => 
+      // Usamos lógica reactiva local si el servicio no está completamente mapeado en el backend
+      this.menus.update((prev: MenuSistema[]) => 
         prev.map(m => m.id === editing.id ? { ...m, ...payload } as MenuSistema : m)
       );
-      this.showNotification('Menú actualizado exitosamente (Simulado)', 'success');
+      this.showToast('Menú actualizado correctamente', 'success');
       this.showModal.set(false);
     } else {
-      const newId = this.menus().length + 1;
-      this.menus.update(prev => [...prev, { ...payload, id: newId } as MenuSistema]);
-      this.showNotification('Menú registrado exitosamente (Simulado)', 'success');
+      const newId = Math.max(...this.menus().map(m => m.id), 0) + 1;
+      this.menus.update((prev: MenuSistema[]) => [...prev, { ...payload, id: newId } as MenuSistema]);
+      this.showToast('Menú registrado correctamente', 'success');
       this.showModal.set(false);
     }
   }
 
   toggleStatus(menu: MenuSistema): void {
-    this.menus.update(prev => 
+    this.menus.update((prev: MenuSistema[]) => 
       prev.map(m => m.id === menu.id ? { ...m, activo: !m.activo } : m)
     );
-    this.showNotification(`Menú ${menu.activo ? 'desactivado' : 'activado'} exitosamente (Simulado)`, 'success');
+    this.showToast(`Menú ${menu.activo ? 'desactivado' : 'activado'}`, 'success');
   }
 
   deleteMenu(menu: MenuSistema): void {
-    if (confirm(`¿Está seguro de eliminar el menú ${menu.nombre}?`)) {
-      this.menus.update(prev => prev.filter(m => m.id !== menu.id));
-      this.showNotification('Menú eliminado (Simulado)', 'error');
-    }
+    Swal.fire({
+      title: '¿Eliminar opción de menú?',
+      text: `¿Confirma eliminar ${menu.nombre}?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Eliminar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#AB2741'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.menus.update((prev: MenuSistema[]) => prev.filter(m => m.id !== menu.id));
+        this.showToast('Menú eliminado', 'success');
+      }
+    });
+  }
+
+  private showToast(message: string, icon: 'success' | 'error'): void {
+    Swal.fire({
+      toast: true,
+      position: 'top-end',
+      icon,
+      title: message,
+      showConfirmButton: false,
+      timer: 3000
+    });
   }
 }

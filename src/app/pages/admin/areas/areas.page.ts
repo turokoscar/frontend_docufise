@@ -3,23 +3,27 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../core/services/api.service';
 import { AreaSistema } from '../../../core/models/area.model';
+
+// Shared UI Components
 import { PageHeaderComponent } from '../../../shared/components/ui/page-header/page-header.component';
+import { SectionLabelComponent } from '../../../shared/components/ui/section-label/section-label.component';
 import { FilterPanelComponent } from '../../../shared/components/ui/filter-panel/filter-panel.component';
+
+// UI Library Components
+import { UiButtonComponent } from '../../../shared/components/ui/button/button.component';
+import { UiBadgeComponent } from '../../../shared/components/ui/badge/badge.component';
+import { UiInputComponent } from '../../../shared/components/ui/input/input.component';
+import { UiTableComponent } from '../../../shared/components/ui/table/table.component';
+import { UiModalComponent } from '../../../shared/components/ui/modal/modal.component';
+import { UiTextareaComponent } from '../../../shared/components/ui/textarea/textarea.component';
+
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { 
-  lucideHouse, 
-  lucideBuilding2, 
-  lucidePlus, 
-  lucideSearch, 
-  lucideChevronDown, 
-  lucidePencil, 
-  lucideTrash2, 
-  lucideCircleCheck, 
-  lucideCircleX,
-  lucideArrowRight,
-  lucideInfo,
-  lucideLayoutGrid
+  lucideHouse, lucideBuilding2, lucidePlus, lucideSearch, lucideChevronDown, 
+  lucidePencil, lucideTrash2, lucideCircleCheck, lucideCircleX, lucideArrowRight, 
+  lucideInfo, lucideLayoutGrid, lucideCheck, lucideX
 } from '@ng-icons/lucide';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-admin-areas',
@@ -30,13 +34,20 @@ import {
     FormsModule, 
     NgIconComponent,
     PageHeaderComponent,
-    FilterPanelComponent
+    FilterPanelComponent,
+    SectionLabelComponent,
+    UiButtonComponent,
+    UiBadgeComponent,
+    UiInputComponent,
+    UiTableComponent,
+    UiModalComponent,
+    UiTextareaComponent
   ],
   providers: [
     provideIcons({ 
       lucideHouse, lucideBuilding2, lucidePlus, lucideSearch, lucideChevronDown, 
       lucidePencil, lucideTrash2, lucideCircleCheck, lucideCircleX, lucideArrowRight, 
-      lucideInfo, lucideLayoutGrid 
+      lucideInfo, lucideLayoutGrid, lucideCheck, lucideX
     })
   ],
   templateUrl: './areas.page.html',
@@ -49,20 +60,6 @@ export class AreasPage implements OnInit {
   areas = signal<AreaSistema[]>([]);
   showModal = signal(false);
   editingArea = signal<AreaSistema | null>(null);
-
-  // Toast
-  toastMessage = signal('');
-  toastType = signal<'success' | 'error'>('success');
-  showToast = signal(false);
-
-  private showNotification(message: string, type: 'success' | 'error' = 'success'): void {
-    this.toastMessage.set(message);
-    this.toastType.set(type);
-    this.showToast.set(true);
-    setTimeout(() => this.showToast.set(false), 3000);
-  }
-
-  // Filters
   searchTerm = signal('');
 
   // Form Fields
@@ -112,7 +109,7 @@ export class AreasPage implements OnInit {
 
   saveArea(): void {
     if (!this.formData.nombre || !this.formData.descripcion) {
-      this.showNotification('Complete todos los campos obligatorios', 'error');
+      this.showToast('Complete todos los campos obligatorios', 'error');
       return;
     }
     
@@ -126,20 +123,20 @@ export class AreasPage implements OnInit {
     if (editing) {
       this.apiService.updateArea(editing.id, payload).subscribe({
         next: () => {
-          this.showNotification('Área actualizada exitosamente', 'success');
+          this.showToast('Área actualizada', 'success');
           this.loadData();
           this.showModal.set(false);
         },
-        error: () => this.showNotification('Error al actualizar área', 'error')
+        error: () => this.showToast('Error al actualizar', 'error')
       });
     } else {
       this.apiService.createArea(payload).subscribe({
         next: () => {
-          this.showNotification('Área registrada exitosamente', 'success');
+          this.showToast('Área registrada', 'success');
           this.loadData();
           this.showModal.set(false);
         },
-        error: () => this.showNotification('Error al registrar área', 'error')
+        error: () => this.showToast('Error al registrar', 'error')
       });
     }
   }
@@ -147,22 +144,43 @@ export class AreasPage implements OnInit {
   toggleStatus(area: AreaSistema): void {
     this.apiService.updateArea(area.id, { activo: !area.activo }).subscribe({
       next: () => {
-        this.showNotification(`Área ${area.activo ? 'desactivada' : 'activada'} exitosamente`, 'success');
+        this.showToast(`Área ${area.activo ? 'desactivada' : 'activada'}`, 'success');
         this.loadData();
       },
-      error: () => this.showNotification('Error al cambiar estado.', 'error')
+      error: () => this.showToast('Error al cambiar estado.', 'error')
     });
   }
 
   deleteArea(area: AreaSistema): void {
-    if (confirm(`¿Está seguro de eliminar el área ${area.nombre}?`)) {
-      this.apiService.deleteArea(area.id).subscribe({
-        next: () => {
-          this.showNotification('Área eliminada', 'success');
-          this.loadData();
-        },
-        error: () => this.showNotification('Error al eliminar área', 'error')
-      });
-    }
+    Swal.fire({
+      title: '¿Eliminar área?',
+      text: `¿Está seguro de eliminar ${area.nombre}?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#AB2741'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.apiService.deleteArea(area.id).subscribe({
+          next: () => {
+            this.showToast('Área eliminada', 'success');
+            this.loadData();
+          },
+          error: () => this.showToast('Error al eliminar', 'error')
+        });
+      }
+    });
+  }
+
+  private showToast(message: string, icon: 'success' | 'error'): void {
+    Swal.fire({
+      toast: true,
+      position: 'top-end',
+      icon,
+      title: message,
+      showConfirmButton: false,
+      timer: 3000
+    });
   }
 }

@@ -5,27 +5,29 @@ import { ApiService } from '../../../core/services/api.service';
 import { UsuarioSistema } from '../../../core/models/usuario.model';
 import { AreaSistema } from '../../../core/models/area.model';
 import { RolSistema } from '../../../core/models/rol.model';
+import { ROLES } from '../../../core/constants/roles.constants';
+
+// Shared UI Components
 import { PageHeaderComponent } from '../../../shared/components/ui/page-header/page-header.component';
 import { SectionLabelComponent } from '../../../shared/components/ui/section-label/section-label.component';
 import { FilterPanelComponent } from '../../../shared/components/ui/filter-panel/filter-panel.component';
-import { ROLES } from '../../../core/constants/roles.constants';
+
+// UI Library Components
+import { UiButtonComponent } from '../../../shared/components/ui/button/button.component';
+import { UiBadgeComponent } from '../../../shared/components/ui/badge/badge.component';
+import { UiInputComponent } from '../../../shared/components/ui/input/input.component';
+import { UiSelectComponent } from '../../../shared/components/ui/select/select.component';
+import { UiTableComponent } from '../../../shared/components/ui/table/table.component';
+import { UiModalComponent } from '../../../shared/components/ui/modal/modal.component';
+
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { 
-  lucideHouse, 
-  lucideUsers, 
-  lucidePlus, 
-  lucideSearch, 
-  lucideChevronDown, 
-  lucidePencil, 
-  lucideTrash2, 
-  lucideShield, 
-  lucideBuilding2,
-  lucideUserCheck,
-  lucideUserX,
-  lucideMail,
-  lucideArrowRight,
-  lucideInfo
+  lucideHouse, lucideUsers, lucidePlus, lucideSearch, lucideChevronDown, 
+  lucidePencil, lucideTrash2, lucideShield, lucideBuilding2, lucideUserCheck, 
+  lucideUserX, lucideMail, lucideArrowRight, lucideInfo, lucideCheck, lucideX,
+  lucideChevronLeft, lucideChevronRight
 } from '@ng-icons/lucide';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-admin-usuarios',
@@ -37,13 +39,20 @@ import {
     NgIconComponent,
     PageHeaderComponent,
     SectionLabelComponent,
-    FilterPanelComponent
+    FilterPanelComponent,
+    UiButtonComponent,
+    UiBadgeComponent,
+    UiInputComponent,
+    UiSelectComponent,
+    UiTableComponent,
+    UiModalComponent
   ],
   providers: [
     provideIcons({ 
       lucideHouse, lucideUsers, lucidePlus, lucideSearch, lucideChevronDown, 
       lucidePencil, lucideTrash2, lucideShield, lucideBuilding2, lucideUserCheck, 
-      lucideUserX, lucideMail, lucideArrowRight, lucideInfo 
+      lucideUserX, lucideMail, lucideArrowRight, lucideInfo, lucideCheck, lucideX,
+      lucideChevronLeft, lucideChevronRight
     })
   ],
   templateUrl: './usuarios.page.html',
@@ -56,21 +65,8 @@ export class UsuariosPage implements OnInit {
   usuarios = signal<UsuarioSistema[]>([]);
   areas = signal<AreaSistema[]>([]);
   roles = signal<RolSistema[]>([]);
-  
   showModal = signal(false);
   editingUsuario = signal<UsuarioSistema | null>(null);
-
-  // Toast
-  toastMessage = signal('');
-  toastType = signal<'success' | 'error'>('success');
-  showToast = signal(false);
-
-  private showNotification(message: string, type: 'success' | 'error' = 'success'): void {
-    this.toastMessage.set(message);
-    this.toastType.set(type);
-    this.showToast.set(true);
-    setTimeout(() => this.showToast.set(false), 3000);
-  }
 
   filters = signal({
     search: '',
@@ -78,13 +74,13 @@ export class UsuariosPage implements OnInit {
     areaId: 'all'
   });
 
-  // Form Fields (linked to modal)
+  // Form Fields
   formData: any = {
     nombreCompleto: '',
     nombreUsuario: '',
     correo: '',
-    rolId: null as any,
-    areaId: null as any,
+    rolId: null,
+    areaId: null,
     activo: true
   };
 
@@ -107,7 +103,6 @@ export class UsuariosPage implements OnInit {
   filteredUsuarios = computed(() => {
     let result = this.usuarios();
     const f = this.filters();
-
     if (f.search) {
       const s = f.search.toLowerCase();
       result = result.filter((u: UsuarioSistema) => 
@@ -116,12 +111,8 @@ export class UsuariosPage implements OnInit {
         (u.correo?.toLowerCase().includes(s) || false)
       );
     }
-    if (f.rolId !== 'all') {
-      result = result.filter((u: UsuarioSistema) => u.rolId === Number(f.rolId));
-    }
-    if (f.areaId !== 'all') {
-      result = result.filter((u: UsuarioSistema) => u.areaId === Number(f.areaId));
-    }
+    if (f.rolId !== 'all') result = result.filter((u: UsuarioSistema) => u.rolId === Number(f.rolId));
+    if (f.areaId !== 'all') result = result.filter((u: UsuarioSistema) => u.areaId === Number(f.areaId));
     return result;
   });
 
@@ -150,7 +141,7 @@ export class UsuariosPage implements OnInit {
 
   saveUsuario(): void {
     if (!this.formData.nombreCompleto || !this.formData.nombreUsuario || !this.formData.rolId || !this.formData.areaId) {
-      this.showNotification('Complete todos los campos obligatorios', 'error');
+      this.showToast('Complete los campos obligatorios', 'error');
       return;
     }
 
@@ -167,20 +158,20 @@ export class UsuariosPage implements OnInit {
     if (editing) {
       this.apiService.updateUsuario(editing.id, payload).subscribe({
         next: () => {
-          this.showNotification('Usuario actualizado exitosamente', 'success');
+          this.showToast('Usuario actualizado', 'success');
           this.loadData();
           this.showModal.set(false);
         },
-        error: () => this.showNotification('Error al actualizar usuario', 'error')
+        error: () => this.showToast('Error al actualizar', 'error')
       });
     } else {
       this.apiService.createUsuario(payload).subscribe({
         next: () => {
-          this.showNotification('Usuario registrado exitosamente', 'success');
+          this.showToast('Usuario registrado', 'success');
           this.loadData();
           this.showModal.set(false);
         },
-        error: () => this.showNotification('Error al registrar usuario', 'error')
+        error: () => this.showToast('Error al registrar', 'error')
       });
     }
   }
@@ -188,32 +179,51 @@ export class UsuariosPage implements OnInit {
   toggleStatus(user: UsuarioSistema): void {
     this.apiService.updateUsuario(user.id, { activo: !user.activo }).subscribe({
       next: () => {
-        this.showNotification(`Usuario ${user.activo ? 'desactivado' : 'activado'} exitosamente`, 'success');
+        this.showToast(`Usuario ${user.activo ? 'desactivado' : 'activado'}`, 'success');
         this.loadData();
       },
-      error: () => this.showNotification('Error al cambiar estado.', 'error')
+      error: () => this.showToast('Error al cambiar estado.', 'error')
     });
   }
 
   deleteUsuario(user: UsuarioSistema): void {
-    if (confirm(`¿Está seguro de eliminar al usuario ${user.nombreCompleto}?`)) {
-      this.apiService.deleteUsuario(user.id).subscribe({
-        next: () => {
-          this.showNotification('Usuario eliminado', 'success');
-          this.loadData();
-        },
-        error: () => this.showNotification('Error al eliminar usuario', 'error')
-      });
-    }
+    Swal.fire({
+      title: '¿Eliminar usuario?',
+      text: `¿Confirma eliminar a ${user.nombreCompleto}?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Eliminar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#AB2741'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.apiService.deleteUsuario(user.id).subscribe({
+          next: () => {
+            this.showToast('Usuario eliminado', 'success');
+            this.loadData();
+          },
+          error: () => this.showToast('Error al eliminar', 'error')
+        });
+      }
+    });
   }
 
-  getRoleBadgeClass(rolNombre?: string): string {
-    if (!rolNombre) return 'bg-muted text-muted-foreground';
-    const styles: Record<string, string> = {
-      [ROLES.ADMIN]: 'bg-primary/10 text-primary border-primary/20',
-      [ROLES.CTD]: 'bg-success/10 text-success border-success/20',
-      [ROLES.FIRMANTE]: 'bg-secondary/10 text-secondary border-secondary/20'
-    };
-    return `px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${styles[rolNombre] || 'bg-muted text-muted-foreground'}`;
+  getRoleBadgeVariant(rolNombre?: string): any {
+    if (!rolNombre) return 'muted';
+    if (rolNombre === ROLES.ADMIN) return 'primary';
+    if (rolNombre === ROLES.CTD) return 'success';
+    if (rolNombre === ROLES.FIRMANTE) return 'warning';
+    return 'muted';
+  }
+
+  private showToast(message: string, icon: 'success' | 'error'): void {
+    Swal.fire({
+      toast: true,
+      position: 'top-end',
+      icon,
+      title: message,
+      showConfirmButton: false,
+      timer: 3000
+    });
   }
 }

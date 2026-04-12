@@ -1,197 +1,163 @@
-<div class="space-y-5">
+<div class="space-y-6">
   <!-- Breadcrumb -->
-  <nav class="flex items-center gap-2 text-xs font-ui text-muted-foreground/60">
+  <nav class="flex items-center gap-2 text-[11px] font-ui text-muted-foreground/60">
     <a routerLink="/" class="flex items-center gap-1.5 hover:text-primary transition-colors">
-      <ng-icon name="lucideHome" class="text-sm"></ng-icon>
+      <ng-icon name="lucideHouse" class="text-xs"></ng-icon>
       Inicio
     </a>
-    <ng-icon name="lucideArrowRight" class="text-[10px]"></ng-icon>
+    <ng-icon name="lucideArrowRight" class="text-[8px]"></ng-icon>
     <a routerLink="/admin/usuarios" class="hover:text-primary transition-colors font-bold text-foreground">Administración</a>
-    <ng-icon name="lucideArrowRight" class="text-[10px]"></ng-icon>
-    <span class="font-bold text-foreground">Áreas</span>
+    <ng-icon name="lucideArrowRight" class="text-[8px]"></ng-icon>
+    <span class="font-bold text-foreground">Gestión de Áreas</span>
   </nav>
 
   <!-- Page Header -->
   <app-ui-page-header 
     title="Gestión de Áreas" 
-    subtitle="Mantenimiento de unidades orgánicas y oficinas" 
+    subtitle="Mantenimiento de unidades orgánicas y oficinas institucionales" 
     icon="lucideBuilding2"
   >
     <div actions>
-      <button 
-        (click)="openCreateModal()"
-        class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#2C5AAB] text-white font-ui font-bold text-xs uppercase tracking-widest transition-all shadow-lg shadow-[#2C5AAB]/20 hover:scale-[1.02] active:scale-[0.98]"
-      >
-        <ng-icon name="lucidePlus" class="text-lg"></ng-icon>
+      <app-ui-button variant="primary" size="lg" (onClick)="openCreateModal()">
+        <ng-icon name="lucidePlus" class="h-4 w-4"></ng-icon>
         Nueva Área
-      </button>
+      </app-ui-button>
     </div>
   </app-ui-page-header>
 
   <!-- Filters Section -->
-  <app-ui-filter-panel>
-    <div class="flex-1 min-w-[300px] space-y-2">
-      <label class="font-ui text-[10px] font-bold text-[#64748B] uppercase tracking-widest ml-1">Buscar área</label>
-      <div class="relative">
-        <ng-icon name="lucideSearch" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/60 h-4 w-4"></ng-icon>
-        <input 
-          type="text" 
-          (input)="searchTerm.set($any($event.target).value)"
-          placeholder="Nombre de área o descripción..."
-          class="w-full pl-10 pr-4 h-11 rounded-xl bg-[#F8FAFC] border border-[#CBD5E1] focus:bg-white focus:border-[#2C5AAB] transition-all outline-none font-body text-sm"
-        />
-      </div>
-    </div>
-  </app-ui-filter-panel>
-
-  <!-- Table Section -->
-  <div class="bg-card border-none shadow-md overflow-hidden rounded-none">
-    <div class="overflow-x-auto">
-      <table class="w-full text-left border-collapse">
-        <thead class="bg-primary text-primary-foreground">
-          <tr class="h-12">
-            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest">Código</th>
-            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest">Nombre del Área</th>
-            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest">Descripción</th>
-            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest text-center">Estado</th>
-            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest text-right">Acciones</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-border/30 font-body text-sm">
-          @for (area of filteredAreas(); track area.id) {
-            <tr class="group hover:bg-primary/5 transition-colors">
-              <td class="px-6 py-4">
-                <span class="font-display font-bold text-primary text-sm">{{ area.id }}</span>
-              </td>
-              <td class="px-6 py-4">
-                <div class="flex items-center gap-2">
-                  <div class="w-2 h-2 rounded-full bg-primary/40"></div>
-                  <span class="font-bold text-foreground">{{ area.nombre }}</span>
-                </div>
-              </td>
-              <td class="px-6 py-4 text-muted-foreground italic max-w-xs truncate">
-                {{ area.descripcion }}
-              </td>
-              <td class="px-6 py-4 text-center">
-                <span 
-                  [ngClass]="area.activo ? 'bg-success/15 text-success' : 'bg-muted text-muted-foreground'"
-                  class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest border border-current/20"
-                >
-                  {{ area.activo ? 'Activo' : 'Inactivo' }}
-                </span>
-              </td>
-              <td class="px-6 py-4 text-right">
-                <div class="flex items-center justify-end gap-1">
-                  <button 
-                    (click)="openEditModal(area)"
-                    class="p-2 rounded-lg hover:bg-blue-100 text-blue-600 transition-colors"
-                  >
-                    <ng-icon name="lucidePencil" class="text-lg"></ng-icon>
-                  </button>
-                  <button 
-                    (click)="toggleStatus(area)"
-                    class="p-2 rounded-lg hover:bg-success/10 text-success transition-colors"
-                  >
-                    <ng-icon [name]="area.activo ? 'lucideCheckCircle2' : 'lucideXCircle'" class="text-lg"></ng-icon>
-                  </button>
-                  <button 
-                    (click)="deleteArea(area)"
-                    class="p-2 rounded-lg hover:bg-red-100 text-red-600 transition-colors"
-                  >
-                    <ng-icon name="lucideTrash2" class="text-lg"></ng-icon>
-                  </button>
-                </div>
-              </td>
-            </tr>
-          } @empty {
-            <tr>
-              <td colspan="5" class="px-6 py-12 text-center">
-                <div class="flex flex-col items-center gap-3 opacity-40">
-                  <ng-icon name="lucideLayoutGrid" class="text-5xl"></ng-icon>
-                  <p class="font-display text-lg font-bold">No se encontraron áreas registradas</p>
-                </div>
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
+  <div>
+    <app-ui-section-label label="Filtros de Búsqueda"></app-ui-section-label>
+    <app-ui-filter-panel>
+      <app-ui-input 
+        label="Buscar área" 
+        [icon]="true"
+        placeholder="Nombre de área o descripción..."
+        [value]="searchTerm()"
+        (onValueChange)="searchTerm.set($event)"
+        class="flex-1"
+      >
+        <ng-icon icon name="lucideSearch" class="h-4 w-4"></ng-icon>
+      </app-ui-input>
+    </app-ui-filter-panel>
   </div>
 
-  <!-- Modal Admin Áreas -->
-  @if (showModal()) {
-    <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-      <div class="bg-card w-full max-w-lg rounded-2xl shadow-2xl border border-border overflow-hidden animate-in zoom-in-95 duration-200">
-        <div class="bg-primary p-6 text-primary-foreground text-center relative">
-          <div class="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-4 border border-white/20">
-            <ng-icon name="lucideBuilding2" class="text-3xl"></ng-icon>
-          </div>
-          <h3 class="font-display text-xl font-extrabold tracking-tight">
-            {{ editingArea() ? 'Editar Área' : 'Nueva Área Institucional' }}
-          </h3>
-          <p class="text-white/70 text-sm font-body mt-1">Gestión de unidades y dependencias</p>
-        </div>
-        
-        <form (submit)="saveArea(); $event.preventDefault()" class="p-6 space-y-4 font-body">
-          <div class="space-y-4">
-            <div class="space-y-2">
-              <label class="font-ui text-[10px] font-bold text-primary uppercase tracking-widest ml-1">Nombre del Área</label>
-              <input 
-                type="text" 
-                [(ngModel)]="formData.nombre" 
-                name="nombre"
-                required
-                placeholder="Ej: Dirección de Infraestructura"
-                class="w-full px-4 h-11 rounded-xl bg-muted/50 border-transparent focus:bg-white focus:border-primary transition-all outline-none"
-              />
-            </div>
-            
-            <div class="space-y-2">
-              <label class="font-ui text-[10px] font-bold text-primary uppercase tracking-widest ml-1">Descripción / Función</label>
-              <textarea 
-                [(ngModel)]="formData.descripcion" 
-                name="descripcion" 
-                placeholder="Indique brevemente el propósito de esta unidad..."
-                class="w-full p-4 rounded-xl bg-muted/50 border-transparent focus:bg-white focus:border-primary transition-all outline-none min-h-[100px]"
-              ></textarea>
-            </div>
+  <!-- Main Table -->
+  <app-ui-table>
+    <ng-container headers>
+      <th class="px-6 font-ui text-[10px] font-bold tracking-widest text-left">ID</th>
+      <th class="px-6 font-ui text-[10px] font-bold tracking-widest text-left">Nombre del Área</th>
+      <th class="px-6 font-ui text-[10px] font-bold tracking-widest text-left">Descripción</th>
+      <th class="px-6 font-ui text-[10px] font-bold tracking-widest text-center">Estado</th>
+      <th class="px-6 font-ui text-[10px] font-bold tracking-widest text-right">Acciones</th>
+    </ng-container>
 
-            <div class="flex items-center gap-3 py-2 px-1">
-              <input type="checkbox" [(ngModel)]="formData.activo" name="activo" id="aactivo" class="w-4 h-4 rounded text-primary border-border focus:ring-primary">
-              <label for="aactivo" class="font-ui text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Área activa para asignación de expedientes</label>
+    <ng-container rows>
+      @for (area of filteredAreas(); track area.id; let i = $index) {
+        <tr class="hover:bg-primary/5 transition-colors" [ngClass]="{'bg-muted/10': i % 2 !== 0}">
+          <td class="px-6 py-4">
+            <span class="font-ui font-bold text-primary text-sm">{{ area.id }}</span>
+          </td>
+          <td class="px-6 py-4">
+            <div class="flex items-center gap-2">
+              <div class="w-2 h-2 rounded-full bg-primary/40"></div>
+              <span class="font-bold font-body text-sm text-foreground">{{ area.nombre }}</span>
             </div>
-          </div>
-
-          <div class="flex gap-3 pt-4">
-            <button 
-              (click)="showModal.set(false)"
-              type="button"
-              class="flex-1 px-4 py-3 rounded-xl border border-border hover:bg-muted font-ui font-bold text-xs uppercase tracking-widest transition-all"
-            >
-              Cancelar
-            </button>
-            <button 
-              type="submit"
-              class="flex-1 bg-primary text-primary-foreground px-4 py-3 rounded-xl font-ui font-bold text-xs uppercase tracking-widest shadow-sm hover:bg-primary/90 transition-all"
-            >
-              Guardar Área
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  }
+          </td>
+          <td class="px-6 py-4 font-body text-sm text-muted-foreground italic max-w-xs truncate">
+            {{ area.descripcion }}
+          </td>
+          <td class="px-6 py-4 text-center">
+            <app-ui-badge [variant]="area.activo ? 'success' : 'muted'">
+              {{ area.activo ? 'Activo' : 'Inactivo' }}
+            </app-ui-badge>
+          </td>
+          <td class="px-6 py-4 text-right">
+            <div class="flex items-center justify-end gap-1">
+              <app-ui-button variant="ghost" size="sm" (onClick)="openEditModal(area)">
+                <ng-icon name="lucidePencil" class="h-4 w-4"></ng-icon>
+              </app-ui-button>
+              <app-ui-button variant="ghost" size="sm" (onClick)="toggleStatus(area)" [className]="area.activo ? 'text-success' : 'text-muted-foreground'">
+                <ng-icon [name]="area.activo ? 'lucideCircleCheck' : 'lucideCircleX'" class="h-4 w-4"></ng-icon>
+              </app-ui-button>
+              <app-ui-button variant="ghost" size="sm" (onClick)="deleteArea(area)" className="text-destructive">
+                <ng-icon name="lucideTrash2" class="h-4 w-4"></ng-icon>
+              </app-ui-button>
+            </div>
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="5" class="px-6 py-12 text-center">
+            <div class="flex flex-col items-center gap-3">
+              <div class="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
+                <ng-icon name="lucideLayoutGrid" class="text-3xl text-muted-foreground/40"></ng-icon>
+              </div>
+              <p class="font-display text-lg font-bold text-muted-foreground">No se encontraron áreas registradas</p>
+            </div>
+          </td>
+        </tr>
+      }
+    </ng-container>
+  </app-ui-table>
 </div>
 
-<!-- Toast Notification -->
-@if (showToast()) {
-  <div 
-    class="fixed top-4 right-4 z-[200] px-4 py-3 rounded-xl shadow-lg font-ui text-sm flex items-center gap-2"
-    [class.bg-success]="toastType() === 'success'"
-    [class.text-success-foreground]="toastType() === 'success'"
-    [class.bg-destructive]="toastType() === 'error'"
-    [class.text-destructive-foreground]="toastType() === 'error'"
-  >
-    {{ toastMessage() }}
+<!-- Modal Form -->
+<app-ui-modal 
+  [isOpen]="showModal()" 
+  (onClose)="showModal.set(false)"
+  maxWidth="max-w-lg"
+  [paddingBody]="false"
+>
+  <div header class="bg-primary -m-6 mb-0 p-8 text-primary-foreground text-center relative rounded-t-2xl">
+    <div class="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mx-auto mb-4 border border-white/20 backdrop-blur-md">
+      <ng-icon name="lucideBuilding2" class="text-3xl"></ng-icon>
+    </div>
+    <h3 class="font-display text-2xl font-extrabold tracking-tight">
+      {{ editingArea() ? 'Editar Área' : 'Nueva Área' }}
+    </h3>
+    <p class="text-white/70 text-sm font-body mt-2">Mantenimiento de dependencias institucionales</p>
   </div>
-}
+
+  <div body class="p-8 space-y-6">
+    <div class="space-y-6">
+      <app-ui-input 
+        label="Nombre del Área" 
+        placeholder="Ej: Dirección de Infraestructura"
+        [(ngModel)]="formData.nombre" 
+        name="nombre"
+      ></app-ui-input>
+      
+      <app-ui-textarea 
+        label="Descripción / Función" 
+        placeholder="Indique brevemente el propósito de esta unidad..."
+        [(ngModel)]="formData.descripcion" 
+        name="descripcion"
+        class="min-h-[120px]"
+      ></app-ui-textarea>
+
+      <div class="flex items-center gap-3 p-1 group">
+        <input 
+          type="checkbox" 
+          [(ngModel)]="formData.activo" 
+          name="activo" 
+          id="area_activo" 
+          class="w-4 h-4 rounded border-border text-primary focus:ring-primary/20 transition-all"
+        >
+        <label for="area_activo" class="font-ui text-[11px] font-bold text-muted-foreground uppercase tracking-widest cursor-pointer group-hover:text-primary transition-colors">
+          Habilitada para derivación de expedientes
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div footer class="flex gap-3">
+    <app-ui-button variant="outline" class="flex-1" (onClick)="showModal.set(false)">
+      Cancelar
+    </app-ui-button>
+    <app-ui-button variant="primary" class="flex-1" (onClick)="saveArea()">
+      <ng-icon name="lucideCheck" class="mr-1"></ng-icon>
+      Guardar Área
+    </app-ui-button>
+  </div>
+</app-ui-modal>

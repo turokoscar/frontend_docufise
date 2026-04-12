@@ -12,16 +12,16 @@
           Sistema Institucional
         </span>
         <h2 class="font-display text-4xl font-extrabold text-white leading-tight">
-          DocuFISE <span class="text-secondary">2026</span>
+          DocuFISE <span class="text-secondary text-5xl">2026</span>
         </h2>
         <p class="mt-4 text-white/70 font-body text-base max-w-md leading-relaxed">
-          Sistema Integrado de Gestión de Expedientes y Firmas. Plataforma centralizada para la gestión documental institucional.
+          Plataforma centralizada para la gestión documental, flujos de aprobación y firmas digitales con validez institucional.
         </p>
       </div>
       <div class="flex items-center gap-3 pt-4 border-t border-white/10">
         <div class="w-8 h-1 bg-secondary rounded-full"></div>
         <span class="text-white/50 text-[10px] font-ui tracking-[0.2em] uppercase">
-          Gestión de Confianza
+          Gestión de Confianza y Transparencia
         </span>
       </div>
     </div>
@@ -34,109 +34,109 @@
         <div class="text-center">
           <img src="/assets/fise-logo.png" alt="FISE" class="h-16 mx-auto mb-6">
           <h1 class="font-display text-2xl font-extrabold text-foreground tracking-tight">Iniciar Sesión</h1>
-          <p class="mt-1 text-muted-foreground font-body text-sm">Bienvenido al sistema DocuFISE.</p>
+          <p class="mt-1 text-muted-foreground font-body text-sm">Ingrese sus credenciales para acceder al sistema.</p>
         </div>
 
-        <form (submit)="handleSubmit(); $event.preventDefault()" class="space-y-5">
+        <form (submit)="handleSubmit(); $event.preventDefault()" class="space-y-6">
           <!-- Alerta de Error -->
-          <div *ngIf="error()" class="bg-destructive/10 border border-destructive/20 text-destructive rounded-xl p-3 text-[10px] font-ui text-center animate-in fade-in slide-in-from-top-1 duration-300">
-            <div class="flex items-center justify-center gap-2">
-              <ng-icon name="lucideInfo" class="text-base"></ng-icon>
-              <span class="font-bold uppercase tracking-wider">{{ error() }}</span>
-            </div>
-          </div>
-
-          <div class="space-y-2">
-            <label for="usuario" class="font-ui text-[10px] font-semibold tracking-wider uppercase text-primary">Usuario</label>
-            <div class="relative group">
-              <div class="absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 text-muted-foreground group-focus-within:text-primary transition-colors">
-                <ng-icon name="lucideUser" class="text-lg"></ng-icon>
+          @if (error()) {
+            <div class="bg-destructive/10 border border-destructive/20 text-destructive rounded-xl p-3 text-[10px] font-ui text-center animate-in fade-in slide-in-from-top-1 duration-300">
+              <div class="flex items-center justify-center gap-2">
+                <ng-icon name="lucideInfo" class="text-base"></ng-icon>
+                <span class="font-bold uppercase tracking-wider">{{ error() }}</span>
               </div>
-              <input
-                id="usuario"
-                type="text"
-                placeholder="Ingrese su usuario"
-                [(ngModel)]="usuario"
-                name="usuario"
-                class="w-full pl-10 font-ui bg-muted/30 border border-[#CBD5E1] h-11 focus:border-primary transition-colors outline-none rounded-lg"
-              />
             </div>
-          </div>
+          }
 
-          <div class="space-y-2">
-            <div class="flex items-center justify-between px-1">
-              <label for="contrasena" class="font-ui text-[10px] font-semibold tracking-wider uppercase text-primary">Contraseña</label>
-              <span class="text-[10px] text-primary cursor-pointer hover:underline font-ui font-semibold">¿Olvidó su contraseña?</span>
-            </div>
-            <div class="relative group">
-              <div class="absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 text-muted-foreground group-focus-within:text-primary transition-colors">
-                <ng-icon name="lucideLock" class="text-lg"></ng-icon>
-              </div>
-              <input
-                id="contrasena"
-                [type]="showPassword() ? 'text' : 'password'"
-                placeholder="••••••••••••"
-                [(ngModel)]="contrasena"
-                name="contrasena"
-                class="w-full pl-10 pr-10 font-ui bg-muted/30 border border-[#CBD5E1] h-11 focus:border-primary transition-colors outline-none rounded-lg"
-              />
-              <button
+          <div class="space-y-5">
+            <app-ui-input 
+              label="Usuario de Red" 
+              [icon]="true"
+              placeholder="Ingrese su usuario"
+              [(ngModel)]="usuario"
+              name="usuario"
+            >
+              <ng-icon icon name="lucideUser" class="h-4 w-4"></ng-icon>
+            </app-ui-input>
+
+            <app-ui-input 
+              label="Contraseña" 
+              [icon]="true"
+              [type]="showPassword() ? 'text' : 'password'"
+              placeholder="••••••••••••"
+              [(ngModel)]="contrasena"
+              name="contrasena"
+            >
+              <ng-icon icon name="lucideLock" class="h-4 w-4"></ng-icon>
+              <!-- Slot para el botón de ver password -->
+              <button 
                 type="button"
                 (click)="togglePassword()"
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors pr-2"
               >
                 <ng-icon [name]="showPassword() ? 'lucideEyeOff' : 'lucideEye'" class="h-4 w-4"></ng-icon>
               </button>
-            </div>
+            </app-ui-input>
           </div>
 
-          <button 
+          <div class="flex items-center justify-between px-1">
+            <label class="flex items-center gap-2 cursor-pointer group">
+              <input type="checkbox" class="w-4 h-4 rounded border-border text-primary focus:ring-primary/20">
+              <span class="text-[11px] font-ui text-muted-foreground group-hover:text-primary transition-colors">Recordar sesión</span>
+            </label>
+            <span class="text-[11px] text-primary cursor-pointer hover:underline font-ui font-semibold">¿Olvidó su contraseña?</span>
+          </div>
+
+          <app-ui-button 
             type="submit" 
-            class="w-full flex items-center justify-center rounded-xl bg-primary text-white text-base font-ui font-semibold h-12 gap-2 hover:bg-primary/90 transition-colors"
+            variant="primary" 
+            size="lg" 
+            class="w-full"
+            [loading]="loading()"
           >
-            Ingresar
-            <ng-icon name="lucideArrowRight" class="h-4 w-4"></ng-icon>
-          </button>
+            Acceder al Sistema
+            <ng-icon name="lucideArrowRight" class="h-4 w-4 ml-1"></ng-icon>
+          </app-ui-button>
         </form>
 
         <!-- Accesos rápidos -->
-        <div class="bg-muted/50 border border-border rounded-lg p-4 space-y-2">
-          <div class="flex items-center gap-2 text-[10px] font-ui font-semibold text-muted-foreground">
+        <div class="bg-muted/30 border border-border/50 rounded-2xl p-4 space-y-3">
+          <div class="flex items-center gap-2 text-[10px] font-ui font-bold text-muted-foreground uppercase tracking-widest">
             <ng-icon name="lucideInfo" class="h-3.5 w-3.5"></ng-icon>
-            Usuarios de prueba
+            Entornos de Validación
           </div>
           <div class="grid grid-cols-3 gap-2">
             @for (u of [
-              { user: 'admin', pass: 'admin', label: 'Admin' },
-              { user: 'ctd', pass: 'ctd', label: 'CTD' },
-              { user: 'firmante', pass: 'firmante', label: 'Firmante' }
+              { user: 'admin', pass: 'admin', label: 'Administrador' },
+              { user: 'ctd', pass: 'ctd', label: 'Recepción' },
+              { user: 'firmante', pass: 'firmante', label: 'Especialista' }
             ]; track u.user) {
               <button
                 type="button"
                 (click)="quickLogin(u.user, u.pass)"
-                class="text-[10px] font-ui px-3 py-2 rounded-md border border-[#CBD5E1] bg-secondary/10 hover:bg-primary/5 hover:border-primary/30 transition-colors text-center shadow-sm"
+                class="flex flex-col items-center justify-center p-2 rounded-xl border border-border bg-background hover:border-primary/40 hover:bg-primary/5 transition-all group"
               >
-                <span class="font-semibold block text-foreground">{{ u.label }}</span>
-                <span class="text-muted-foreground">{{ u.user }}/{{ u.pass }}</span>
+                <span class="text-[9px] font-bold text-muted-foreground group-hover:text-primary uppercase tracking-tighter mb-1">{{ u.label }}</span>
+                <span class="text-[10px] font-ui text-foreground font-semibold">{{ u.user }}</span>
               </button>
             }
           </div>
         </div>
 
-        <p class="text-center text-[10px] text-muted-foreground font-body pt-2">
+        <p class="text-center text-[11px] text-muted-foreground font-body">
           ¿Necesita asistencia técnica? 
-          <span class="text-primary cursor-pointer hover:underline">Centro de Ayuda</span>
+          <span class="text-primary font-bold cursor-pointer hover:underline">Consultar Mesa de Ayuda</span>
         </p>
       </div>
     </div>
 
     <!-- Footer de Login -->
-    <div class="flex items-center justify-between px-8 py-3 border-t border-border bg-muted/30">
+    <div class="flex items-center justify-between px-8 py-4 border-t border-border/50 bg-muted/20">
       <div class="flex items-center gap-2">
-        <div class="w-2 h-2 rounded-full bg-success animate-pulse"></div>
-        <span class="text-[10px] font-ui text-muted-foreground uppercase tracking-wider">Servidor Activo</span>
+        <div class="w-1.5 h-1.5 rounded-full bg-success shadow-[0_0_8px_rgba(15,191,144,0.5)]"></div>
+        <span class="text-[10px] font-ui text-muted-foreground uppercase tracking-widest font-bold">Estado del Servidor: Operativo</span>
       </div>
-      <span class="text-[10px] font-ui text-muted-foreground tracking-wider">DocuFISE V2.0</span>
+      <span class="text-[10px] font-ui text-muted-foreground tracking-widest font-bold uppercase">FISE &copy; 2026</span>
     </div>
   </div>
 </div>

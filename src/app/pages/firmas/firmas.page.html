@@ -1,33 +1,31 @@
-<div class="space-y-5">
+<div class="space-y-6">
   <!-- Breadcrumb -->
-  <nav class="flex items-center gap-2 text-xs font-ui text-muted-foreground/60">
+  <nav class="flex items-center gap-2 text-[11px] font-ui text-muted-foreground/60">
     <a routerLink="/" class="flex items-center gap-1.5 hover:text-primary transition-colors">
-      <ng-icon name="lucideHouse" class="text-sm"></ng-icon>
+      <ng-icon name="lucideHouse" class="text-xs"></ng-icon>
       Inicio
     </a>
-    <ng-icon name="lucideArrowRight" class="text-[10px]"></ng-icon>
-    <span class="font-bold text-foreground">Gestión de Firmas</span>
+    <ng-icon name="lucideArrowRight" class="text-[8px]"></ng-icon>
+    <span class="font-bold text-foreground">Bandeja de Firmas</span>
   </nav>
+
   <!-- Page Header -->
   <app-ui-page-header 
-    title="Gestión de Firmas" 
-    subtitle="Bandeja de documentos derivados para firma" 
+    title="Bandeja de Firmas" 
+    subtitle="Documentos derivados para su revisión y firma digital" 
     icon="lucidePenTool"
   >
     <div actions>
-      <button 
-        (click)="exportToExcel()"
-        class="flex items-center gap-2 h-11 px-5 rounded-xl border border-[#CBD5E1] bg-white hover:bg-[#F8FAFC] text-[#334155] font-ui text-xs font-bold transition-all shadow-sm"
-      >
+      <app-ui-button variant="white" size="lg" (onClick)="exportToExcel()">
         <ng-icon name="lucideFileSpreadsheet" class="h-4 w-4 text-[#2C5AAB]"></ng-icon>
-        Exportar Excel
-      </button>
+        Exportar Reporte
+      </app-ui-button>
     </div>
   </app-ui-page-header>
 
   <!-- KPI Strip -->
-  <div>
-    <app-ui-section-label label="Resumen General"></app-ui-section-label>
+  <div class="space-y-0">
+    <app-ui-section-label label="Resumen de Pendientes"></app-ui-section-label>
     <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
       @for (kpi of kpis(); track kpi.label) {
         <app-ui-kpi-card
@@ -41,275 +39,190 @@
   </div>
 
   <!-- Filters Section -->
-  <div>
+  <div class="space-y-0 pt-2">
     <app-ui-section-label label="Búsqueda y Filtros"></app-ui-section-label>
     <app-ui-filter-panel>
-      <div class="flex-1 min-w-[240px] space-y-2">
-        <label class="font-ui text-[10px] font-bold text-[#64748B] uppercase tracking-widest ml-1">Búsqueda rápida</label>
-        <div class="relative">
-          <ng-icon name="lucideSearch" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/60 h-4 w-4"></ng-icon>
-          <input 
-            type="text" 
-            (input)="updateFilters('search', $any($event.target).value)"
-            placeholder="Cód. Firma, elaborador o documento"
-            class="w-full pl-10 pr-4 h-11 rounded-xl bg-[#F8FAFC] border border-[#CBD5E1] focus:bg-white focus:border-[#2C5AAB] transition-all outline-none font-body text-sm"
-          />
-        </div>
-      </div>
+      <app-ui-input 
+        label="Búsqueda rápida" 
+        [icon]="true"
+        placeholder="Cód. Firma, elaborador o documento"
+        (onValueChange)="updateFilters('search', $event)"
+        class="flex-1 min-w-[300px]"
+      >
+        <ng-icon icon name="lucideSearch" class="h-4 w-4"></ng-icon>
+      </app-ui-input>
 
-      <div class="w-full sm:w-[220px] space-y-2">
-        <label class="font-ui text-[10px] font-bold text-[#64748B] uppercase tracking-widest ml-1">Tipo de documento</label>
-        <div class="relative">
-          <select 
-            (change)="updateFilters('tipo', $any($event.target).value)"
-            class="w-full pl-4 pr-10 h-11 rounded-xl bg-[#F8FAFC] border border-[#CBD5E1] focus:bg-white focus:border-[#2C5AAB] outline-none appearance-none cursor-pointer font-body text-sm"
-          >
-            <option value="all">Todos los tipos</option>
-            @for (tipo of tiposDocumento; track tipo.id) {
-              <option [value]="tipo.id">{{ tipo.nombre }}</option>
-            }
-          </select>
-          <ng-icon name="lucideChevronDown" class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground"></ng-icon>
-        </div>
-      </div>
+      <app-ui-select 
+        label="Tipo de documento" 
+        [value]="filters().tipo"
+        (onValueChange)="updateFilters('tipo', $event)"
+        class="w-full sm:w-[240px]"
+      >
+        <option value="all">Todos los tipos</option>
+        @for (tipo of tiposDocumento; track tipo.id) {
+          <option [value]="tipo.id">{{ tipo.nombre }}</option>
+        }
+      </app-ui-select>
 
-      <div class="w-full sm:w-[200px] space-y-2">
-        <label class="font-ui text-[10px] font-bold text-[#64748B] uppercase tracking-widest ml-1">Estado</label>
-        <div class="relative">
-          <select 
-            (change)="updateFilters('estado', $any($event.target).value)"
-            class="w-full pl-4 pr-10 h-11 rounded-xl bg-[#F8FAFC] border border-[#CBD5E1] focus:bg-white focus:border-[#2C5AAB] outline-none appearance-none cursor-pointer font-body text-sm"
-          >
-            <option value="all">Todos los estados</option>
-            <option value="INGRESADO">Ingresado</option>
-            <option value="PENDIENTE">Pendiente</option>
-            <option value="OBSERVADO">Observado</option>
-            <option value="FIRMADO">Firmado</option>
-          </select>
-          <ng-icon name="lucideChevronDown" class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground"></ng-icon>
-        </div>
-      </div>
+      <app-ui-select 
+        label="Estado" 
+        [value]="filters().estado"
+        (onValueChange)="updateFilters('estado', $event)"
+        class="w-full sm:w-[200px]"
+      >
+        <option value="all">Todos los estados</option>
+        <option value="INGRESADO">Ingresado</option>
+        <option value="PENDIENTE">Pendiente</option>
+        <option value="OBSERVADO">Observado</option>
+        <option value="FIRMADO">Firmado</option>
+      </app-ui-select>
     </app-ui-filter-panel>
   </div>
 
-  <!-- Table Section -->
-  <div class="bg-card border-none shadow-md overflow-hidden rounded-none mt-4">
-    <div class="overflow-x-auto">
-      <table class="w-full text-left border-collapse">
-        <thead class="bg-primary text-primary-foreground">
-          <tr class="h-12 border-b border-white/10">
-            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest">ID Registro</th>
-            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest">Documento</th>
-            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest">Tipo Documento</th>
-            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest">Elaborado por</th>
-            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest">Fecha Asignación</th>
-            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest text-center">Estado</th>
-            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest text-right">Acciones</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-border/30">
-          @for (f of paginatedFirmas(); track f.id; let i = $index) {
-            <tr class="group hover:bg-primary/5 transition-colors" [ngClass]="{'bg-muted/10': i % 2 !== 0}">
-              <td class="px-6 py-4">
-                <span class="font-display font-bold text-primary text-sm">{{ f.id }}</span>
-              </td>
-              <td class="px-6 py-4 font-ui text-xs font-bold text-muted-foreground">{{ f.documentoNumeracion }}</td>
-              <td class="px-6 py-4">
-                  <span class="font-body text-sm">{{ f.documentoTipoDocumento }}</span>
-              </td>
-              <td class="px-6 py-4 font-body text-sm font-semibold text-foreground/80">{{ f.documentoUsuarioElabora }}</td>
-              <td class="px-6 py-4 font-body text-sm text-muted-foreground">{{ f.fechaAsignacion | date:'dd/MM/yyyy HH:mm' }}</td>
-              <td class="px-6 py-4 text-center">
-                <span [class]="getStatusClass(f.estado)">{{ f.estado }}</span>
-              </td>
-              <td class="px-6 py-4 text-right">
-                <div class="flex items-center justify-end gap-1">
-                  <!-- Descargar (Ingresado → Pendiente) -->
-                  @if ((f.estado || '').toUpperCase() === ESTADOS.REGISTRADO.toUpperCase()) {
-                    <button 
-                      (click)="handleDescargar(f)"
-                      class="p-2 rounded-lg hover:bg-blue-100 text-blue-600 transition-colors flex items-center gap-1.5 px-3 mb-1"
-                      title="Descargar para revisión"
-                    >
-                      <ng-icon name="lucideDownload" class="text-lg"></ng-icon>
-                      <span class="text-[10px] font-ui font-bold uppercase">Visar</span>
-                    </button>
-                  }
-                  
-                  <!-- Firmar y Rechazar (Pendiente) -->
-                  @if ((f.estado || '').toUpperCase() === ESTADOS.PENDIENTE.toUpperCase()) {
-                    <button 
-                      (click)="openSignModal(f)"
-                      class="p-2 rounded-lg bg-success/10 text-success hover:bg-success hover:text-white transition-all shadow-sm border border-success/20 mr-1"
-                      title="Firmar documento"
-                    >
-                      <ng-icon name="lucideFileCheck" class="text-lg"></ng-icon>
-                    </button>
-                    <button 
-                      (click)="openRejectModal(f)"
-                      class="p-2 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive hover:text-white transition-all shadow-sm border border-destructive/20"
-                      title="Observar documento"
-                    >
-                      <ng-icon name="lucideTriangleAlert" class="text-lg"></ng-icon>
-                    </button>
-                  }
-
-                  <!-- Visualizar (Firmado) -->
-                  <button 
-                    *ngIf="(f.estado || '').toUpperCase() === ESTADOS.FIRMADO.toUpperCase()"
-                    (click)="handleVerArchivoFirmado(f)"
-                    class="p-2 rounded-lg bg-muted text-foreground/60 hover:bg-muted/80 transition-all border border-border"
-                    title="Ver archivo firmado"
-                  >
-                    <ng-icon name="lucideFileText" class="text-lg"></ng-icon>
-                  </button>
-                </div>
-              </td>
-            </tr>
-          } @empty {
-            <tr>
-              <td colspan="7" class="px-6 py-12 text-center">
-                <div class="flex flex-col items-center gap-3">
-                  <div class="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
-                    <ng-icon name="lucideSearch" class="text-3xl text-muted-foreground/40"></ng-icon>
-                  </div>
-                  <p class="font-display text-lg font-bold text-muted-foreground">No se encontraron firmas en esta bandeja</p>
-                </div>
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
+  <div class="flex items-center justify-between pt-4">
+    <div class="flex items-center gap-2">
+      <div class="w-1 h-4 bg-[#2C5AAB] rounded-full"></div>
+      <h3 class="font-ui text-[11px] font-bold text-muted-foreground uppercase tracking-widest">Documentos por Firmar</h3>
     </div>
+    <div class="text-[11px] font-ui text-[#64748B] tracking-tight">
+      {{ paginationSummary() }}
+    </div>
+  </div>
+
+  <!-- Main Table -->
+  <app-ui-table>
+    <ng-container headers>
+      <th class="px-6 font-ui text-[10px] font-bold tracking-widest">ID Registro</th>
+      <th class="px-6 font-ui text-[10px] font-bold tracking-widest">Documento</th>
+      <th class="px-6 font-ui text-[10px] font-bold tracking-widest">Tipo Documento</th>
+      <th class="px-6 font-ui text-[10px] font-bold tracking-widest">Elaborado por</th>
+      <th class="px-6 font-ui text-[10px] font-bold tracking-widest">Fecha Asignación</th>
+      <th class="px-6 font-ui text-[10px] font-bold tracking-widest text-center">Estado</th>
+      <th class="px-6 font-ui text-[10px] font-bold tracking-widest text-center">Acciones</th>
+    </ng-container>
+
+    <ng-container rows>
+      @for (f of paginatedFirmas(); track f.id; let i = $index) {
+        <tr class="hover:bg-primary/5 transition-colors" [ngClass]="{'bg-muted/10': i % 2 !== 0}">
+          <td class="px-6 py-4">
+            <span class="font-ui font-bold text-[#2C5AAB] text-sm">{{ f.id }}</span>
+          </td>
+          <td class="px-6 py-4 font-ui text-xs font-bold text-muted-foreground">
+            {{ f.documentoNumeracion }}
+          </td>
+          <td class="px-6 py-4 font-body text-sm">
+            {{ f.documentoTipoDocumento }}
+          </td>
+          <td class="px-6 py-4 font-body text-sm font-bold text-foreground">
+            {{ f.documentoUsuarioElabora }}
+          </td>
+          <td class="px-6 py-4 font-body text-sm text-muted-foreground tabular-nums">
+            {{ f.fechaAsignacion | date:'dd/MM/yyyy HH:mm' }}
+          </td>
+          <td class="px-6 py-4 text-center">
+            <app-ui-badge [variant]="(f.estado || '').toLowerCase() === 'firmado' ? 'success' : 
+                                    (f.estado || '').toLowerCase() === 'pendiente' ? 'warning' : 
+                                    (f.estado || '').toLowerCase() === 'observado' ? 'destructive' : 
+                                    (f.estado || '').toLowerCase() === 'ingresado' ? 'primary' : 'muted'">
+              {{ f.estado }}
+            </app-ui-badge>
+          </td>
+          <td class="px-6 py-4">
+            <div class="flex items-center justify-center gap-2">
+              <!-- Visar (Ingresado → Pendiente) -->
+              @if ((f.estado || '').toUpperCase() === ESTADOS.INGRESADO.toUpperCase()) {
+                <app-ui-button variant="white" size="sm" (onClick)="handleDescargar(f)" className="text-primary hover:bg-primary/10">
+                  <ng-icon name="lucideDownload" class="h-4 w-4"></ng-icon>
+                  Visar
+                </app-ui-button>
+              }
+              
+              <!-- Firmar y Rechazar (Pendiente) -->
+              @if ((f.estado || '').toUpperCase() === ESTADOS.PENDIENTE.toUpperCase()) {
+                <app-ui-button variant="white" size="sm" (onClick)="openSignModal(f)" className="text-success hover:bg-success/10">
+                  <ng-icon name="lucideFileCheck" class="h-4 w-4"></ng-icon>
+                  Firmar
+                </app-ui-button>
+                <app-ui-button variant="white" size="sm" (onClick)="openRejectModal(f)" className="text-destructive hover:bg-destructive/10">
+                  <ng-icon name="lucideTriangleAlert" class="h-4 w-4"></ng-icon>
+                  Observar
+                </app-ui-button>
+              }
+
+              <!-- Ver Firmado (Firmado) -->
+              @if ((f.estado || '').toUpperCase() === ESTADOS.FIRMADO.toUpperCase()) {
+                <app-ui-button variant="ghost" size="sm" (onClick)="handleVerArchivoFirmado(f)" title="Ver archivo firmado">
+                  <ng-icon name="lucideFileText" class="h-5 w-5"></ng-icon>
+                </app-ui-button>
+              }
+            </div>
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="7" class="px-6 py-12 text-center">
+            <div class="flex flex-col items-center gap-3">
+              <div class="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
+                <ng-icon name="lucideSearch" class="text-3xl text-muted-foreground/40"></ng-icon>
+              </div>
+              <p class="font-display text-lg font-bold text-muted-foreground">No se encontraron firmas en esta bandeja</p>
+            </div>
+          </td>
+        </tr>
+      }
+    </ng-container>
 
     <!-- Pagination -->
-    <div class="flex items-center justify-end gap-2 px-6 py-4 border-t border-border">
-      <button (click)="setPage(currentPage() - 1)" [disabled]="currentPage() === 1" class="p-2 rounded-lg border border-border hover:bg-primary/5 disabled:opacity-50 transition-colors">←</button>
-      <div class="flex items-center gap-1">
+    <div footer class="flex items-center justify-end gap-2 px-6 py-4">
+      <app-ui-button 
+        variant="outline" 
+        size="sm"
+        [disabled]="currentPage() === 1" 
+        (onClick)="setPage(currentPage() - 1)"
+      >
+        <ng-icon name="lucideChevronLeft" class="text-[10px]"></ng-icon>
+        Anterior
+      </app-ui-button>
+      
+      <div class="flex items-center gap-1 px-2">
         @for (page of paginatedPages(); track page) {
           <button 
             (click)="setPage(page)" 
-            class="w-8 h-8 rounded-lg text-xs font-ui transition-colors"
+            class="w-8 h-8 rounded-lg text-xs font-bold transition-all duration-200"
             [ngClass]="{
-              'bg-primary text-primary-foreground': currentPage() === page,
-              'hover:bg-primary/10': currentPage() !== page
+              'bg-[#E8F0FE] text-[#1967D2] shadow-sm border border-[#D2E3FC]': currentPage() === page,
+              'text-[#6B7280] hover:bg-[#F3F4F6]': currentPage() !== page
             }"
           >
             {{ page }}
           </button>
         }
       </div>
-      <button (click)="setPage(currentPage() + 1)" [disabled]="currentPage() === totalPages()" class="p-2 rounded-lg border border-border hover:bg-primary/5 disabled:opacity-50 transition-colors">→</button>
+
+      <app-ui-button 
+        variant="outline" 
+        size="sm"
+        [disabled]="currentPage() === totalPages()" 
+        (onClick)="setPage(currentPage() + 1)"
+      >
+        Siguiente
+        <ng-icon name="lucideChevronRight" class="text-[10px]"></ng-icon>
+      </app-ui-button>
     </div>
-  </div>
-
-  <!-- Modals -->
-  
-  <!-- Sign Modal -->
-  <div *ngIf="showSignModal()" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300">
-    <div class="bg-card w-full max-w-md rounded-2xl shadow-2xl border border-border/50 overflow-hidden transform transition-all scale-100">
-      <div class="bg-gradient-to-r from-primary to-primary/80 p-6">
-        <div class="flex items-center gap-4">
-          <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-white/20 backdrop-blur-md">
-            <ng-icon name="lucidePenTool" class="text-2xl text-white"></ng-icon>
-          </div>
-          <div>
-            <h3 class="font-display text-xl font-bold text-white">Firmar Documento</h3>
-            <p class="text-xs text-white/80 font-body">Suba el archivo con su firma digital</p>
-          </div>
-        </div>
-      </div>
-      
-      <div class="p-6 space-y-6">
-        <div class="bg-muted/30 rounded-xl p-4 border border-border/40">
-          <div class="flex items-center justify-between mb-1">
-            <p class="text-[10px] font-ui text-muted-foreground uppercase tracking-wider">Número de Documento</p>
-            <span class="px-2 py-0.5 rounded text-[10px] bg-primary/10 text-primary font-bold uppercase">{{ selectedFirma()?.documentoTipoDocumento }}</span>
-          </div>
-          <p class="font-display text-lg font-bold text-foreground">{{ selectedFirma()?.documentoNumeracion }}</p>
-        </div>
-        
-        <div class="space-y-3">
-          <label class="font-ui text-xs text-muted-foreground uppercase block font-semibold tracking-wide">Cargar documento firmado (.pdf)</label>
-          <app-file-upload
-            [maxSizeMB]="10"
-            (fileSelected)="onSignedFileSelected($event)"
-          ></app-file-upload>
-          <p class="text-[10px] text-muted-foreground italic flex items-center gap-1">
-            <ng-icon name="lucideInfo"></ng-icon>
-            Asegúrese de que el archivo contenga su firma digital válida.
-          </p>
-        </div>
-      </div>
-
-      <div class="p-6 border-t border-border flex items-center justify-end gap-3 bg-muted/10">
-        <button 
-          (click)="closeSignModal()" 
-          class="px-4 py-2 rounded-xl font-ui text-sm font-semibold hover:bg-muted transition-colors"
-        >
-          Cancelar
-        </button>
-        <button 
-          (click)="confirmSign()" 
-          [disabled]="!selectedSignedFile() || isUploadingSigned()"
-          class="px-6 py-2 rounded-xl bg-primary text-primary-foreground font-ui text-sm font-bold shadow-lg shadow-primary/20 hover:shadow-primary/30 hover:translate-y-[-1px] active:translate-y-[0] transition-all disabled:opacity-50 disabled:translate-y-0"
-        >
-          <div class="flex items-center gap-2">
-            <span *ngIf="isUploadingSigned()" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-            {{ isUploadingSigned() ? 'Procesando...' : 'Firmar Documento' }}
-          </div>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Reject Modal -->
-  <div *ngIf="showRejectModal()" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300">
-    <div class="bg-card w-full max-w-md rounded-2xl shadow-2xl border border-border/50 overflow-hidden">
-      <div class="bg-gradient-to-r from-destructive to-destructive/80 p-6">
-        <div class="flex items-center gap-4">
-          <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-white/20 backdrop-blur-md">
-            <ng-icon name="lucideTriangleAlert" class="text-2xl text-white"></ng-icon>
-          </div>
-          <div>
-            <h3 class="font-display text-xl font-bold text-white">Rechazar Firma</h3>
-            <p class="text-xs text-white/80 font-body">Indique el motivo de la observación</p>
-          </div>
-        </div>
-      </div>
-      
-      <div class="p-6 space-y-6">
-        <div class="bg-destructive/5 rounded-xl p-4 border border-destructive/10">
-          <p class="text-[10px] font-ui text-destructive uppercase tracking-wider mb-1">Documento a Rechazar</p>
-          <p class="font-display font-bold text-foreground">{{ selectedFirma()?.documentoNumeracion }}</p>
-        </div>
-
-        <div class="space-y-3">
-          <label class="font-ui text-xs text-muted-foreground uppercase block font-semibold tracking-wide">Motivo del Rechazo</label>
-          <textarea 
-            [ngModel]="motivoRechazo()"
-            (ngModelChange)="motivoRechazo.set($event)"
-            class="w-full h-32 p-4 rounded-xl bg-muted/30 border border-border focus:border-destructive focus:ring-4 focus:ring-destructive/10 transition-all outline-none text-sm font-body resize-none"
-            placeholder="Describa brevemente por qué rechaza el documento..."
-          ></textarea>
-        </div>
-      </div>
-
-      <div class="p-6 border-t border-border flex items-center justify-end gap-3 bg-muted/10">
-        <button 
-          (click)="closeRejectModal()" 
-          class="px-4 py-2 rounded-xl font-ui text-sm font-semibold hover:bg-muted transition-colors"
-        >
-          Cancelar
-        </button>
-        <button 
-          (click)="confirmReject()" 
-          [disabled]="!motivoRechazo().trim()"
-          class="px-6 py-2 rounded-xl bg-destructive text-destructive-foreground font-ui text-sm font-bold shadow-lg shadow-destructive/20 hover:shadow-destructive/30 hover:translate-y-[-1px] active:translate-y-[0] transition-all disabled:opacity-50 disabled:translate-y-0"
-        >
-          Rechazar Documento
-        </button>
-      </div>
-    </div>
-  </div>
+  </app-ui-table>
 </div>
+
+<!-- Modal Components -->
+<app-sign-modal
+  [isOpen]="showSignModal()"
+  [firma]="selectedFirma()"
+  (onClose)="showSignModal.set(false)"
+  (onSigned)="onSignSuccess()"
+></app-sign-modal>
+
+<app-reject-modal
+  [isOpen]="showRejectModal()"
+  [firma]="selectedFirma()"
+  (onClose)="showRejectModal.set(false)"
+  (onRejected)="onRejectSuccess()"
+></app-reject-modal>

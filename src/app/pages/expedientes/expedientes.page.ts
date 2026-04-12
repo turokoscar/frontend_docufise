@@ -1,20 +1,31 @@
-import { Component, signal, computed, inject, OnInit, ChangeDetectionStrategy, effect } from '@angular/core';
+import { Component, signal, computed, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DocumentoService } from '../../core/services/documento.service';
 import { CatalogService } from '../../core/services/catalog.service';
-import { 
-  UsuarioSistema
-} from '../../core/models/usuario.model';
 import { AuthService } from '../../core/services/auth.service';
-import { ApiService, UploadProgress } from '../../core/services/api.service';
-import { Documento, EstadoDocumentoLabel } from '../../core/models/documento.model';
+import { ApiService } from '../../core/services/api.service';
+import { Documento } from '../../core/models/documento.model';
 import { ESTADOS_EXPEDIENTE } from '../../core/constants/states.constants';
-import { FileUploadComponent } from '../../shared/components/file-upload/file-upload.component';
+
+// Shared Components
 import { PageHeaderComponent } from '../../shared/components/ui/page-header/page-header.component';
 import { KpiCardComponent } from '../../shared/components/ui/kpi-card/kpi-card.component';
 import { SectionLabelComponent } from '../../shared/components/ui/section-label/section-label.component';
 import { FilterPanelComponent } from '../../shared/components/ui/filter-panel/filter-panel.component';
+
+// UI Library Components
+import { UiButtonComponent } from '../../shared/components/ui/button/button.component';
+import { UiBadgeComponent } from '../../shared/components/ui/badge/badge.component';
+import { UiInputComponent } from '../../shared/components/ui/input/input.component';
+import { UiSelectComponent } from '../../shared/components/ui/select/select.component';
+import { UiTableComponent } from '../../shared/components/ui/table/table.component';
+import { UiDropdownComponent } from '../../shared/components/ui/dropdown/dropdown.component';
+
+// Local Page Components
+import { ExpedienteFormComponent } from './components/expediente-form/expediente-form.component';
+import { DerivacionModalComponent } from './components/derivacion-modal/derivacion-modal.component';
+
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { 
   lucideHouse, 
@@ -50,11 +61,18 @@ import * as XLSX from 'xlsx';
     CommonModule, 
     FormsModule, 
     NgIconComponent, 
-    FileUploadComponent,
     PageHeaderComponent,
     KpiCardComponent,
     SectionLabelComponent,
-    FilterPanelComponent
+    FilterPanelComponent,
+    UiButtonComponent,
+    UiBadgeComponent,
+    UiInputComponent,
+    UiSelectComponent,
+    UiTableComponent,
+    UiDropdownComponent,
+    ExpedienteFormComponent,
+    DerivacionModalComponent
   ],
   providers: [
     provideIcons({ 
@@ -77,27 +95,16 @@ export class ExpedientesPage implements OnInit {
 
   user = this.authService.user;
   
-  // Upload state
-  selectedFile = signal<File | null>(null);
-  uploadProgress = signal(0);
-  isUploading = signal(false);
-  uploadedFilename = signal('');
-  
   // Catálogos desde API - se cargan a demanda
   get tiposDocumento() { return this.catalogService.tiposDocumento(); }
   get areas() { return this.catalogService.areas(); }
   get estados() { return this.catalogService.estados(); }
   
-  // Helpers
-  get elaboradores(): string[] { return ['Marco Tomy', 'Ana García', 'Carlos Mendoza']; }
-  get areasDestino(): string[] { return this.catalogService.areas().map(a => a.nombre); }
-  get usuariosPorArea(): Record<string, string[]> { return {}; }
-  
   // State local que sincroniza con el servicio
   allDocumentos = computed(() => this.documentoService.documentos());
   loading = this.documentoService.loading;
 
-  // Modal state
+  // Modal visibility and data signals
   showModal = signal(false);
   showDerivarModal = signal(false);
   editingDocumento = signal<Documento | null>(null);
@@ -105,18 +112,6 @@ export class ExpedientesPage implements OnInit {
   
   // Dropdown state
   openDropdownId = signal<number | null>(null);
-
-  // Form fields
-  formTipoDoc = signal('');
-  formElaborado = signal('');
-  formEnviado = signal('');
-
-  // Derivar fields
-  derivarAreaId = signal<number | null>(null);
-  derivarUsuarioId = signal<number | null>(null);
-  derivarObs = signal('');
-  usuariosDestino = signal<UsuarioSistema[]>([]);
-  isLoadingUsuarios = signal(false);
 
   // Filters
   filters = signal({
@@ -130,12 +125,9 @@ export class ExpedientesPage implements OnInit {
   itemsPerPage = 10;
 
   ngOnInit(): void {
-    // Cargar catálogos a demanda solo cuando se necesita esta página
     this.catalogService.loadAreas();
     this.catalogService.loadTiposDocumento();
     this.catalogService.loadEstados();
-    
-    // Cargar documentos
     this.documentoService.loadAll();
   }
   
@@ -153,13 +145,6 @@ export class ExpedientesPage implements OnInit {
     return estado === ESTADOS_EXPEDIENTE.REGISTRADO || estado === ESTADOS_EXPEDIENTE.OBSERVADO;
   }
 
-  get usuariosDisponibles(): string[] {
-    const areaId = this.derivarAreaId();
-    // Este getter ahora es menos relevante con la carga reactiva, 
-    // pero lo fixeo para evitar el error de compilación.
-    return []; 
-  }
-
   get autoNumeracion(): string {
     const editing = this.editingDocumento();
     if (editing) return editing.numeracion;
@@ -173,14 +158,7 @@ export class ExpedientesPage implements OnInit {
     return new Date().toISOString().split('T')[0];
   }
 
-  get autoFechaEnvio(): string {
-    const editing = this.editingDocumento();
-    if (editing?.fechaHoraEnvio) return editing.fechaHoraEnvio;
-    const now = new Date();
-    return `${now.toISOString().split('T')[0]} ${now.toTimeString().slice(0, 5)}`;
-  }
-
-  // KPIs (Calculados dinámicamente)
+  // KPIs
   kpis = computed(() => {
     const data = this.allDocumentos();
     const countByState = (s: string) => data.filter((doc: Documento) => (doc.estado || '').toUpperCase() === s.toUpperCase()).length;
@@ -196,7 +174,6 @@ export class ExpedientesPage implements OnInit {
   filteredDocumentos = computed(() => {
     let result = this.allDocumentos();
     const f = this.filters();
-
     if (f.search) {
       const s = f.search.toLowerCase();
       result = result.filter((doc: Documento) => 
@@ -206,12 +183,8 @@ export class ExpedientesPage implements OnInit {
         (doc.tipoDocumento || '').toLowerCase().includes(s)
       );
     }
-    if (f.estado !== 'all') {
-      result = result.filter((doc: Documento) => doc.estado === f.estado);
-    }
-    if (f.tipo !== 'all') {
-      result = result.filter((doc: Documento) => String(doc.tipoDocumentoId) === f.tipo);
-    }
+    if (f.estado !== 'all') result = result.filter((doc: Documento) => doc.estado === f.estado);
+    if (f.tipo !== 'all') result = result.filter((doc: Documento) => String(doc.tipoDocumentoId) === f.tipo);
     return result;
   });
 
@@ -222,7 +195,6 @@ export class ExpedientesPage implements OnInit {
   });
 
   totalPages = computed(() => Math.ceil(this.filteredDocumentos().length / this.itemsPerPage));
-  
   paginationSummary = computed(() => {
     const total = this.filteredDocumentos().length;
     if (total === 0) return '0 registros';
@@ -233,42 +205,16 @@ export class ExpedientesPage implements OnInit {
 
   paginatedPages(): number[] {
     const total = this.totalPages();
-    if (total <= 5) {
-      return Array.from({ length: total }, (_, i) => i + 1);
-    }
+    if (total <= 5) return Array.from({ length: total }, (_, i) => i + 1);
     const current = this.currentPage();
     if (current <= 2) return [1, 2, 3, 4, total];
     if (current >= total - 1) return [1, total - 3, total - 2, total - 1, total];
     return [1, current - 1, current, current + 1, total];
   }
 
-  // Handlers
   updateFilters(key: string, value: string): void {
     this.filters.update((f: any) => ({ ...f, [key]: value }));
     this.currentPage.set(1);
-  }
-
-  getStatusClass(estado?: string): string {
-    if (!estado) return 'bg-muted text-muted-foreground border-muted';
-    const s = estado.toUpperCase();
-    if (s === ESTADOS_EXPEDIENTE.FIRMADO.toUpperCase()) return 'bg-success/10 text-success border-success/20';
-    if (s === ESTADOS_EXPEDIENTE.PENDIENTE.toUpperCase()) return 'bg-warning/10 text-warning border-warning/20';
-    if (s === ESTADOS_EXPEDIENTE.OBSERVADO.toUpperCase()) return 'bg-destructive/10 text-destructive border-destructive/20';
-    if (s === ESTADOS_EXPEDIENTE.INGRESADO.toUpperCase()) return 'bg-primary/10 text-primary border-primary/20';
-    return 'bg-muted text-muted-foreground border-muted';
-  }
-
-  getStatusIcon(estado?: string): string {
-    if (!estado) return 'lucideFile';
-    const s = estado.toUpperCase();
-    const icons: Record<string, string> = {
-      [ESTADOS_EXPEDIENTE.REGISTRADO.toUpperCase()]: 'lucideFile',
-      [ESTADOS_EXPEDIENTE.INGRESADO.toUpperCase()]: 'lucideSend',
-      [ESTADOS_EXPEDIENTE.PENDIENTE.toUpperCase()]: 'lucideClock',
-      [ESTADOS_EXPEDIENTE.OBSERVADO.toUpperCase()]: 'lucideTriangleAlert',
-      [ESTADOS_EXPEDIENTE.FIRMADO.toUpperCase()]: 'lucideCircleCheck'
-    };
-    return icons[s] || 'lucideFile';
   }
 
   exportToExcel(): void {
@@ -281,7 +227,6 @@ export class ExpedientesPage implements OnInit {
       'Fecha/Hora Envío': doc.fechaHoraEnvio,
       'Estado': doc.estado,
     }));
-    
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Expedientes');
@@ -289,108 +234,19 @@ export class ExpedientesPage implements OnInit {
   }
 
   setPage(page: number): void {
-    if (page >= 1 && page <= this.totalPages()) {
-      this.currentPage.set(page);
-    }
+    if (page >= 1 && page <= this.totalPages()) this.currentPage.set(page);
   }
 
-  // CRUD Operations
+  // CRUD Handlers
   openNewForm(): void {
     this.editingDocumento.set(null);
-    this.formTipoDoc.set('');
-    this.formElaborado.set('');
-    this.formEnviado.set('');
-    this.selectedFile.set(null);
-    this.uploadProgress.set(0);
-    this.uploadedFilename.set('');
     this.showModal.set(true);
   }
 
   openEditForm(doc: Documento): void {
     if (!this.canEdit(doc)) return;
     this.editingDocumento.set(doc);
-    this.formTipoDoc.set(String(doc.tipoDocumentoId || ''));
-    this.formElaborado.set(String(doc.usuarioElaboraId || ''));
-    this.formEnviado.set(String(doc.usuarioEnviaId || ''));
-    this.selectedFile.set(null);
-    this.uploadProgress.set(0);
-    this.uploadedFilename.set(doc.rutaArchivoOriginal ? doc.rutaArchivoOriginal : '');
     this.showModal.set(true);
-  }
-
-  closeModal(): void {
-    this.showModal.set(false);
-    this.editingDocumento.set(null);
-    this.formTipoDoc.set('');
-    this.formElaborado.set('');
-    this.formEnviado.set('');
-    this.selectedFile.set(null);
-    this.uploadProgress.set(0);
-    this.uploadedFilename.set('');
-  }
-
-  onFileSelected(file: File): void {
-    this.selectedFile.set(file);
-    this.uploadedFilename.set('');
-  }
-
-  saveDocumento(): void {
-    const tipoDocId = Number(this.formTipoDoc());
-    const elaboradoId = Number(this.formElaborado());
-
-    if (!tipoDocId || !elaboradoId) {
-      return;
-    }
-
-    const editing = this.editingDocumento();
-    const file = this.selectedFile();
-
-    if (file) {
-      this.isUploading.set(true);
-      const formData = new FormData();
-      formData.append('documento', new Blob([JSON.stringify({
-        numeracion: editing?.numeracion || this.autoNumeracion,
-        tipoDocumentoId: tipoDocId,
-        usuarioElaboraId: elaboradoId,
-        usuarioEnviaId: Number(this.formEnviado()) || null,
-        fechaElaboracion: new Date().toISOString().split('T')[0],
-        estadoId: editing?.estadoId || 1,
-        rutaArchivoOriginal: editing?.rutaArchivoOriginal || null
-      })], { type: 'application/json' }));
-      formData.append('archivo', file);
-
-      const request = editing 
-        ? this.apiService.updateDocumentWithFile(editing.id, formData)
-        : this.apiService.uploadFileToDocument(formData);
-
-      request.subscribe({
-        next: (doc) => {
-          this.isUploading.set(false);
-          this.uploadedFilename.set(doc.rutaArchivoOriginal || '');
-          this.documentoService.loadAll();
-          this.closeModal();
-        },
-        error: (err) => {
-          this.isUploading.set(false);
-          alert('Error al guardar documento: ' + (err.message || 'Error desconocido'));
-        }
-      });
-    } else {
-      if (editing) {
-        this.documentoService.update(editing.id, {
-          tipoDocumentoId: tipoDocId,
-          usuarioElaboraId: elaboradoId,
-          usuarioEnviaId: Number(this.formEnviado()) || undefined
-        });
-      } else {
-        this.documentoService.create({
-          tipoDocumentoId: tipoDocId,
-          usuarioElaboraId: elaboradoId,
-          fechaElaboracion: new Date().toISOString().split('T')[0]
-        });
-      }
-      this.closeModal();
-    }
   }
 
   deleteDocumento(doc: Documento): void {
@@ -400,62 +256,17 @@ export class ExpedientesPage implements OnInit {
     }
   }
 
-  // Derivar operations
   openDerivarModal(doc: Documento): void {
     if (doc.estado !== ESTADOS_EXPEDIENTE.REGISTRADO) return;
     this.derivandoDocumento.set(doc);
-    this.derivarAreaId.set(null);
-    this.derivarUsuarioId.set(null);
-    this.derivarObs.set('');
-    this.usuariosDestino.set([]);
     this.showDerivarModal.set(true);
   }
 
-  closeDerivarModal(): void {
-    this.showDerivarModal.set(false);
-    this.derivandoDocumento.set(null);
-    this.derivarAreaId.set(null);
-    this.derivarUsuarioId.set(null);
-    this.derivarObs.set('');
-    this.usuariosDestino.set([]);
+  onSaved(): void {
+    this.documentoService.loadAll();
   }
 
-  onAreaDestinoChange(areaId: any): void {
-    const id = Number(areaId);
-    this.derivarAreaId.set(id);
-    this.derivarUsuarioId.set(null);
-    this.usuariosDestino.set([]);
-    
-    if (id) {
-      this.isLoadingUsuarios.set(true);
-      this.apiService.getUsuarios(id).subscribe({
-        next: (users) => {
-          this.usuariosDestino.set(users);
-          this.isLoadingUsuarios.set(false);
-        },
-        error: () => this.isLoadingUsuarios.set(false)
-      });
-    }
+  onDerived(): void {
+    this.documentoService.loadAll();
   }
-
-  confirmarDerivacion(): void {
-    const areaId = this.derivarAreaId();
-    const usuarioId = this.derivarUsuarioId();
-    const doc = this.derivandoDocumento();
-    const currentUser = this.user();
-
-    if (!areaId || !usuarioId || !doc) {
-      return;
-    }
-
-    this.documentoService.derivar(
-      doc.id, 
-      areaId, 
-      usuarioId, 
-      currentUser ? currentUser.id : undefined
-    );
-    this.closeDerivarModal();
-  }
-
-  Math = Math;
 }

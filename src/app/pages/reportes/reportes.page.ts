@@ -2,8 +2,13 @@ import { Component, signal, computed, inject, OnInit, ChangeDetectionStrategy } 
 import { CommonModule } from '@angular/common';
 import { DocumentoService } from '../../core/services/documento.service';
 import { AuthService } from '../../core/services/auth.service';
-import { Documento, EstadoDocumentoLabel } from '../../core/models/documento.model';
+import { Documento } from '../../core/models/documento.model';
 import { ESTADOS_EXPEDIENTE } from '../../core/constants/states.constants';
+
+// Shared UI Components
+import { KpiCardComponent } from '../../shared/components/ui/kpi-card/kpi-card.component';
+import { SectionLabelComponent } from '../../shared/components/ui/section-label/section-label.component';
+
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { 
   lucideHouse, 
@@ -21,7 +26,8 @@ import {
   lucideSend,
   lucideActivity,
   lucideFileText,
-  lucidePenTool
+  lucidePenTool,
+  lucideChevronRight
 } from '@ng-icons/lucide';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
@@ -31,13 +37,19 @@ import * as XLSX from 'xlsx';
   selector: 'app-reportes',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, NgIconComponent, BaseChartDirective],
+  imports: [
+    CommonModule, 
+    NgIconComponent, 
+    BaseChartDirective,
+    KpiCardComponent,
+    SectionLabelComponent
+  ],
   providers: [
     provideIcons({ 
       lucideHouse, lucideChartColumn, lucideFileSpreadsheet, lucideArrowRight, 
       lucideInfo, lucideTrendingUp, lucideChartPie, lucideLayoutGrid,
       lucideFile, lucideCircleCheck, lucideClock, lucideTriangleAlert, lucideSend,
-      lucideActivity, lucideFileText, lucidePenTool
+      lucideActivity, lucideFileText, lucidePenTool, lucideChevronRight
     })
   ],
   templateUrl: './reportes.page.html',
@@ -53,8 +65,8 @@ export class ReportesPage implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
-    // Load from API for reports
     this.documentoService.loadAll();
+    // Simple polling for initial data sync (could be improved with a selector)
     const sync = setInterval(() => {
       const docs = this.documentoService.documentos();
       if (docs.length > 0) {
@@ -63,14 +75,6 @@ export class ReportesPage implements OnInit {
       }
     }, 500);
   }
-
-  recentActivity = [
-    { action: 'Documento firmado', detail: '001-2026-FISE', time: 'Hace 2h', type: 'success' },
-    { action: 'Nuevo documento registrado', detail: '012-2026-FISE', time: 'Hace 4h', type: 'info' },
-    { action: 'Firma pendiente', detail: 'REG-552', time: 'Hace 5h', type: 'warning' },
-    { action: 'Documento observado', detail: 'REG-102', time: 'Hace 1d', type: 'error' },
-    { action: 'Documento derivado', detail: '006-2026-FISE', time: 'Hace 1d', type: 'info' },
-  ];
 
   kpis = computed(() => {
     const docs = this.allDocumentos();
@@ -170,6 +174,4 @@ export class ReportesPage implements OnInit {
     XLSX.utils.book_append_sheet(wb, ws, 'Reporte General');
     XLSX.writeFile(wb, `Reporte_Documentos_${new Date().toISOString().split('T')[0]}.xlsx`);
   }
-
-  Math = Math;
 }

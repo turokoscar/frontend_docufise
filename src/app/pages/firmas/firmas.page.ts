@@ -5,35 +5,33 @@ import { FirmaService } from '../../core/services/firma.service';
 import { CatalogService } from '../../core/services/catalog.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ApiService } from '../../core/services/api.service';
-import { Firma, FirmasParams } from '../../core/models/firma.model';
-import { EstadoDocumentoLabel } from '../../core/models/documento.model';
+import { Firma } from '../../core/models/firma.model';
 import { ESTADOS_EXPEDIENTE } from '../../core/constants/states.constants';
-import { FileUploadComponent } from '../../shared/components/file-upload/file-upload.component';
+
+// Shared UI Components
 import { PageHeaderComponent } from '../../shared/components/ui/page-header/page-header.component';
 import { KpiCardComponent } from '../../shared/components/ui/kpi-card/kpi-card.component';
 import { SectionLabelComponent } from '../../shared/components/ui/section-label/section-label.component';
 import { FilterPanelComponent } from '../../shared/components/ui/filter-panel/filter-panel.component';
+
+// UI Library Components
+import { UiButtonComponent } from '../../shared/components/ui/button/button.component';
+import { UiBadgeComponent } from '../../shared/components/ui/badge/badge.component';
+import { UiInputComponent } from '../../shared/components/ui/input/input.component';
+import { UiSelectComponent } from '../../shared/components/ui/select/select.component';
+import { UiTableComponent } from '../../shared/components/ui/table/table.component';
+
+// Local Page Components
+import { SignModalComponent } from './components/sign-modal/sign-modal.component';
+import { RejectModalComponent } from './components/reject-modal/reject-modal.component';
+
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { 
-  lucideHouse, 
-  lucidePenTool, 
-  lucideSearch, 
-  lucideChevronDown, 
-  lucideFileSpreadsheet,
-  lucideInbox,
-  lucideDownload,
-  lucideClock,
-  lucideCircleCheck,
-  lucideTriangleAlert,
-  lucideCircleX,
-  lucideFileCheck,
-  lucideInfo,
-  lucideArrowRight,
-  lucideFileText,
-  lucideCircleHelp,
-  lucideUpload,
-  lucideCheck,
-  lucideX
+  lucideHouse, lucidePenTool, lucideSearch, lucideChevronDown, 
+  lucideFileSpreadsheet, lucideInbox, lucideDownload, lucideClock, 
+  lucideCircleCheck, lucideTriangleAlert, lucideCircleX, lucideFileCheck,
+  lucideInfo, lucideArrowRight, lucideFileText, lucideCircleHelp,
+  lucideUpload, lucideCheck, lucideX, lucideChevronLeft, lucideChevronRight
 } from '@ng-icons/lucide';
 import * as XLSX from 'xlsx';
 import Swal from 'sweetalert2';
@@ -46,11 +44,17 @@ import Swal from 'sweetalert2';
     CommonModule, 
     FormsModule, 
     NgIconComponent, 
-    FileUploadComponent,
     PageHeaderComponent,
     KpiCardComponent,
     SectionLabelComponent,
-    FilterPanelComponent
+    FilterPanelComponent,
+    UiButtonComponent,
+    UiBadgeComponent,
+    UiInputComponent,
+    UiSelectComponent,
+    UiTableComponent,
+    SignModalComponent,
+    RejectModalComponent
   ],
   providers: [
     provideIcons({ 
@@ -58,7 +62,7 @@ import Swal from 'sweetalert2';
       lucideFileSpreadsheet, lucideInbox, lucideDownload, lucideClock, 
       lucideCircleCheck, lucideTriangleAlert, lucideCircleX, lucideFileCheck,
       lucideInfo, lucideArrowRight, lucideFileText, lucideCircleHelp,
-      lucideUpload, lucideCheck, lucideX
+      lucideUpload, lucideCheck, lucideX, lucideChevronLeft, lucideChevronRight
     })
   ],
   templateUrl: './firmas.page.html',
@@ -72,20 +76,18 @@ export class FirmasPage implements OnInit {
 
   user = this.authService.user;
   readonly ESTADOS = ESTADOS_EXPEDIENTE;
+  
   get tiposDocumento() { return this.catalogService.tiposDocumento(); }
   get estados() { return this.catalogService.estados(); }
   
-  // State local que sincroniza con el servicio
+  // State from Service
   allFirmas = computed(() => this.firmaService.firmas());
   loading = this.firmaService.loading;
+  
+  // Modal visibility and data signals
   selectedFirma = signal<Firma | null>(null);
   showSignModal = signal(false);
   showRejectModal = signal(false);
-  motivoRechazo = signal('');
-  
-  // Upload state
-  selectedSignedFile = signal<File | null>(null);
-  isUploadingSigned = signal(false);
 
   // Filters
   filters = signal({
@@ -99,15 +101,9 @@ export class FirmasPage implements OnInit {
   itemsPerPage = 10;
 
   ngOnInit(): void {
-    // Cargar catálogos a demanda solo cuando se necesita esta página
     this.catalogService.loadTiposDocumento();
     this.catalogService.loadEstados();
-    
-    // Cargar firmas desde API usando el ID del usuario actual
-    const usuarioId = this.authService.user()?.id;
-    if (usuarioId) {
-      this.firmaService.loadAll({ usuarioAsignadoId: usuarioId });
-    }
+    this.refreshList();
   }
 
   // KPIs
@@ -126,7 +122,6 @@ export class FirmasPage implements OnInit {
   filteredFirmas = computed(() => {
     let result = this.allFirmas();
     const f = this.filters();
-
     if (f.search) {
       const s = f.search.toLowerCase();
       result = result.filter((e: Firma) => 
@@ -136,12 +131,8 @@ export class FirmasPage implements OnInit {
         String(e.id).includes(s)
       );
     }
-    if (f.estado !== 'all') {
-      result = result.filter((e: Firma) => e.estado === f.estado);
-    }
-    if (f.tipo !== 'all') {
-      result = result.filter((e: Firma) => String(e.documentoId) === f.tipo);
-    }
+    if (f.estado !== 'all') result = result.filter((e: Firma) => e.estado === f.estado);
+    if (f.tipo !== 'all') result = result.filter((e: Firma) => String(e.documentoId) === f.tipo);
     return result;
   });
 
@@ -153,40 +144,37 @@ export class FirmasPage implements OnInit {
 
   totalPages = computed(() => Math.ceil(this.filteredFirmas().length / this.itemsPerPage));
 
+  paginationSummary = computed(() => {
+    const total = this.filteredFirmas().length;
+    if (total === 0) return '0 registros';
+    const start = (this.currentPage() - 1) * this.itemsPerPage + 1;
+    const end = Math.min(this.currentPage() * this.itemsPerPage, total);
+    return `${start}–${end} de ${total} registros`;
+  });
+
   paginatedPages(): number[] {
     const total = this.totalPages();
-    if (total <= 5) {
-      return Array.from({ length: total }, (_, i) => i + 1);
-    }
+    if (total <= 5) return Array.from({ length: total }, (_, i) => i + 1);
     const current = this.currentPage();
     if (current <= 2) return [1, 2, 3, 4, total];
     if (current >= total - 1) return [1, total - 3, total - 2, total - 1, total];
     return [1, current - 1, current, current + 1, total];
   }
 
-  // Handlers
   updateFilters(key: string, value: string): void {
     this.filters.update((f: any) => ({ ...f, [key]: value }));
     this.currentPage.set(1);
   }
 
-  getStatusClass(estado?: string): string {
-    if (!estado) return '';
-    const upperEstado = estado.toUpperCase();
-    
-    // Comparar contra las constantes en mayúsculas para robustez
-    if (upperEstado === ESTADOS_EXPEDIENTE.REGISTRADO.toUpperCase()) return 'bg-[#3B7DCC]/15 text-[#3B7DCC] border border-[#3B7DCC]/30 font-ui text-[11px] font-semibold px-2 py-0.5 rounded-full';
-    if (upperEstado === ESTADOS_EXPEDIENTE.INGRESADO.toUpperCase()) return 'bg-primary/15 text-primary border border-primary/30 font-ui text-[11px] font-semibold px-2 py-0.5 rounded-full';
-    if (upperEstado === ESTADOS_EXPEDIENTE.PENDIENTE.toUpperCase()) return 'bg-warning/15 text-[#F2B801] border border-warning/30 font-ui text-[11px] font-semibold px-2 py-0.5 rounded-full';
-    if (upperEstado === ESTADOS_EXPEDIENTE.OBSERVADO.toUpperCase()) return 'bg-destructive/15 text-destructive border border-destructive/30 font-ui text-[11px] font-semibold px-2 py-0.5 rounded-full';
-    if (upperEstado === ESTADOS_EXPEDIENTE.FIRMADO.toUpperCase()) return 'bg-success/15 text-[#0FBF90] border border-success/30 font-ui text-[11px] font-semibold px-2 py-0.5 rounded-full';
-    
-    return 'font-ui text-[11px] font-semibold px-2 py-0.5 rounded-full bg-muted text-muted-foreground';
+  refreshList(): void {
+    const usuarioId = this.authService.user()?.id;
+    if (usuarioId) {
+      this.firmaService.loadAll({ usuarioAsignadoId: usuarioId });
+    }
   }
 
   handleDescargar(firma: Firma): void {
     if ((firma.estado || '').toUpperCase() !== ESTADOS_EXPEDIENTE.INGRESADO.toUpperCase()) return;
-    
     this.apiService.downloadFirmaDocumento(firma.id).subscribe({
       next: (blob) => {
         const url = window.URL.createObjectURL(blob);
@@ -195,65 +183,36 @@ export class FirmasPage implements OnInit {
         a.download = `${firma.documentoNumeracion || 'documento'}.pdf`;
         a.click();
         window.URL.revokeObjectURL(url);
-        
-        // Recargar el listado para reflejar el cambio de estado automático del backend
         this.refreshList();
-        
         Swal.fire({
           toast: true,
           position: 'top-end',
           icon: 'success',
           title: 'Documento descargado',
-          text: 'El estado se ha actualizado a PENDIENTE.',
+          text: 'Estado actualizado a PENDIENTE.',
           showConfirmButton: false,
-          timer: 3000,
-          timerProgressBar: true,
-          iconColor: '#2C5AAB',
-          background: '#fff',
-          color: '#2C5AAB'
+          timer: 3000
         });
       },
       error: (err) => {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error al descargar',
-          text: err.message || 'Error desconocido',
-          confirmButtonColor: '#AB2741'
-        });
+        Swal.fire({ icon: 'error', title: 'Error al descargar', text: err.message || 'Error desconocido' });
       }
     });
   }
 
   handleVerArchivoFirmado(firma: Firma): void {
     if (!firma.id) return;
-    
     this.apiService.downloadFirmaFirmada(firma.id).subscribe({
       next: (blob) => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
         a.download = `${firma.documentoNumeracion || 'documento'}_firmado.pdf`;
-        document.body.appendChild(a);
         a.click();
-        document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
-        
-        Swal.fire({
-          toast: true,
-          position: 'top-end',
-          icon: 'success',
-          title: 'Archivo firmado descargado',
-          showConfirmButton: false,
-          timer: 3000
-        });
       },
       error: (err) => {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error al descargar',
-          text: 'No se pudo recuperar el archivo firmado.',
-          confirmButtonColor: '#AB2741'
-        });
+        Swal.fire({ icon: 'error', title: 'Error al descargar', text: 'No se pudo recuperar el archivo firmado.' });
       }
     });
   }
@@ -261,107 +220,32 @@ export class FirmasPage implements OnInit {
   openSignModal(firma: Firma): void {
     if (firma.estado !== 'PENDIENTE') return;
     this.selectedFirma.set(firma);
-    this.selectedSignedFile.set(null);
     this.showSignModal.set(true);
   }
 
   openRejectModal(firma: Firma): void {
     if (firma.estado !== 'PENDIENTE') return;
     this.selectedFirma.set(firma);
-    this.motivoRechazo.set('');
     this.showRejectModal.set(true);
   }
 
-  onSignedFileSelected(file: File): void {
-    this.selectedSignedFile.set(file);
+  onSignSuccess(): void {
+    this.refreshList();
   }
 
-  closeSignModal(): void {
-    this.showSignModal.set(false);
-    this.selectedFirma.set(null);
-    this.selectedSignedFile.set(null);
-  }
-
-  private getClientIp(): string {
-    // En una app real, esto vendría de un servicio de configuración o del backend
-    // Por ahora, usamos un placeholder más descriptivo o '0.0.0.0' si es desconocido
-    return '0.0.0.0'; 
-  }
-
-  private refreshList(): void {
-    const usuarioId = this.authService.user()?.id;
-    if (usuarioId) {
-      this.firmaService.loadAll({ usuarioAsignadoId: usuarioId });
-    }
-  }
-
-  confirmSign(): void {
-    const firma = this.selectedFirma();
-    const file = this.selectedSignedFile();
-    if (!firma) return;
-    
-    const ip = this.getClientIp();
-
-    if (file) {
-      this.isUploadingSigned.set(true);
-      this.apiService.uploadFirma(firma.id, file, ip).subscribe({
-        next: () => {
-          this.isUploadingSigned.set(false);
-          this.refreshList();
-          this.closeSignModal();
-          
-          Swal.fire({
-            icon: 'success',
-            title: 'Documento firmado',
-            text: 'El documento ha sido firmado exitosamente y el estado se ha actualizado.',
-            timer: 2000,
-            showConfirmButton: false
-          });
-        },
-        error: (err) => {
-          this.isUploadingSigned.set(false);
-          Swal.fire({
-            icon: 'error',
-            title: 'Error al firmar',
-            text: err.message || 'Ocurrió un error al procesar la firma.',
-            confirmButtonColor: '#AB2741'
-          });
-        }
-      });
-    } else {
-      // Si no hay archivo (flujo alternativo), usamos el servicio
-      this.firmaService.firmar(firma.id, `${firma.rutaArchivoOriginal?.replace('.pdf', '')}_firmado.pdf`, ip);
-      this.closeSignModal();
-    }
-  }
-
-  closeRejectModal(): void {
-    this.showRejectModal.set(false);
-    this.selectedFirma.set(null);
-    this.motivoRechazo.set('');
-  }
-
-  confirmReject(): void {
-    const firma = this.selectedFirma();
-    const motivo = this.motivoRechazo().trim();
-    if (!firma || !motivo) {
-      return;
-    }
-
-    this.firmaService.rechazar(firma.id, motivo);
-    this.closeRejectModal();
+  onRejectSuccess(): void {
+    this.refreshList();
   }
 
   exportToExcel(): void {
     const data = this.filteredFirmas().map(f => ({
-      'Elaborado por': f.documentoUsuarioElabora,
+      'ID Registro': f.id,
+      'Documento': f.documentoNumeracion,
       'Tipo Documento': f.documentoTipoDocumento,
-      'Estado': f.estado,
+      'Elaborado por': f.documentoUsuarioElabora,
       'Fecha Asignación': f.fechaAsignacion,
-      'Archivo Original': f.rutaArchivoOriginal || '',
-      'Archivo Firmado': f.rutaArchivoFirmado || '',
+      'Estado': f.estado,
     }));
-    
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Firmas');
@@ -369,10 +253,6 @@ export class FirmasPage implements OnInit {
   }
 
   setPage(page: number): void {
-    if (page >= 1 && page <= this.totalPages()) {
-      this.currentPage.set(page);
-    }
+    if (page >= 1 && page <= this.totalPages()) this.currentPage.set(page);
   }
-
-  Math = Math;
 }

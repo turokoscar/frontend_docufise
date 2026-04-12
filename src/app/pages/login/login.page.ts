@@ -1,66 +1,81 @@
-import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
-import { CatalogService } from '../../core/services/catalog.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
-import { lucideUser, lucideLock, lucideEye, lucideEyeOff, lucideArrowRight, lucideInfo } from '@ng-icons/lucide';
+import { 
+  lucideUser, 
+  lucideLock, 
+  lucideEye, 
+  lucideEyeOff, 
+  lucideArrowRight, 
+  lucideInfo 
+} from '@ng-icons/lucide';
+
+// UI Library Components
+import { UiButtonComponent } from '../../shared/components/ui/button/button.component';
+import { UiInputComponent } from '../../shared/components/ui/input/input.component';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, NgIconComponent],
+  imports: [
+    CommonModule, 
+    FormsModule, 
+    NgIconComponent, 
+    UiButtonComponent, 
+    UiInputComponent
+  ],
   providers: [
-    provideIcons({ lucideUser, lucideLock, lucideEye, lucideEyeOff, lucideArrowRight, lucideInfo })
+    provideIcons({ 
+      lucideUser, 
+      lucideLock, 
+      lucideEye, 
+      lucideEyeOff, 
+      lucideArrowRight, 
+      lucideInfo 
+    })
   ],
   templateUrl: './login.page.html',
   styleUrl: './login.page.css'
 })
 export class LoginPage {
   private authService = inject(AuthService);
-  private catalogService = inject(CatalogService);
-  private router = inject(Router);
 
   usuario = '';
   contrasena = '';
   showPassword = signal(false);
-  error = signal('');
-
-  async handleSubmit(): Promise<void> {
-    this.error.set('');
-    
-    if (!this.usuario || !this.contrasena) {
-      this.error.set('Ingrese usuario y contraseña');
-      return;
-    }
-
-    const success = await this.authService.login(this.usuario, this.contrasena);
-    
-    if (success) {
-      const user = this.authService.user();
-      if (user) {
-        const menus = this.catalogService.getMenusByRol(user.rol);
-        
-        if (menus.length > 0) {
-          const route = menus[0].ruta;
-          this.router.navigate([route]);
-        } else {
-          this.error.set('No tiene menús asignados');
-        }
-      }
-    } else {
-      this.error.set('Credenciales incorrectas');
-    }
-  }
+  error = signal<string | null>(null);
+  loading = signal(false);
 
   togglePassword(): void {
     this.showPassword.update(v => !v);
   }
 
+  handleSubmit(): void {
+    if (!this.usuario || !this.contrasena) {
+      this.error.set('Por favor, ingrese sus credenciales');
+      return;
+    }
+
+    this.loading.set(true);
+    this.error.set(null);
+
+    this.authService.login(this.usuario, this.contrasena).then((success: boolean) => {
+      this.loading.set(false);
+      if (!success) {
+        this.error.set('Error de autenticación: verifique sus credenciales');
+      }
+    }).catch((err: any) => {
+      this.loading.set(false);
+      this.error.set(err.message || 'Error de conexión con el servidor');
+    });
+  }
+
   quickLogin(user: string, pass: string): void {
     this.usuario = user;
     this.contrasena = pass;
+    this.handleSubmit();
   }
 }

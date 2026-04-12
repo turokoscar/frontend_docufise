@@ -1,0 +1,64 @@
+import { Component, input, output, computed } from '@angular/core';
+import { CommonModule } from '@angular/common';
+
+export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'destructive' | 'white';
+export type ButtonSize = 'sm' | 'md' | 'lg' | 'xl';
+
+@Component({
+  selector: 'app-ui-button',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
+    <button
+      [type]="type()"
+      [disabled]="disabled() || loading()"
+      [class]="buttonClasses()"
+      (click)="onClick.emit($event)"
+    >
+      <div class="flex items-center justify-center gap-2">
+        <span *ngIf="loading()" class="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent"></span>
+        <ng-content></ng-content>
+      </div>
+    </button>
+  `,
+  styles: [`
+    :host {
+      display: inline-block;
+    }
+  `]
+})
+export class UiButtonComponent {
+  variant = input<ButtonVariant>('primary');
+  size = input<ButtonSize>('md');
+  type = input<'button' | 'submit' | 'reset'>('button');
+  disabled = input<boolean>(false);
+  loading = input<boolean>(false);
+  className = input<string>('');
+
+  onClick = output<MouseEvent>();
+
+  protected buttonClasses = computed(() => {
+    const baseClasses = 'inline-flex items-center justify-center rounded-xl font-ui font-bold transition-all duration-200 outline-none focus:ring-4 disabled:opacity-50 disabled:cursor-not-allowed';
+    
+    const variantClasses: Record<ButtonVariant, string> = {
+      primary: 'bg-[#2C5AAB] text-white hover:bg-[#244b8f] shadow-md shadow-[#2C5AAB]/20 focus:ring-[#2C5AAB]/10',
+      secondary: 'bg-[#0FAEBF] text-white hover:bg-[#0d9aa9] shadow-md shadow-[#0FAEBF]/20 focus:ring-[#0FAEBF]/10',
+      outline: 'bg-white border border-[#CBD5E1] text-[#334155] hover:bg-[#F8FAFC] focus:ring-[#F8FAFC]',
+      ghost: 'bg-transparent text-muted-foreground hover:bg-muted focus:ring-muted',
+      destructive: 'bg-[#AB2741] text-white hover:bg-[#8e2036] shadow-md shadow-[#AB2741]/20 focus:ring-[#AB2741]/10',
+      white: 'bg-white text-[#334155] hover:bg-[#F8FAFC] border border-[#CBD5E1] shadow-sm'
+    };
+
+    const sizeClasses: Record<ButtonSize, string> = {
+      sm: 'h-8 px-3 text-[10px] tracking-wider',
+      md: 'h-10 px-4 text-xs',
+      lg: 'h-11 px-5 text-xs',
+      xl: 'h-12 px-6 text-sm'
+    };
+
+    // Hover effect for premium feel (slight lift)
+    const hoverLift = this.disabled() || this.loading() ? '' : 'hover:-translate-y-0.5';
+
+    return `${baseClasses} ${variantClasses[this.variant()]} ${sizeClasses[this.size()]} ${hoverLift} ${this.className()}`;
+  });
+}
