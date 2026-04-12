@@ -39,26 +39,27 @@
     <div class="section-accent flex items-center gap-2 mb-3">
       <h3 class="font-ui text-xs font-semibold text-muted-foreground uppercase tracking-wider">Resumen General</h3>
     </div>
-  <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
-    @for (kpi of kpis(); track kpi.label) {
-      <div class="bg-card border-none shadow-sm overflow-hidden relative group kpi-glow transition-all duration-200">
-        <div class="p-4 flex items-center gap-4">
-          <div 
-            class="flex items-center justify-center w-12 h-12 rounded-xl transition-transform group-hover:scale-110" 
-            [style.backgroundColor]="kpi.color + '15'"
-          >
-            <ng-icon [name]="kpi.icon" class="text-2xl" [style.color]="kpi.color"></ng-icon>
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+      @for (kpi of kpis(); track kpi.label) {
+        <div class="bg-card border-none shadow-sm overflow-hidden relative group kpi-glow transition-all duration-200">
+          <div class="p-4 flex items-center gap-4">
+            <div 
+              class="flex items-center justify-center w-12 h-12 rounded-xl transition-transform group-hover:scale-110" 
+              [style.backgroundColor]="kpi.color + '15'"
+            >
+              <ng-icon [name]="kpi.icon" class="text-2xl" [style.color]="kpi.color"></ng-icon>
+            </div>
+            <div>
+              <p class="text-2xl font-display font-extrabold leading-none mb-1" [style.color]="kpi.color">
+                {{ kpi.value }}
+              </p>
+              <p class="text-[10px] font-ui font-bold text-muted-foreground uppercase tracking-widest">{{ kpi.label }}</p>
+            </div>
           </div>
-          <div>
-            <p class="text-2xl font-display font-extrabold leading-none mb-1" [style.color]="kpi.color">
-              {{ kpi.value }}
-            </p>
-            <p class="text-[10px] font-ui font-bold text-muted-foreground uppercase tracking-widest">{{ kpi.label }}</p>
-          </div>
+          <div class="absolute bottom-0 left-0 right-0 h-1" [style.backgroundColor]="kpi.color"></div>
         </div>
-        <div class="absolute bottom-0 left-0 right-0 h-1" [style.backgroundColor]="kpi.color"></div>
-      </div>
-    }
+      }
+    </div>
   </div>
 
   <!-- Filters Section -->
@@ -141,6 +142,7 @@
                   <span class="font-body text-sm">{{ f.documentoTipoDocumento }}</span>
               </td>
               <td class="px-6 py-4 font-body text-sm font-semibold text-foreground/80">{{ f.documentoUsuarioElabora }}</td>
+              <td class="px-6 py-4 font-body text-sm text-muted-foreground">{{ f.fechaAsignacion | date:'dd/MM/yyyy HH:mm' }}</td>
               <td class="px-6 py-4 text-center">
                 <span [class]="getEstadoBadgeClass(f.estado)">{{ f.estado }}</span>
               </td>
@@ -171,13 +173,14 @@
                       class="p-2 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive hover:text-white transition-all shadow-sm border border-destructive/20"
                       title="Observar documento"
                     >
-                      <ng-icon name="lucideCircleX" class="text-lg"></ng-icon>
+                      <ng-icon name="lucideTriangleAlert" class="text-lg"></ng-icon>
                     </button>
                   }
 
                   <!-- Visualizar (Firmado) -->
                   <button 
                     *ngIf="f.estado === 'FIRMADO'"
+                    (click)="handleVerArchivoFirmado(f)"
                     class="p-2 rounded-lg bg-muted text-foreground/60 hover:bg-muted/80 transition-all border border-border"
                     title="Ver archivo firmado"
                   >
@@ -226,96 +229,109 @@
   <!-- Modals -->
   
   <!-- Sign Modal -->
-  <div *ngIf="showSignModal()" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-    <div class="bg-card w-full max-w-md rounded-xl shadow-2xl border border-border overflow-hidden">
-      <div class="flex items-center gap-3 p-4 border-b border-border">
-        <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-primary/10">
-          <ng-icon name="lucidePenTool" class="text-xl text-primary"></ng-icon>
-        </div>
-        <div>
-          <h3 class="font-display text-lg font-bold">Firmar Documento</h3>
-          <p class="text-xs text-muted-foreground font-body">Aplicar firma electrónica</p>
+  <div *ngIf="showSignModal()" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300">
+    <div class="bg-card w-full max-w-md rounded-2xl shadow-2xl border border-border/50 overflow-hidden transform transition-all scale-100">
+      <div class="bg-gradient-to-r from-primary to-primary/80 p-6">
+        <div class="flex items-center gap-4">
+          <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-white/20 backdrop-blur-md">
+            <ng-icon name="lucidePenTool" class="text-2xl text-white"></ng-icon>
+          </div>
+          <div>
+            <h3 class="font-display text-xl font-bold text-white">Firmar Documento</h3>
+            <p class="text-xs text-white/80 font-body">Suba el archivo con su firma digital</p>
+          </div>
         </div>
       </div>
-      <div class="p-4 space-y-4">
-        <div class="bg-muted/50 rounded-lg p-3 border border-border/50">
-          <p class="text-[10px] font-ui text-muted-foreground uppercase">Documento</p>
-          <p class="font-display font-bold">{{ selectedFirma()?.documentoNumeracion }}</p>
+      
+      <div class="p-6 space-y-6">
+        <div class="bg-muted/30 rounded-xl p-4 border border-border/40">
+          <div class="flex items-center justify-between mb-1">
+            <p class="text-[10px] font-ui text-muted-foreground uppercase tracking-wider">Número de Documento</p>
+            <span class="px-2 py-0.5 rounded text-[10px] bg-primary/10 text-primary font-bold uppercase">{{ selectedFirma()?.documentoTipoDocumento }}</span>
+          </div>
+          <p class="font-display text-lg font-bold text-foreground">{{ selectedFirma()?.documentoNumeracion }}</p>
         </div>
         
-        <div>
-          <label class="font-ui text-xs text-muted-foreground uppercase block mb-2">Cargar documento firmado</label>
+        <div class="space-y-3">
+          <label class="font-ui text-xs text-muted-foreground uppercase block font-semibold tracking-wide">Cargar documento firmado (.pdf)</label>
           <app-file-upload
             [maxSizeMB]="10"
-            acceptedTypes=".pdf"
-            subfolder="firmados"
             (fileSelected)="onSignedFileSelected($event)"
           ></app-file-upload>
+          <p class="text-[10px] text-muted-foreground italic flex items-center gap-1">
+            <ng-icon name="lucideInfo"></ng-icon>
+            Asegúrese de que el archivo contenga su firma digital válida.
+          </p>
         </div>
-        
-        <div class="flex gap-3">
-          <button 
-            (click)="showSignModal.set(false)"
-            class="flex-1 px-4 py-2 rounded-lg border border-border hover:bg-muted font-ui text-sm transition-colors"
-          >
-            Cancelar
-          </button>
-          <button 
-            (click)="confirmSign()"
-            [disabled]="!selectedSignedFile() || isUploadingSigned()"
-            class="flex-1 bg-primary text-white px-4 py-2 rounded-lg font-ui text-sm font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-          >
-            @if (isUploadingSigned()) {
-              <span>Subiendo...</span>
-            } @else {
-              <ng-icon name="lucideCheck" class="h-4 w-4"></ng-icon>
-              <span>Confirmar Firma</span>
-            }
-          </button>
-        </div>
+      </div>
+
+      <div class="p-6 border-t border-border flex items-center justify-end gap-3 bg-muted/10">
+        <button 
+          (click)="closeSignModal()" 
+          class="px-4 py-2 rounded-xl font-ui text-sm font-semibold hover:bg-muted transition-colors"
+        >
+          Cancelar
+        </button>
+        <button 
+          (click)="confirmSign()" 
+          [disabled]="!selectedSignedFile() || isUploadingSigned()"
+          class="px-6 py-2 rounded-xl bg-primary text-primary-foreground font-ui text-sm font-bold shadow-lg shadow-primary/20 hover:shadow-primary/30 hover:translate-y-[-1px] active:translate-y-[0] transition-all disabled:opacity-50 disabled:translate-y-0"
+        >
+          <div class="flex items-center gap-2">
+            <span *ngIf="isUploadingSigned()" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+            {{ isUploadingSigned() ? 'Procesando...' : 'Firmar Documento' }}
+          </div>
+        </button>
       </div>
     </div>
   </div>
 
   <!-- Reject Modal -->
-  <div *ngIf="showRejectModal()" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-    <div class="bg-card w-full max-w-md rounded-xl shadow-2xl border border-border overflow-hidden">
-      <div class="flex items-center gap-3 p-4 border-b border-destructive/20 bg-destructive/5">
-        <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-destructive/10">
-          <ng-icon name="lucideTriangleAlert" class="text-xl text-destructive"></ng-icon>
-        </div>
-        <div>
-          <h3 class="font-display text-lg font-bold">Observar Documento</h3>
-          <p class="text-xs text-muted-foreground font-body">Indique el motivo del rechazo</p>
+  <div *ngIf="showRejectModal()" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300">
+    <div class="bg-card w-full max-w-md rounded-2xl shadow-2xl border border-border/50 overflow-hidden">
+      <div class="bg-gradient-to-r from-destructive to-destructive/80 p-6">
+        <div class="flex items-center gap-4">
+          <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-white/20 backdrop-blur-md">
+            <ng-icon name="lucideTriangleAlert" class="text-2xl text-white"></ng-icon>
+          </div>
+          <div>
+            <h3 class="font-display text-xl font-bold text-white">Rechazar Firma</h3>
+            <p class="text-xs text-white/80 font-body">Indique el motivo de la observación</p>
+          </div>
         </div>
       </div>
-      <div class="p-4 space-y-4 text-foreground">
-        <div class="space-y-2">
-          <label class="font-ui text-xs text-destructive font-semibold uppercase">Motivo de observación</label>
-          <textarea 
-            [value]="motivoRechazo()"
-            (input)="motivoRechazo.set($any($event.target).value)"
-            placeholder="Ej: Falta firma de supervisor en anexo 4, datos incorrectos..."
-            class="w-full p-3 rounded-lg bg-muted/50 border border-border focus:border-destructive focus:ring-2 focus:ring-destructive/10 transition-all outline-none font-body text-sm min-h-[100px]"
-            required
-          ></textarea>
+      
+      <div class="p-6 space-y-6">
+        <div class="bg-destructive/5 rounded-xl p-4 border border-destructive/10">
+          <p class="text-[10px] font-ui text-destructive uppercase tracking-wider mb-1">Documento a Rechazar</p>
+          <p class="font-display font-bold text-foreground">{{ selectedFirma()?.documentoNumeracion }}</p>
         </div>
 
-        <div class="flex gap-3">
-          <button 
-            (click)="showRejectModal.set(false)"
-            class="flex-1 px-4 py-2 rounded-lg border border-border hover:bg-muted font-ui text-sm transition-colors"
-          >
-            Cancelar
-          </button>
-          <button 
-            (click)="confirmReject()"
-            [disabled]="!motivoRechazo().trim()"
-            class="flex-1 bg-destructive text-white px-4 py-2 rounded-lg font-ui text-sm font-semibold hover:bg-destructive/90 transition-colors disabled:opacity-50"
-          >
-            Enviar Observación
-          </button>
+        <div class="space-y-3">
+          <label class="font-ui text-xs text-muted-foreground uppercase block font-semibold tracking-wide">Motivo del Rechazo</label>
+          <textarea 
+            [ngModel]="motivoRechazo()"
+            (ngModelChange)="motivoRechazo.set($event)"
+            class="w-full h-32 p-4 rounded-xl bg-muted/30 border border-border focus:border-destructive focus:ring-4 focus:ring-destructive/10 transition-all outline-none text-sm font-body resize-none"
+            placeholder="Describa brevemente por qué rechaza el documento..."
+          ></textarea>
         </div>
+      </div>
+
+      <div class="p-6 border-t border-border flex items-center justify-end gap-3 bg-muted/10">
+        <button 
+          (click)="closeRejectModal()" 
+          class="px-4 py-2 rounded-xl font-ui text-sm font-semibold hover:bg-muted transition-colors"
+        >
+          Cancelar
+        </button>
+        <button 
+          (click)="confirmReject()" 
+          [disabled]="!motivoRechazo().trim()"
+          class="px-6 py-2 rounded-xl bg-destructive text-destructive-foreground font-ui text-sm font-bold shadow-lg shadow-destructive/20 hover:shadow-destructive/30 hover:translate-y-[-1px] active:translate-y-[0] transition-all disabled:opacity-50 disabled:translate-y-0"
+        >
+          Rechazar Documento
+        </button>
       </div>
     </div>
   </div>

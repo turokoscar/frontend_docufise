@@ -180,10 +180,7 @@ export class FirmasPage implements OnInit {
         window.URL.revokeObjectURL(url);
         
         // Recargar el listado para reflejar el cambio de estado automático del backend
-        const usuarioId = this.authService.user()?.id;
-        if (usuarioId) {
-          this.firmaService.loadAll({ usuarioAsignadoId: usuarioId });
-        }
+        this.refreshList();
         
         Swal.fire({
           toast: true,
@@ -204,6 +201,40 @@ export class FirmasPage implements OnInit {
           icon: 'error',
           title: 'Error al descargar',
           text: err.message || 'Error desconocido',
+          confirmButtonColor: '#AB2741'
+        });
+      }
+    });
+  }
+
+  handleVerArchivoFirmado(firma: Firma): void {
+    if (!firma.id) return;
+    
+    this.apiService.downloadFirmaFirmada(firma.id).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${firma.documentoNumeracion || 'documento'}_firmado.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'success',
+          title: 'Archivo firmado descargado',
+          showConfirmButton: false,
+          timer: 3000
+        });
+      },
+      error: (err) => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al descargar',
+          text: 'No se pudo recuperar el archivo firmado.',
           confirmButtonColor: '#AB2741'
         });
       }
@@ -234,26 +265,55 @@ export class FirmasPage implements OnInit {
     this.selectedSignedFile.set(null);
   }
 
+  private getClientIp(): string {
+    // En una app real, esto vendría de un servicio de configuración o del backend
+    // Por ahora, usamos un placeholder más descriptivo o '0.0.0.0' si es desconocido
+    return '0.0.0.0'; 
+  }
+
+  private refreshList(): void {
+    const usuarioId = this.authService.user()?.id;
+    if (usuarioId) {
+      this.firmaService.loadAll({ usuarioAsignadoId: usuarioId });
+    }
+  }
+
   confirmSign(): void {
     const firma = this.selectedFirma();
     const file = this.selectedSignedFile();
     if (!firma) return;
     
+    const ip = this.getClientIp();
+
     if (file) {
       this.isUploadingSigned.set(true);
-      this.apiService.uploadFirma(firma.id, file, '127.0.0.1').subscribe({
+      this.apiService.uploadFirma(firma.id, file, ip).subscribe({
         next: () => {
           this.isUploadingSigned.set(false);
-          this.firmaService.loadAll({ usuarioAsignadoId: this.user()?.id });
+          this.refreshList();
           this.closeSignModal();
+          
+          Swal.fire({
+            icon: 'success',
+            title: 'Documento firmado',
+            text: 'El documento ha sido firmado exitosamente y el estado se ha actualizado.',
+            timer: 2000,
+            showConfirmButton: false
+          });
         },
         error: (err) => {
           this.isUploadingSigned.set(false);
-          alert('Error al firmar documento: ' + (err.message || 'Error desconocido'));
+          Swal.fire({
+            icon: 'error',
+            title: 'Error al firmar',
+            text: err.message || 'Ocurrió un error al procesar la firma.',
+            confirmButtonColor: '#AB2741'
+          });
         }
       });
     } else {
-      this.firmaService.firmar(firma.id, `${firma.rutaArchivoOriginal?.replace('.pdf', '')}_firmado.pdf`, '127.0.0.1');
+      // Si no hay archivo (flujo alternativo), usamos el servicio
+      this.firmaService.firmar(firma.id, `${firma.rutaArchivoOriginal?.replace('.pdf', '')}_firmado.pdf`, ip);
       this.closeSignModal();
     }
   }

@@ -295,4 +295,10 @@ export class ApiService {
       responseType: 'blob'
     });
   }
+
+  downloadFirmaFirmada(firmaId: number): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/firmas/${firmaId}/descargar-firmado`, {
+      responseType: 'blob'
+    });
+  }
 }
