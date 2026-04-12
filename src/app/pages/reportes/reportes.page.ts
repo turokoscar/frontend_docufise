@@ -5,18 +5,18 @@ import { AuthService } from '../../core/services/auth.service';
 import { Documento, EstadoDocumentoLabel } from '../../core/models/documento.model';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { 
-  lucideHome, 
-  lucideBarChart3, 
+  lucideHouse, 
+  lucideChartColumn, 
   lucideFileSpreadsheet, 
   lucideArrowRight, 
   lucideInfo,
   lucideTrendingUp,
-  lucidePieChart,
+  lucideChartPie,
   lucideLayoutGrid,
   lucideFile,
-  lucideCheckCircle2,
+  lucideCircleCheck,
   lucideClock,
-  lucideAlertTriangle,
+  lucideTriangleAlert,
   lucideSend,
   lucideActivity,
   lucideFileText,
@@ -33,9 +33,9 @@ import * as XLSX from 'xlsx';
   imports: [CommonModule, NgIconComponent, BaseChartDirective],
   providers: [
     provideIcons({ 
-      lucideHome, lucideBarChart3, lucideFileSpreadsheet, lucideArrowRight, 
-      lucideInfo, lucideTrendingUp, lucidePieChart, lucideLayoutGrid,
-      lucideFile, lucideCheckCircle2, lucideClock, lucideAlertTriangle, lucideSend,
+      lucideHouse, lucideChartColumn, lucideFileSpreadsheet, lucideArrowRight, 
+      lucideInfo, lucideTrendingUp, lucideChartPie, lucideLayoutGrid,
+      lucideFile, lucideCircleCheck, lucideClock, lucideTriangleAlert, lucideSend,
       lucideActivity, lucideFileText, lucidePenTool
     })
   ],

@@ -6,15 +6,15 @@ import { RolSistema } from '../../../core/models/rol.model';
 import { MenuSistema } from '../../../core/models/menu.model';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { 
-  lucideHome, 
+  lucideHouse, 
   lucideShield, 
   lucidePlus, 
   lucideSearch, 
   lucideChevronDown, 
   lucidePencil, 
   lucideTrash2, 
-  lucideCheckCircle2, 
-  lucideXCircle,
+  lucideCircleCheck, 
+  lucideCircleX,
   lucideArrowRight,
   lucideInfo,
   lucideListChecks
@@ -27,8 +27,8 @@ import {
   imports: [CommonModule, FormsModule, NgIconComponent],
   providers: [
     provideIcons({ 
-      lucideHome, lucideShield, lucidePlus, lucideSearch, lucideChevronDown, 
-      lucidePencil, lucideTrash2, lucideCheckCircle2, lucideXCircle, lucideArrowRight, 
+      lucideHouse, lucideShield, lucidePlus, lucideSearch, lucideChevronDown, 
+      lucidePencil, lucideTrash2,      lucideCircleCheck, lucideCircleX, lucideArrowRight, 
       lucideInfo, lucideListChecks 
     })
   ],

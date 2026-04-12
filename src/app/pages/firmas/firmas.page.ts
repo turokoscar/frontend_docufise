@@ -10,7 +10,7 @@ import { EstadoDocumentoLabel } from '../../core/models/documento.model';
 import { FileUploadComponent } from '../../shared/components/file-upload/file-upload.component';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { 
-  lucideHome, 
+  lucideHouse, 
   lucidePenTool, 
   lucideSearch, 
   lucideChevronDown, 
@@ -18,19 +18,20 @@ import {
   lucideInbox,
   lucideDownload,
   lucideClock,
-  lucideCheckCircle2,
-  lucideAlertTriangle,
-  lucideXCircle,
+  lucideCircleCheck,
+  lucideTriangleAlert,
+  lucideCircleX,
   lucideFileCheck,
   lucideInfo,
   lucideArrowRight,
   lucideFileText,
-  lucideHelpCircle,
+  lucideCircleHelp,
   lucideUpload,
   lucideCheck,
   lucideX
 } from '@ng-icons/lucide';
 import * as XLSX from 'xlsx';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-firmas',
@@ -39,10 +40,10 @@ import * as XLSX from 'xlsx';
   imports: [CommonModule, FormsModule, NgIconComponent, FileUploadComponent],
   providers: [
     provideIcons({ 
-      lucideHome, lucidePenTool, lucideSearch, lucideChevronDown, 
+      lucideHouse, lucidePenTool, lucideSearch, lucideChevronDown, 
       lucideFileSpreadsheet, lucideInbox, lucideDownload, lucideClock, 
-      lucideCheckCircle2, lucideAlertTriangle, lucideXCircle, lucideFileCheck,
-      lucideInfo, lucideArrowRight, lucideFileText, lucideHelpCircle,
+      lucideCircleCheck, lucideTriangleAlert, lucideCircleX, lucideFileCheck,
+      lucideInfo, lucideArrowRight, lucideFileText, lucideCircleHelp,
       lucideUpload, lucideCheck, lucideX
     })
   ],
@@ -111,8 +112,8 @@ export class FirmasPage implements OnInit {
       { label: "Bandeja", value: data.length, icon: 'lucideInbox', color: "#2C5AAB" },
       { label: "Ingresados", value: countByState("INGRESADO"), icon: 'lucideDownload', color: "#2C5AAB" },
       { label: "Pendientes", value: countByState("PENDIENTE"), icon: 'lucideClock', color: "#F2B801" },
-      { label: "Firmados", value: countByState("FIRMADO"), icon: 'lucideCheckCircle2', color: "#0FBF90" },
-      { label: "Observados", value: countByState("OBSERVADO"), icon: 'lucideAlertTriangle', color: "#AB2741" },
+      { label: "Firmados", value: countByState("FIRMADO"), icon: 'lucideCircleCheck', color: "#0FBF90" },
+      { label: "Observados", value: countByState("OBSERVADO"), icon: 'lucideTriangleAlert', color: "#AB2741" },
     ];
   });
 
@@ -189,6 +190,15 @@ export class FirmasPage implements OnInit {
         
         // Marcar como descargado
         this.firmaService.descargar(firma.id, '127.0.0.1');
+        
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'success',
+          title: 'Documento descargado. Estado actualizado a PENDIENTE.',
+          showConfirmButton: false,
+          timer: 3000
+        });
       },
       error: (err) => {
         alert('Error al descargar: ' + (err.message || 'Error desconocido'));

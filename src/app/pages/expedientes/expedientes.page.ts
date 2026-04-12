@@ -9,24 +9,24 @@ import { Documento, EstadoDocumentoLabel } from '../../core/models/documento.mod
 import { FileUploadComponent } from '../../shared/components/file-upload/file-upload.component';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { 
-  lucideHome, 
+  lucideHouse, 
   lucideFileText, 
   lucideSearch, 
   lucideChevronDown, 
   lucideFileSpreadsheet,
   lucidePlus,
-  lucideHelpCircle,
+  lucideCircleHelp,
   lucidePencil,
   lucideTrash2,
   lucideArrowRight,
   lucideSend,
   lucideUpload,
-  lucideAlertTriangle,
+  lucideTriangleAlert,
   lucideX,
   lucideInfo,
   lucideListFilter,
   lucideClock,
-  lucideCheckCircle2,
+  lucideCircleCheck,
   lucideCheck,
   lucideFile
 } from '@ng-icons/lucide';
@@ -39,11 +39,11 @@ import * as XLSX from 'xlsx';
   imports: [CommonModule, FormsModule, NgIconComponent, FileUploadComponent],
   providers: [
     provideIcons({ 
-      lucideHome, lucideFileText, lucideSearch, lucideChevronDown, 
-      lucideFileSpreadsheet, lucidePlus, lucideHelpCircle, lucidePencil, 
+      lucideHouse, lucideFileText, lucideSearch, lucideChevronDown, 
+      lucideFileSpreadsheet, lucidePlus, lucideCircleHelp, lucidePencil, 
       lucideTrash2, lucideArrowRight, lucideSend, lucideUpload,
-      lucideAlertTriangle, lucideX, lucideInfo, lucideListFilter,
-      lucideClock, lucideCheckCircle2, lucideCheck, lucideFile
+      lucideTriangleAlert, lucideX, lucideInfo, lucideListFilter,
+      lucideClock, lucideCircleCheck, lucideCheck, lucideFile
     })
   ],
   templateUrl: './expedientes.page.html',
@@ -170,8 +170,8 @@ export class ExpedientesPage implements OnInit {
       { label: "Total", value: data.length, icon: 'lucideFile', color: "#2C5AAB" },
       { label: "Registrados", value: countByState("REGISTRADO"), icon: 'lucideFile', color: "#3B7DCC" },
       { label: "Pendientes", value: countByState("PENDIENTE"), icon: 'lucideClock', color: "#F2B801" },
-      { label: "Firmados", value: countByState("FIRMADO"), icon: 'lucideCheckCircle2', color: "#0FBF90" },
-      { label: "Observados", value: countByState("OBSERVADO"), icon: 'lucideAlertTriangle', color: "#AB2741" },
+      { label: "Firmados", value: countByState("FIRMADO"), icon: 'lucideCircleCheck', color: "#0FBF90" },
+      { label: "Observados", value: countByState("OBSERVADO"), icon: 'lucideTriangleAlert', color: "#AB2741" },
     ];
   });
 

@@ -7,7 +7,7 @@ import { AreaSistema } from '../../../core/models/area.model';
 import { RolSistema } from '../../../core/models/rol.model';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { 
-  lucideHome, 
+  lucideHouse, 
   lucideUsers, 
   lucidePlus, 
   lucideSearch, 
@@ -30,7 +30,7 @@ import {
   imports: [CommonModule, FormsModule, NgIconComponent],
   providers: [
     provideIcons({ 
-      lucideHome, lucideUsers, lucidePlus, lucideSearch, lucideChevronDown, 
+      lucideHouse, lucideUsers, lucidePlus, lucideSearch, lucideChevronDown, 
       lucidePencil, lucideTrash2, lucideShield, lucideBuilding2, lucideUserCheck, 
       lucideUserX, lucideMail, lucideArrowRight, lucideInfo 
     })

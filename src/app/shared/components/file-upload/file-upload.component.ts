@@ -5,8 +5,8 @@ import {
   lucideUpload, 
   lucideX, 
   lucideFile,
-  lucideCheckCircle2,
-  lucideAlertCircle
+  lucideCircleCheck,
+  lucideCircleAlert
 } from '@ng-icons/lucide';
 
 @Component({
@@ -15,7 +15,7 @@ import {
   imports: [CommonModule, NgIconComponent],
   providers: [
     provideIcons({ 
-      lucideUpload, lucideX, lucideFile, lucideCheckCircle2, lucideAlertCircle 
+      lucideUpload, lucideX, lucideFile, lucideCircleCheck, lucideCircleAlert 
     })
   ],
   template: `
@@ -112,7 +112,7 @@ import {
       @if (isSuccess() && uploadedFilename()) {
         <div class="mt-3 flex items-center justify-between bg-green-50 rounded-lg p-3 border border-green-200">
           <div class="flex items-center gap-2">
-            <ng-icon name="lucideCheckCircle2" class="w-5 h-5 text-green-500"></ng-icon>
+            <ng-icon name="lucideCircleCheck" class="w-5 h-5 text-green-500"></ng-icon>
             <span class="text-sm text-green-700">{{ uploadedFilename() }}</span>
           </div>
           <button 

@@ -5,15 +5,15 @@ import { ApiService } from '../../../core/services/api.service';
 import { AreaSistema } from '../../../core/models/area.model';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { 
-  lucideHome, 
+  lucideHouse, 
   lucideBuilding2, 
   lucidePlus, 
   lucideSearch, 
   lucideChevronDown, 
   lucidePencil, 
   lucideTrash2, 
-  lucideCheckCircle2, 
-  lucideXCircle,
+  lucideCircleCheck, 
+  lucideCircleX,
   lucideArrowRight,
   lucideInfo,
   lucideLayoutGrid
@@ -26,8 +26,8 @@ import {
   imports: [CommonModule, FormsModule, NgIconComponent],
   providers: [
     provideIcons({ 
-      lucideHome, lucideBuilding2, lucidePlus, lucideSearch, lucideChevronDown, 
-      lucidePencil, lucideTrash2, lucideCheckCircle2, lucideXCircle, lucideArrowRight, 
+      lucideHouse, lucideBuilding2, lucidePlus, lucideSearch, lucideChevronDown, 
+      lucidePencil, lucideTrash2, lucideCircleCheck, lucideCircleX, lucideArrowRight, 
       lucideInfo, lucideLayoutGrid 
     })
   ],

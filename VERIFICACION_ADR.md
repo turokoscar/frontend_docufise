@@ -32,7 +32,7 @@
 | Requisito ADR | Estado | Observaciones |
 |--------------|--------|---------------|
 | Tabla 10 reg/página | ✅ | `itemsPerPage = 10` |
-| Columnas: Numeración, Tipo, Elaborado, Enviado, Fecha | ⚠️ | Falta "Enviado por" |
+| Columnas: Numeración, Tipo, Elaborado, Enviado, Fecha | ✅ | Columna "Enviado por" añadida |
 | Botón "Añadir nuevo" Azul #2C5AAB | ✅ | `bg-primary` |
 | Botones Actualizar/Eliminar según estado | ✅ | `canEdit()` implementado |
 | Estado inicial REGISTRADO | ✅ | hardcodeado en saveExpediente() |
@@ -46,8 +46,8 @@
 | Tabla filtrada por usuario | ✅ | En proceso |
 | Columnas: Elaborado, Tipo, Estado, Fecha-Hora | ✅ | |
 | Botón Descargar archivo | ✅ | |
-| Cambio INGRESADO → PENDIENTE al descargar | ⚠️ | No implementado |
-| Toast "Se ha descargado..." | ⚠️ | Falta mensaje específico |
+| Cambio INGRESADO → PENDIENTE al descargar | ✅ | Implementado en FirmaService.java |
+| Toast "Se ha descargado..." | ✅ | Implementado en FirmasPage |
 | Botón Rechazar con motivo | ⚠️ | Modal existe pero revisar |
 | Cambio OBSERVADO al rechazar | ✅ | Implementado |
 

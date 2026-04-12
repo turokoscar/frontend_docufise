@@ -4,8 +4,8 @@ import { RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { 
-  lucideHome, 
-  lucideBarChart3, 
+  lucideHouse, 
+  lucideChartColumn, 
   lucideFileText, 
   lucidePenTool, 
   lucideUsers, 
@@ -29,8 +29,8 @@ import {
   imports: [CommonModule, RouterModule, NgIconComponent],
   providers: [
     provideIcons({ 
-      lucideHome, 
-      lucideBarChart3, 
+      lucideHouse, 
+      lucideChartColumn, 
       lucideFileText, 
       lucidePenTool, 
       lucideUsers, 
@@ -81,7 +81,7 @@ export class LayoutComponent {
 
   getMenuIcon(name: string): string {
     const icons: Record<string, string> = {
-      'BarChart3': 'lucideBarChart3',
+      'BarChart3': 'lucideChartColumn',
       'FileText': 'lucideFileText',
       'PenTool': 'lucidePenTool',
       'Users': 'lucideUsers',
@@ -90,6 +90,6 @@ export class LayoutComponent {
       'LayoutList': 'lucideLayoutList',
       'Settings': 'lucideSettings'
     };
-    return icons[name] || 'lucideHome';
+    return icons[name] || 'lucideHouse';
   }
 }
