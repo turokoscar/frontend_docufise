@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { DocumentoService } from '../../core/services/documento.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Documento, EstadoDocumentoLabel } from '../../core/models/documento.model';
+import { ESTADOS_EXPEDIENTE } from '../../core/constants/states.constants';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { 
   lucideHouse, 
@@ -73,16 +74,16 @@ export class ReportesPage implements OnInit {
 
   kpis = computed(() => {
     const docs = this.allDocumentos();
-    const count = (s: string) => docs.filter(doc => doc.estado === s).length;
+    const count = (s: string) => docs.filter(doc => (doc.estado || '').toUpperCase() === s.toUpperCase()).length;
     
-    const firmados = count('FIRMADO');
+    const firmados = count(ESTADOS_EXPEDIENTE.FIRMADO);
     const total = docs.length;
     const tasaFirma = total > 0 ? Math.round((firmados / total) * 100) : 0;
     
     return [
       { label: 'Total Documentos', value: total, icon: 'lucideFileText', color: '#2C5AAB' },
       { label: 'Firmados', value: firmados, icon: 'lucidePenTool', color: '#0FBF90' },
-      { label: 'Pendientes', value: count('PENDIENTE'), icon: 'lucideClock', color: '#F2B801' },
+      { label: 'Pendientes', value: count(ESTADOS_EXPEDIENTE.PENDIENTE), icon: 'lucideClock', color: '#F2B801' },
       { label: 'Tasa de Firma', value: tasaFirma + '%', icon: 'lucideTrendingUp', color: '#0FAEBF' },
     ];
   });
@@ -90,13 +91,13 @@ export class ReportesPage implements OnInit {
   // Datos dinámicos para gráfica
   datosReporte = computed(() => {
     const docs = this.allDocumentos();
-    const count = (s: string) => docs.filter(doc => doc.estado === s).length;
+    const count = (s: string) => docs.filter(doc => (doc.estado || '').toUpperCase() === s.toUpperCase()).length;
     return [
-      { estado: 'Registrados', cantidad: count('REGISTRADO'), color: '#3B7DCC' },
-      { estado: 'Ingresados', cantidad: count('INGRESADO'), color: '#2C5AAB' },
-      { estado: 'Pendientes', cantidad: count('PENDIENTE'), color: '#F2B801' },
-      { estado: 'Observados', cantidad: count('OBSERVADO'), color: '#AB2741' },
-      { estado: 'Firmados', cantidad: count('FIRMADO'), color: '#0FBF90' },
+      { estado: 'Registrados', cantidad: count(ESTADOS_EXPEDIENTE.REGISTRADO), color: '#3B7DCC' },
+      { estado: 'Ingresados', cantidad: count(ESTADOS_EXPEDIENTE.INGRESADO), color: '#2C5AAB' },
+      { estado: 'Pendientes', cantidad: count(ESTADOS_EXPEDIENTE.PENDIENTE), color: '#F2B801' },
+      { estado: 'Observados', cantidad: count(ESTADOS_EXPEDIENTE.OBSERVADO), color: '#AB2741' },
+      { estado: 'Firmados', cantidad: count(ESTADOS_EXPEDIENTE.FIRMADO), color: '#0FBF90' },
     ];
   });
 

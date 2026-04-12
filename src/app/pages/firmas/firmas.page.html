@@ -8,85 +8,61 @@
     <ng-icon name="lucideArrowRight" class="text-[10px]"></ng-icon>
     <span class="font-bold text-foreground">Gestión de Firmas</span>
   </nav>
-
   <!-- Page Header -->
-  <div class="bg-gradient-to-r from-secondary/5 via-secondary/3 to-transparent rounded-xl p-5 border border-secondary/10">
-    <div class="flex items-center justify-between">
-      <div class="flex items-center gap-4">
-        <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-secondary/10">
-          <ng-icon name="lucidePenTool" class="h-6 w-6 text-secondary"></ng-icon>
-        </div>
-        <div>
-          <h2 class="font-display text-2xl font-extrabold text-foreground">Gestión de Firmas</h2>
-          <p class="text-sm text-muted-foreground font-body mt-0.5">Bandeja de documentos derivados para firma</p>
-        </div>
-      </div>
-      
-      <div class="flex items-center gap-2">
-        <button 
-          (click)="exportToExcel()"
-          class="flex items-center gap-2 px-4 py-2 rounded-xl border border-input bg-background hover:bg-accent hover:text-accent-foreground font-ui text-xs transition-colors"
-        >
-          <ng-icon name="lucideFileSpreadsheet" class="h-4 w-4"></ng-icon>
-          Exportar Excel
-        </button>
-      </div>
+  <app-ui-page-header 
+    title="Gestión de Firmas" 
+    subtitle="Bandeja de documentos derivados para firma" 
+    icon="lucidePenTool"
+  >
+    <div actions>
+      <button 
+        (click)="exportToExcel()"
+        class="flex items-center gap-2 h-11 px-5 rounded-xl border border-[#CBD5E1] bg-white hover:bg-[#F8FAFC] text-[#334155] font-ui text-xs font-bold transition-all shadow-sm"
+      >
+        <ng-icon name="lucideFileSpreadsheet" class="h-4 w-4 text-[#2C5AAB]"></ng-icon>
+        Exportar Excel
+      </button>
     </div>
-  </div>
+  </app-ui-page-header>
 
   <!-- KPI Strip -->
   <div>
-    <div class="section-accent flex items-center gap-2 mb-3">
-      <h3 class="font-ui text-xs font-semibold text-muted-foreground uppercase tracking-wider">Resumen General</h3>
-    </div>
-    <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+    <app-ui-section-label label="Resumen General"></app-ui-section-label>
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
       @for (kpi of kpis(); track kpi.label) {
-        <div class="bg-card border-none shadow-sm overflow-hidden relative group kpi-glow transition-all duration-200">
-          <div class="p-4 flex items-center gap-4">
-            <div 
-              class="flex items-center justify-center w-12 h-12 rounded-xl transition-transform group-hover:scale-110" 
-              [style.backgroundColor]="kpi.color + '15'"
-            >
-              <ng-icon [name]="kpi.icon" class="text-2xl" [style.color]="kpi.color"></ng-icon>
-            </div>
-            <div>
-              <p class="text-2xl font-display font-extrabold leading-none mb-1" [style.color]="kpi.color">
-                {{ kpi.value }}
-              </p>
-              <p class="text-[10px] font-ui font-bold text-muted-foreground uppercase tracking-widest">{{ kpi.label }}</p>
-            </div>
-          </div>
-          <div class="absolute bottom-0 left-0 right-0 h-1" [style.backgroundColor]="kpi.color"></div>
-        </div>
+        <app-ui-kpi-card
+          [label]="kpi.label"
+          [value]="kpi.value"
+          [icon]="kpi.icon"
+          [color]="kpi.color"
+        ></app-ui-kpi-card>
       }
     </div>
   </div>
 
   <!-- Filters Section -->
-  <div class="section-accent flex items-center gap-2 mt-4 mb-1">
-    <h3 class="font-ui text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Búsqueda y Filtros</h3>
-  </div>
-  <div class="bg-card border-none shadow-sm p-4">
-    <div class="flex flex-wrap items-end gap-4">
+  <div>
+    <app-ui-section-label label="Búsqueda y Filtros"></app-ui-section-label>
+    <app-ui-filter-panel>
       <div class="flex-1 min-w-[240px] space-y-2">
-        <label class="font-ui text-[10px] font-bold text-primary uppercase tracking-widest ml-1">Búsqueda rápida</label>
-        <div class="relative group">
-          <ng-icon name="lucideSearch" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors"></ng-icon>
+        <label class="font-ui text-[10px] font-bold text-[#64748B] uppercase tracking-widest ml-1">Búsqueda rápida</label>
+        <div class="relative">
+          <ng-icon name="lucideSearch" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/60 h-4 w-4"></ng-icon>
           <input 
             type="text" 
             (input)="updateFilters('search', $any($event.target).value)"
             placeholder="Cód. Firma, elaborador o documento"
-            class="w-full pl-10 pr-4 h-11 rounded-xl bg-muted/30 border-transparent focus:bg-white focus:border-primary transition-all outline-none font-body text-sm"
+            class="w-full pl-10 pr-4 h-11 rounded-xl bg-[#F8FAFC] border border-[#CBD5E1] focus:bg-white focus:border-[#2C5AAB] transition-all outline-none font-body text-sm"
           />
         </div>
       </div>
 
       <div class="w-full sm:w-[220px] space-y-2">
-        <label class="font-ui text-[10px] font-bold text-primary uppercase tracking-widest ml-1">Tipo de documento</label>
+        <label class="font-ui text-[10px] font-bold text-[#64748B] uppercase tracking-widest ml-1">Tipo de documento</label>
         <div class="relative">
           <select 
             (change)="updateFilters('tipo', $any($event.target).value)"
-            class="w-full pl-4 pr-10 h-11 rounded-xl bg-muted/30 border-transparent outline-none appearance-none cursor-pointer font-body text-sm"
+            class="w-full pl-4 pr-10 h-11 rounded-xl bg-[#F8FAFC] border border-[#CBD5E1] focus:bg-white focus:border-[#2C5AAB] outline-none appearance-none cursor-pointer font-body text-sm"
           >
             <option value="all">Todos los tipos</option>
             @for (tipo of tiposDocumento; track tipo.id) {
@@ -98,11 +74,11 @@
       </div>
 
       <div class="w-full sm:w-[200px] space-y-2">
-        <label class="font-ui text-[10px] font-bold text-primary uppercase tracking-widest ml-1">Estado</label>
+        <label class="font-ui text-[10px] font-bold text-[#64748B] uppercase tracking-widest ml-1">Estado</label>
         <div class="relative">
           <select 
             (change)="updateFilters('estado', $any($event.target).value)"
-            class="w-full pl-4 pr-10 h-11 rounded-xl bg-muted/30 border-transparent outline-none appearance-none cursor-pointer font-body text-sm"
+            class="w-full pl-4 pr-10 h-11 rounded-xl bg-[#F8FAFC] border border-[#CBD5E1] focus:bg-white focus:border-[#2C5AAB] outline-none appearance-none cursor-pointer font-body text-sm"
           >
             <option value="all">Todos los estados</option>
             <option value="INGRESADO">Ingresado</option>
@@ -113,7 +89,7 @@
           <ng-icon name="lucideChevronDown" class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground"></ng-icon>
         </div>
       </div>
-    </div>
+    </app-ui-filter-panel>
   </div>
 
   <!-- Table Section -->
@@ -144,23 +120,24 @@
               <td class="px-6 py-4 font-body text-sm font-semibold text-foreground/80">{{ f.documentoUsuarioElabora }}</td>
               <td class="px-6 py-4 font-body text-sm text-muted-foreground">{{ f.fechaAsignacion | date:'dd/MM/yyyy HH:mm' }}</td>
               <td class="px-6 py-4 text-center">
-                <span [class]="getEstadoBadgeClass(f.estado)">{{ f.estado }}</span>
+                <span [class]="getStatusClass(f.estado)">{{ f.estado }}</span>
               </td>
               <td class="px-6 py-4 text-right">
                 <div class="flex items-center justify-end gap-1">
                   <!-- Descargar (Ingresado → Pendiente) -->
-                  <button 
-                    (click)="handleDescargar(f)"
-                    *ngIf="f.estado === 'INGRESADO'"
-                    class="p-2 rounded-lg hover:bg-blue-100 text-blue-600 transition-colors flex items-center gap-1.5 px-3 mb-1"
-                    title="Descargar para revisión"
-                  >
-                    <ng-icon name="lucideDownload" class="text-lg"></ng-icon>
-                    <span class="text-[10px] font-ui font-bold uppercase">Visar</span>
-                  </button>
+                  @if ((f.estado || '').toUpperCase() === ESTADOS.REGISTRADO.toUpperCase()) {
+                    <button 
+                      (click)="handleDescargar(f)"
+                      class="p-2 rounded-lg hover:bg-blue-100 text-blue-600 transition-colors flex items-center gap-1.5 px-3 mb-1"
+                      title="Descargar para revisión"
+                    >
+                      <ng-icon name="lucideDownload" class="text-lg"></ng-icon>
+                      <span class="text-[10px] font-ui font-bold uppercase">Visar</span>
+                    </button>
+                  }
                   
                   <!-- Firmar y Rechazar (Pendiente) -->
-                  @if (f.estado === 'PENDIENTE') {
+                  @if ((f.estado || '').toUpperCase() === ESTADOS.PENDIENTE.toUpperCase()) {
                     <button 
                       (click)="openSignModal(f)"
                       class="p-2 rounded-lg bg-success/10 text-success hover:bg-success hover:text-white transition-all shadow-sm border border-success/20 mr-1"
@@ -179,7 +156,7 @@
 
                   <!-- Visualizar (Firmado) -->
                   <button 
-                    *ngIf="f.estado === 'FIRMADO'"
+                    *ngIf="(f.estado || '').toUpperCase() === ESTADOS.FIRMADO.toUpperCase()"
                     (click)="handleVerArchivoFirmado(f)"
                     class="p-2 rounded-lg bg-muted text-foreground/60 hover:bg-muted/80 transition-all border border-border"
                     title="Ver archivo firmado"

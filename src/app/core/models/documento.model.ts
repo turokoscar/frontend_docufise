@@ -1,7 +1,7 @@
 import { UsuarioSistema } from './usuario.model';
 import { AreaSistema } from './area.model';
 
-export type EstadoDocumentoLabel = 'REGISTRADO' | 'INGRESADO' | 'PENDIENTE' | 'OBSERVADO' | 'FIRMADO';
+export type EstadoDocumentoLabel = 'Registrado' | 'Ingresado' | 'Pendiente' | 'Observado' | 'Firmado';
 
 export interface Estado {
   id: number;

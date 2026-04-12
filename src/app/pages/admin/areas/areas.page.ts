@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../core/services/api.service';
 import { AreaSistema } from '../../../core/models/area.model';
+import { PageHeaderComponent } from '../../../shared/components/ui/page-header/page-header.component';
+import { FilterPanelComponent } from '../../../shared/components/ui/filter-panel/filter-panel.component';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { 
   lucideHouse, 
@@ -23,7 +25,13 @@ import {
   selector: 'app-admin-areas',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, NgIconComponent],
+  imports: [
+    CommonModule, 
+    FormsModule, 
+    NgIconComponent,
+    PageHeaderComponent,
+    FilterPanelComponent
+  ],
   providers: [
     provideIcons({ 
       lucideHouse, lucideBuilding2, lucidePlus, lucideSearch, lucideChevronDown, 

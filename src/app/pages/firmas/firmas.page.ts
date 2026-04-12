@@ -7,7 +7,12 @@ import { AuthService } from '../../core/services/auth.service';
 import { ApiService } from '../../core/services/api.service';
 import { Firma, FirmasParams } from '../../core/models/firma.model';
 import { EstadoDocumentoLabel } from '../../core/models/documento.model';
+import { ESTADOS_EXPEDIENTE } from '../../core/constants/states.constants';
 import { FileUploadComponent } from '../../shared/components/file-upload/file-upload.component';
+import { PageHeaderComponent } from '../../shared/components/ui/page-header/page-header.component';
+import { KpiCardComponent } from '../../shared/components/ui/kpi-card/kpi-card.component';
+import { SectionLabelComponent } from '../../shared/components/ui/section-label/section-label.component';
+import { FilterPanelComponent } from '../../shared/components/ui/filter-panel/filter-panel.component';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { 
   lucideHouse, 
@@ -37,7 +42,16 @@ import Swal from 'sweetalert2';
   selector: 'app-firmas',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, NgIconComponent, FileUploadComponent],
+  imports: [
+    CommonModule, 
+    FormsModule, 
+    NgIconComponent, 
+    FileUploadComponent,
+    PageHeaderComponent,
+    KpiCardComponent,
+    SectionLabelComponent,
+    FilterPanelComponent
+  ],
   providers: [
     provideIcons({ 
       lucideHouse, lucidePenTool, lucideSearch, lucideChevronDown, 
@@ -57,6 +71,7 @@ export class FirmasPage implements OnInit {
   private apiService = inject(ApiService);
 
   user = this.authService.user;
+  readonly ESTADOS = ESTADOS_EXPEDIENTE;
   get tiposDocumento() { return this.catalogService.tiposDocumento(); }
   get estados() { return this.catalogService.estados(); }
   
@@ -98,13 +113,13 @@ export class FirmasPage implements OnInit {
   // KPIs
   kpis = computed(() => {
     const data = this.allFirmas();
-    const countByState = (s: EstadoDocumentoLabel) => data.filter((f: Firma) => f.estado === s).length;
+    const countByState = (s: string) => data.filter((f: Firma) => (f.estado || '').toUpperCase() === s.toUpperCase()).length;
     return [
       { label: "Bandeja", value: data.length, icon: 'lucideInbox', color: "#2C5AAB" },
-      { label: "Ingresados", value: countByState("INGRESADO"), icon: 'lucideDownload', color: "#2C5AAB" },
-      { label: "Pendientes", value: countByState("PENDIENTE"), icon: 'lucideClock', color: "#F2B801" },
-      { label: "Firmados", value: countByState("FIRMADO"), icon: 'lucideCircleCheck', color: "#0FBF90" },
-      { label: "Observados", value: countByState("OBSERVADO"), icon: 'lucideTriangleAlert', color: "#AB2741" },
+      { label: "Ingresados", value: countByState(ESTADOS_EXPEDIENTE.INGRESADO), icon: 'lucideDownload', color: "#2C5AAB" },
+      { label: "Pendientes", value: countByState(ESTADOS_EXPEDIENTE.PENDIENTE), icon: 'lucideClock', color: "#F2B801" },
+      { label: "Firmados", value: countByState(ESTADOS_EXPEDIENTE.FIRMADO), icon: 'lucideCircleCheck', color: "#0FBF90" },
+      { label: "Observados", value: countByState(ESTADOS_EXPEDIENTE.OBSERVADO), icon: 'lucideTriangleAlert', color: "#AB2741" },
     ];
   });
 
@@ -155,20 +170,22 @@ export class FirmasPage implements OnInit {
     this.currentPage.set(1);
   }
 
-  getEstadoBadgeClass(estado?: string): string {
+  getStatusClass(estado?: string): string {
     if (!estado) return '';
-    const styles: Record<string, string> = {
-      'REGISTRADO': 'bg-[#3B7DCC]/15 text-[#3B7DCC] border border-[#3B7DCC]/30',
-      'INGRESADO': 'bg-primary/15 text-primary border border-primary/30',
-      'PENDIENTE': 'bg-warning/15 text-[#F2B801] border border-warning/30',
-      'OBSERVADO': 'bg-destructive/15 text-destructive border border-destructive/30',
-      'FIRMADO': 'bg-success/15 text-[#0FBF90] border border-success/30',
-    };
-    return `font-ui text-[11px] font-semibold px-2 py-0.5 rounded-full ${styles[estado] || ''}`;
+    const upperEstado = estado.toUpperCase();
+    
+    // Comparar contra las constantes en mayúsculas para robustez
+    if (upperEstado === ESTADOS_EXPEDIENTE.REGISTRADO.toUpperCase()) return 'bg-[#3B7DCC]/15 text-[#3B7DCC] border border-[#3B7DCC]/30 font-ui text-[11px] font-semibold px-2 py-0.5 rounded-full';
+    if (upperEstado === ESTADOS_EXPEDIENTE.INGRESADO.toUpperCase()) return 'bg-primary/15 text-primary border border-primary/30 font-ui text-[11px] font-semibold px-2 py-0.5 rounded-full';
+    if (upperEstado === ESTADOS_EXPEDIENTE.PENDIENTE.toUpperCase()) return 'bg-warning/15 text-[#F2B801] border border-warning/30 font-ui text-[11px] font-semibold px-2 py-0.5 rounded-full';
+    if (upperEstado === ESTADOS_EXPEDIENTE.OBSERVADO.toUpperCase()) return 'bg-destructive/15 text-destructive border border-destructive/30 font-ui text-[11px] font-semibold px-2 py-0.5 rounded-full';
+    if (upperEstado === ESTADOS_EXPEDIENTE.FIRMADO.toUpperCase()) return 'bg-success/15 text-[#0FBF90] border border-success/30 font-ui text-[11px] font-semibold px-2 py-0.5 rounded-full';
+    
+    return 'font-ui text-[11px] font-semibold px-2 py-0.5 rounded-full bg-muted text-muted-foreground';
   }
 
   handleDescargar(firma: Firma): void {
-    if (firma.estado !== 'INGRESADO') return;
+    if ((firma.estado || '').toUpperCase() !== ESTADOS_EXPEDIENTE.INGRESADO.toUpperCase()) return;
     
     this.apiService.downloadFirmaDocumento(firma.id).subscribe({
       next: (blob) => {

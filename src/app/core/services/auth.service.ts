@@ -2,6 +2,7 @@ import { Injectable, signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import { ApiService } from './api.service';
 import { CatalogService } from './catalog.service';
+import { ROLES } from '../constants/roles.constants';
 import { LoginResponse } from '../models/auth.model';
 import { MenuSistema } from '../models/menu.model';
 
@@ -112,9 +113,9 @@ export class AuthService {
     
     // Map rol to default route
     const rolRouteMap: Record<string, string> = {
-      'CTD': '/expedientes',
-      'FIRMANTE': '/firmas',
-      'ADMINISTRADOR': '/reportes'
+      [ROLES.CTD]: '/expedientes',
+      [ROLES.FIRMANTE]: '/firmas',
+      [ROLES.ADMIN]: '/reportes'
     };
     
     return rolRouteMap[user.rol] || '/expedientes';

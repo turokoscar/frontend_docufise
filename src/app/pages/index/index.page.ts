@@ -2,6 +2,7 @@ import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/cor
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { DataService } from '../../core/services/data.service';
+import { ROLES } from '../../core/constants/roles.constants';
 
 @Component({
   selector: 'app-index',
@@ -32,7 +33,7 @@ export class IndexPage implements OnInit {
   ngOnInit(): void {
     const user = this.authService.user();
     if (user) {
-      const rol = user.rol as 'CTD' | 'Firmante' | 'Administrador';
+      const rol = user.rol;
       const defaultRoute = this.dataService.getDefaultRouteByRol(rol);
       this.router.navigate([defaultRoute]);
     } else {

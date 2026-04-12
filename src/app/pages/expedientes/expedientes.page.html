@@ -8,123 +8,99 @@
     <ng-icon name="lucideChevronRight" class="text-[8px]"></ng-icon>
     <span class="font-bold text-foreground">Gestión de Expedientes</span>
   </nav>
-
-  <!-- Page Header -->
-  <div class="flex items-center gap-6 py-2">
-    <div class="flex items-center justify-center w-14 h-14 rounded-[18px] bg-[#E8F0FE] text-[#2C5AAB] shadow-sm">
-      <ng-icon name="lucideFileText" class="text-2xl"></ng-icon>
+  <!-- Page Header -->
+  <app-ui-page-header 
+    title="Gestión de Expedientes" 
+    subtitle="Registro, clasificación y derivación de documentos" 
+    icon="lucideFileText"
+  >
+    <div actions class="flex items-center gap-3">
+      <button 
+        (click)="exportToExcel()"
+        class="flex items-center gap-2 h-11 px-5 rounded-xl border border-[#CBD5E1] bg-white hover:bg-[#F8FAFC] text-[#334155] font-ui text-xs font-bold transition-all shadow-sm"
+      >
+        <ng-icon name="lucideFileSpreadsheet" class="h-4 w-4 text-[#2C5AAB]"></ng-icon>
+        Exportar Excel
+      </button>
+      <button 
+        (click)="openNewForm()"
+        class="flex items-center gap-2 h-11 px-5 rounded-xl bg-[#2C5AAB] text-white hover:bg-[#244b8f] font-ui text-xs font-bold shadow-md shadow-[#2C5AAB]/20 transition-all hover:-translate-y-0.5"
+      >
+        <ng-icon name="lucidePlus" class="h-4 w-4"></ng-icon>
+        Añadir nuevo
+      </button>
     </div>
-    <div class="space-y-0.5">
-      <h1 class="text-3xl font-display font-bold text-[#0F172A] tracking-tight">Gestión de Expedientes</h1>
-      <p class="text-sm font-body text-muted-foreground/80">Registro, clasificación y derivación de documentos</p>
-    </div>
-    
-    <div class="ml-auto flex items-center gap-3">
-       <button 
-         (click)="exportToExcel()"
-         class="flex items-center gap-2 h-11 px-5 rounded-xl border border-[#CBD5E1] bg-white hover:bg-[#F8FAFC] text-[#334155] font-ui text-xs font-bold transition-all shadow-sm"
-       >
-         <ng-icon name="lucideFileSpreadsheet" class="h-4 w-4 text-[#2C5AAB]"></ng-icon>
-         Exportar Excel
-       </button>
-       <button 
-         (click)="openNewForm()"
-         class="flex items-center gap-2 h-11 px-5 rounded-xl bg-[#2C5AAB] text-white hover:bg-[#244b8f] font-ui text-xs font-bold shadow-md shadow-[#2C5AAB]/20 transition-all hover:-translate-y-0.5"
-       >
-         <ng-icon name="lucidePlus" class="h-4 w-4"></ng-icon>
-         Añadir nuevo
-       </button>
-    </div>
-  </div>
+  </app-ui-page-header>
 
   <!-- KPI Section -->
-  <div class="space-y-4">
-    <div class="flex items-center gap-2">
-      <div class="w-1 h-4 bg-[#2C5AAB] rounded-full"></div>
-      <h3 class="font-ui text-[11px] font-bold text-muted-foreground uppercase tracking-widest">Resumen General</h3>
-    </div>
+  <div class="space-y-0">
+    <app-ui-section-label label="Resumen General"></app-ui-section-label>
     <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
       @for (kpi of kpis(); track kpi.label) {
-        <div class="bg-card rounded-xl border border-border/40 overflow-hidden relative group transition-all duration-200 border-b-4 hover:shadow-md" [style.borderBottomColor]="kpi.color">
-          <div class="p-4 flex items-center justify-between">
-            <div 
-              class="flex items-center justify-center w-10 h-10 rounded-xl" 
-              [style.backgroundColor]="kpi.color + '10'"
-            >
-              <ng-icon [name]="kpi.icon" class="text-xl" [style.color]="kpi.color"></ng-icon>
-            </div>
-            <div class="text-right">
-              <p class="text-2xl font-display font-bold tracking-tight text-[#0F172A]">
-                {{ kpi.value }}
-              </p>
-              <p class="text-[10px] font-ui font-bold text-muted-foreground uppercase tracking-wider mt-1">{{ kpi.label }}</p>
-            </div>
-          </div>
-        </div>
+        <app-ui-kpi-card
+          [label]="kpi.label"
+          [value]="kpi.value"
+          [icon]="kpi.icon"
+          [color]="kpi.color"
+        ></app-ui-kpi-card>
       }
     </div>
   </div>
 
   <!-- Filters Section -->
-  <div class="space-y-4 pt-2">
-    <div class="flex items-center gap-2">
-      <div class="w-1 h-4 bg-[#2C5AAB] rounded-full"></div>
-      <h3 class="font-ui text-[11px] font-bold text-muted-foreground uppercase tracking-widest">Filtros de búsqueda</h3>
-      <ng-icon name="lucideCircleHelp" class="text-muted-foreground/30 text-xs"></ng-icon>
-    </div>
-    <div class="bg-card rounded-2xl border border-border/50 shadow-sm p-6 overflow-visible">
-      <div class="flex flex-wrap items-end gap-6">
-        <!-- Search -->
-        <div class="flex-1 min-w-[300px] space-y-2">
-          <label class="font-ui text-[10px] font-bold text-[#64748B] uppercase tracking-widest ml-1">Buscar</label>
-          <div class="relative">
-            <ng-icon name="lucideSearch" class="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/60 h-4 w-4"></ng-icon>
-            <input 
-              type="text" 
-              (input)="updateFilters('search', $any($event.target).value)"
-              placeholder="Numeración, elaborador, remitente..."
-              class="w-full pl-11 pr-4 h-11 rounded-xl bg-[#F8FAFC] border border-[#CBD5E1] focus:bg-white focus:border-[#2C5AAB] focus:ring-4 focus:ring-[#2C5AAB]/5 transition-all outline-none font-body text-sm"
-            />
-          </div>
-        </div>
-
-        <!-- Tipo Select -->
-        <div class="w-full sm:w-[240px] space-y-2">
-          <label class="font-ui text-[10px] font-bold text-[#64748B] uppercase tracking-widest ml-1">Tipo Documento</label>
-          <div class="relative">
-            <select 
-              (change)="updateFilters('tipo', $any($event.target).value)"
-              class="w-full pl-4 pr-10 h-11 rounded-xl bg-[#F8FAFC] border border-[#CBD5E1] focus:bg-white focus:border-[#2C5AAB] transition-all outline-none font-body text-sm appearance-none cursor-pointer"
-            >
-              <option value="all">Todos</option>
-              @for (tipo of tiposDocumento; track tipo.id) {
-                <option [value]="tipo.id">{{ tipo.nombre }}</option>
-              }
-            </select>
-            <ng-icon name="lucideChevronDown" class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground/60"></ng-icon>
-          </div>
-        </div>
-
-        <!-- Estado Select -->
-        <div class="w-full sm:w-[200px] space-y-2">
-          <label class="font-ui text-[10px] font-bold text-[#64748B] uppercase tracking-widest ml-1">Estado</label>
-          <div class="relative">
-            <select 
-              (change)="updateFilters('estado', $any($event.target).value)"
-              class="w-full pl-4 pr-10 h-11 rounded-xl bg-[#F8FAFC] border border-[#CBD5E1] focus:bg-white focus:border-[#2C5AAB] transition-all outline-none font-body text-sm appearance-none cursor-pointer"
-            >
-              <option value="all">Todos</option>
-              <option value="REGISTRADO">Registrado</option>
-              <option value="INGRESADO">Ingresado</option>
-              <option value="PENDIENTE">Pendiente</option>
-              <option value="OBSERVADO">Observado</option>
-              <option value="FIRMADO">Firmado</option>
-            </select>
-            <ng-icon name="lucideChevronDown" class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground/60"></ng-icon>
-          </div>
+  <div class="space-y-0 pt-2">
+    <app-ui-section-label label="Filtros de búsqueda"></app-ui-section-label>
+    <app-ui-filter-panel>
+      <!-- Search -->
+      <div class="flex-1 min-w-[300px] space-y-2">
+        <label class="font-ui text-[10px] font-bold text-[#64748B] uppercase tracking-widest ml-1">Buscar</label>
+        <div class="relative">
+          <ng-icon name="lucideSearch" class="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/60 h-4 w-4"></ng-icon>
+          <input 
+            type="text" 
+            (input)="updateFilters('search', $any($event.target).value)"
+            placeholder="Numeración, elaborador, remitente..."
+            class="w-full pl-11 pr-4 h-11 rounded-xl bg-[#F8FAFC] border border-[#CBD5E1] focus:bg-white focus:border-[#2C5AAB] focus:ring-4 focus:ring-[#2C5AAB]/5 transition-all outline-none font-body text-sm"
+          />
         </div>
       </div>
-    </div>
+
+      <!-- Tipo Select -->
+      <div class="w-full sm:w-[240px] space-y-2">
+        <label class="font-ui text-[10px] font-bold text-[#64748B] uppercase tracking-widest ml-1">Tipo Documento</label>
+        <div class="relative">
+          <select 
+            (change)="updateFilters('tipo', $any($event.target).value)"
+            class="w-full pl-4 pr-10 h-11 rounded-xl bg-[#F8FAFC] border border-[#CBD5E1] focus:bg-white focus:border-[#2C5AAB] transition-all outline-none font-body text-sm appearance-none cursor-pointer"
+          >
+            <option value="all">Todos</option>
+            @for (tipo of tiposDocumento; track tipo.id) {
+              <option [value]="tipo.id">{{ tipo.nombre }}</option>
+            }
+          </select>
+          <ng-icon name="lucideChevronDown" class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground/60"></ng-icon>
+        </div>
+      </div>
+
+      <!-- Estado Select -->
+      <div class="w-full sm:w-[200px] space-y-2">
+        <label class="font-ui text-[10px] font-bold text-[#64748B] uppercase tracking-widest ml-1">Estado</label>
+        <div class="relative">
+          <select 
+            (change)="updateFilters('estado', $any($event.target).value)"
+            class="w-full pl-4 pr-10 h-11 rounded-xl bg-[#F8FAFC] border border-[#CBD5E1] focus:bg-white focus:border-[#2C5AAB] transition-all outline-none font-body text-sm appearance-none cursor-pointer"
+          >
+            <option value="all">Todos</option>
+            <option value="REGISTRADO">Registrado</option>
+            <option value="INGRESADO">Ingresado</option>
+            <option value="PENDIENTE">Pendiente</option>
+            <option value="OBSERVADO">Observado</option>
+            <option value="FIRMADO">Firmado</option>
+          </select>
+          <ng-icon name="lucideChevronDown" class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground/60"></ng-icon>
+        </div>
+      </div>
+    </app-ui-filter-panel>
   </div>
 
   <!-- Table Section Header -->
@@ -178,7 +154,7 @@
                 {{ doc.fechaElaboracion }}
               </td>
               <td class="px-6 py-4 text-center">
-                <span [class]="getEstadoBadgeClass(doc.estado)">{{ doc.estado }}</span>
+                <span [class]="getStatusClass(doc.estado)">{{ doc.estado }}</span>
               </td>
               <td class="px-6 py-4 text-center">
                 <div class="relative inline-block text-left">
@@ -192,7 +168,7 @@
                   @if (openDropdownId() === doc.id) {
                     <div class="absolute right-0 mt-1 w-48 rounded-lg border border-border bg-card shadow-lg z-50 text-foreground">
                       <div class="py-1">
-                        @if (doc.estado === 'REGISTRADO') {
+                        @if ((doc.estado || '').toUpperCase() === 'INGRESADO') {
                           <button (click)="openDerivarModal(doc); closeDropdown()" class="w-full flex items-center gap-2 px-3 py-2 text-xs font-ui hover:bg-muted text-left">
                             <ng-icon name="lucideSend" class="h-4 w-4 text-primary"></ng-icon>
                             Derivar expediente

@@ -2,6 +2,7 @@ import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@a
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { ROLES } from '../../../core/constants/roles.constants';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { 
   lucideHouse, 
@@ -74,8 +75,8 @@ export class LayoutComponent {
   }
 
   getRoleStyle(rol?: string): string {
-    if (rol === "Administrador") return "bg-primary text-primary-foreground border-transparent";
-    if (rol === "CTD") return "bg-success/15 text-success border-success/30";
+    if (rol === ROLES.ADMIN) return "bg-primary text-primary-foreground border-transparent";
+    if (rol === ROLES.CTD) return "bg-success/15 text-success border-success/30";
     return "bg-secondary/15 text-secondary border-secondary/30";
   }
 

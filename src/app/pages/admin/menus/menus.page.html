@@ -12,44 +12,37 @@
   </nav>
 
   <!-- Page Header -->
-  <div class="bg-card rounded-2xl p-6 border border-primary/10 shadow-sm relative overflow-hidden group">
-    <div class="absolute inset-0 bg-gradient-to-r from-primary/5 via-primary/3 to-transparent"></div>
-    
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
-      <div class="flex items-center gap-4">
-        <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 backdrop-blur-md border border-primary/10">
-          <ng-icon name="lucideLayoutList" class="text-3xl text-primary"></ng-icon>
-        </div>
-        <div>
-          <h2 class="font-display text-2xl font-extrabold text-foreground tracking-tight">Gestión de Menús</h2>
-          <p class="text-sm text-muted-foreground font-body mt-0.5">Configuración de la estructura de navegación</p>
-        </div>
-      </div>
-      
-      <div class="flex items-center gap-3">
-        <button 
-          (click)="openCreateModal()"
-          class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-secondary text-secondary-foreground font-ui font-bold text-xs uppercase tracking-widest transition-all shadow-lg shadow-secondary/20 hover:scale-[1.02] active:scale-[0.98]"
-        >
-          <ng-icon name="lucidePlus" class="text-lg"></ng-icon>
-          Nuevo Menú
-        </button>
-      </div>
+  <app-ui-page-header 
+    title="Gestión de Menús" 
+    subtitle="Configuración de la estructura de navegación" 
+    icon="lucideLayoutList"
+  >
+    <div actions>
+      <button 
+        (click)="openCreateModal()"
+        class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#2C5AAB] text-white font-ui font-bold text-xs uppercase tracking-widest transition-all shadow-lg shadow-[#2C5AAB]/20 hover:scale-[1.02] active:scale-[0.98]"
+      >
+        <ng-icon name="lucidePlus" class="text-lg"></ng-icon>
+        Nuevo Menú
+      </button>
     </div>
-  </div>
+  </app-ui-page-header>
 
   <!-- Filters Section -->
-  <div class="bg-card border-none shadow-sm p-4">
-    <div class="relative group">
-      <ng-icon name="lucideSearch" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors"></ng-icon>
-      <input 
-        type="text" 
-        (input)="searchTerm.set($any($event.target).value)"
-        placeholder="Buscar por nombre, ruta o icono..."
-        class="w-full pl-10 pr-4 h-11 rounded-xl bg-muted/30 border-transparent focus:bg-white focus:border-primary transition-all outline-none font-body text-sm"
-      />
+  <app-ui-filter-panel>
+    <div class="flex-1 min-w-[300px] space-y-2">
+      <label class="font-ui text-[10px] font-bold text-[#64748B] uppercase tracking-widest ml-1">Buscar menú</label>
+      <div class="relative">
+        <ng-icon name="lucideSearch" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/60 h-4 w-4"></ng-icon>
+        <input 
+          type="text" 
+          (input)="searchTerm.set($any($event.target).value)"
+          placeholder="Nombre, ruta o icono..."
+          class="w-full pl-10 pr-4 h-11 rounded-xl bg-[#F8FAFC] border border-[#CBD5E1] focus:bg-white focus:border-[#2C5AAB] transition-all outline-none font-body text-sm"
+        />
+      </div>
     </div>
-  </div>
+  </app-ui-filter-panel>
 
   <!-- Table Section -->
   <div class="bg-card border-none shadow-md overflow-hidden rounded-none">

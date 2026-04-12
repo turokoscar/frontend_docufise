@@ -9,7 +9,12 @@ import {
 import { AuthService } from '../../core/services/auth.service';
 import { ApiService, UploadProgress } from '../../core/services/api.service';
 import { Documento, EstadoDocumentoLabel } from '../../core/models/documento.model';
+import { ESTADOS_EXPEDIENTE } from '../../core/constants/states.constants';
 import { FileUploadComponent } from '../../shared/components/file-upload/file-upload.component';
+import { PageHeaderComponent } from '../../shared/components/ui/page-header/page-header.component';
+import { KpiCardComponent } from '../../shared/components/ui/kpi-card/kpi-card.component';
+import { SectionLabelComponent } from '../../shared/components/ui/section-label/section-label.component';
+import { FilterPanelComponent } from '../../shared/components/ui/filter-panel/filter-panel.component';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { 
   lucideHouse, 
@@ -41,7 +46,16 @@ import * as XLSX from 'xlsx';
   selector: 'app-expedientes',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, NgIconComponent, FileUploadComponent],
+  imports: [
+    CommonModule, 
+    FormsModule, 
+    NgIconComponent, 
+    FileUploadComponent,
+    PageHeaderComponent,
+    KpiCardComponent,
+    SectionLabelComponent,
+    FilterPanelComponent
+  ],
   providers: [
     provideIcons({ 
       lucideHouse, lucideFileText, lucideSearch, lucideChevronDown, 
@@ -136,7 +150,7 @@ export class ExpedientesPage implements OnInit {
   
   canEdit(doc: Documento): boolean {
     const estado = doc.estado;
-    return estado === 'REGISTRADO' || estado === 'OBSERVADO';
+    return estado === ESTADOS_EXPEDIENTE.REGISTRADO || estado === ESTADOS_EXPEDIENTE.OBSERVADO;
   }
 
   get usuariosDisponibles(): string[] {
@@ -169,13 +183,13 @@ export class ExpedientesPage implements OnInit {
   // KPIs (Calculados dinámicamente)
   kpis = computed(() => {
     const data = this.allDocumentos();
-    const countByState = (s: EstadoDocumentoLabel) => data.filter((doc: Documento) => doc.estado === s).length;
+    const countByState = (s: string) => data.filter((doc: Documento) => (doc.estado || '').toUpperCase() === s.toUpperCase()).length;
     return [
       { label: "Total", value: data.length, icon: 'lucideFile', color: "#2C5AAB" },
-      { label: "Registrados", value: countByState("REGISTRADO"), icon: 'lucideFile', color: "#3B7DCC" },
-      { label: "Pendientes", value: countByState("PENDIENTE"), icon: 'lucideClock', color: "#F2B801" },
-      { label: "Firmados", value: countByState("FIRMADO"), icon: 'lucideCircleCheck', color: "#0FBF90" },
-      { label: "Observados", value: countByState("OBSERVADO"), icon: 'lucideTriangleAlert', color: "#AB2741" },
+      { label: "Registrados", value: countByState(ESTADOS_EXPEDIENTE.REGISTRADO), icon: 'lucideFile', color: "#3B7DCC" },
+      { label: "Pendientes", value: countByState(ESTADOS_EXPEDIENTE.PENDIENTE), icon: 'lucideClock', color: "#F2B801" },
+      { label: "Firmados", value: countByState(ESTADOS_EXPEDIENTE.FIRMADO), icon: 'lucideCircleCheck', color: "#0FBF90" },
+      { label: "Observados", value: countByState(ESTADOS_EXPEDIENTE.OBSERVADO), icon: 'lucideTriangleAlert', color: "#AB2741" },
     ];
   });
 
@@ -234,16 +248,27 @@ export class ExpedientesPage implements OnInit {
     this.currentPage.set(1);
   }
 
-  getEstadoBadgeClass(estado?: string): string {
-    if (!estado) return '';
-    const styles: Record<string, string> = {
-      'REGISTRADO': 'bg-[#E8F0FE] text-[#1967D2] border border-[#D2E3FC]',
-      'INGRESADO': 'bg-[#F3E8FD] text-[#8430CE] border border-[#E9D2FD]',
-      'PENDIENTE': 'bg-[#FEF7E0] text-[#B06000] border border-[#FEEFC3]',
-      'OBSERVADO': 'bg-[#FCE8E6] text-[#C5221F] border border-[#FAD2CF]',
-      'FIRMADO': 'bg-[#E6F4EA] text-[#137333] border border-[#CEEAD6]',
+  getStatusClass(estado?: string): string {
+    if (!estado) return 'bg-muted text-muted-foreground border-muted';
+    const s = estado.toUpperCase();
+    if (s === ESTADOS_EXPEDIENTE.FIRMADO.toUpperCase()) return 'bg-success/10 text-success border-success/20';
+    if (s === ESTADOS_EXPEDIENTE.PENDIENTE.toUpperCase()) return 'bg-warning/10 text-warning border-warning/20';
+    if (s === ESTADOS_EXPEDIENTE.OBSERVADO.toUpperCase()) return 'bg-destructive/10 text-destructive border-destructive/20';
+    if (s === ESTADOS_EXPEDIENTE.INGRESADO.toUpperCase()) return 'bg-primary/10 text-primary border-primary/20';
+    return 'bg-muted text-muted-foreground border-muted';
+  }
+
+  getStatusIcon(estado?: string): string {
+    if (!estado) return 'lucideFile';
+    const s = estado.toUpperCase();
+    const icons: Record<string, string> = {
+      [ESTADOS_EXPEDIENTE.REGISTRADO.toUpperCase()]: 'lucideFile',
+      [ESTADOS_EXPEDIENTE.INGRESADO.toUpperCase()]: 'lucideSend',
+      [ESTADOS_EXPEDIENTE.PENDIENTE.toUpperCase()]: 'lucideClock',
+      [ESTADOS_EXPEDIENTE.OBSERVADO.toUpperCase()]: 'lucideTriangleAlert',
+      [ESTADOS_EXPEDIENTE.FIRMADO.toUpperCase()]: 'lucideCircleCheck'
     };
-    return `font-ui text-[11px] font-bold px-3 py-1 rounded-full ${styles[estado] || ''}`;
+    return icons[s] || 'lucideFile';
   }
 
   exportToExcel(): void {
@@ -377,7 +402,7 @@ export class ExpedientesPage implements OnInit {
 
   // Derivar operations
   openDerivarModal(doc: Documento): void {
-    if (doc.estado !== 'REGISTRADO') return;
+    if (doc.estado !== ESTADOS_EXPEDIENTE.REGISTRADO) return;
     this.derivandoDocumento.set(doc);
     this.derivarAreaId.set(null);
     this.derivarUsuarioId.set(null);

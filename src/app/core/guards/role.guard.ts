@@ -1,6 +1,7 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router, ActivatedRouteSnapshot } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { ROLES } from '../constants/roles.constants';
 
 export const roleGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
   const authService = inject(AuthService);
@@ -27,8 +28,10 @@ export const roleGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
 
   // Check if user has any of the required roles
   const userRol = String(user.rol).toUpperCase();
+  const adminRole = ROLES.ADMIN.toUpperCase();
+
   const hasAccess = requiredRoles.some(role => 
-    userRol === role.toUpperCase() || userRol === 'ADMINISTRADOR'
+    userRol === role.toUpperCase() || userRol === adminRole
   );
 
   if (!hasAccess) {
@@ -48,9 +51,10 @@ export const hasRoleAccess = (userRole: string, allowedRoles: string[]): boolean
   }
   
   const upperUserRole = userRole.toUpperCase();
+  const adminRole = ROLES.ADMIN.toUpperCase();
   
   // Administrador has access to everything
-  if (upperUserRole === 'ADMINISTRADOR') {
+  if (upperUserRole === adminRole) {
     return true;
   }
   

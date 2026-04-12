@@ -5,6 +5,10 @@ import { ApiService } from '../../../core/services/api.service';
 import { UsuarioSistema } from '../../../core/models/usuario.model';
 import { AreaSistema } from '../../../core/models/area.model';
 import { RolSistema } from '../../../core/models/rol.model';
+import { PageHeaderComponent } from '../../../shared/components/ui/page-header/page-header.component';
+import { SectionLabelComponent } from '../../../shared/components/ui/section-label/section-label.component';
+import { FilterPanelComponent } from '../../../shared/components/ui/filter-panel/filter-panel.component';
+import { ROLES } from '../../../core/constants/roles.constants';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { 
   lucideHouse, 
@@ -27,7 +31,14 @@ import {
   selector: 'app-admin-usuarios',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, NgIconComponent],
+  imports: [
+    CommonModule, 
+    FormsModule, 
+    NgIconComponent,
+    PageHeaderComponent,
+    SectionLabelComponent,
+    FilterPanelComponent
+  ],
   providers: [
     provideIcons({ 
       lucideHouse, lucideUsers, lucidePlus, lucideSearch, lucideChevronDown, 
@@ -199,9 +210,9 @@ export class UsuariosPage implements OnInit {
   getRoleBadgeClass(rolNombre?: string): string {
     if (!rolNombre) return 'bg-muted text-muted-foreground';
     const styles: Record<string, string> = {
-      'Administrador': 'bg-primary/10 text-primary border-primary/20',
-      'CTD': 'bg-success/10 text-success border-success/20',
-      'Firmante': 'bg-secondary/10 text-secondary border-secondary/20'
+      [ROLES.ADMIN]: 'bg-primary/10 text-primary border-primary/20',
+      [ROLES.CTD]: 'bg-success/10 text-success border-success/20',
+      [ROLES.FIRMANTE]: 'bg-secondary/10 text-secondary border-secondary/20'
     };
     return `px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${styles[rolNombre] || 'bg-muted text-muted-foreground'}`;
   }
