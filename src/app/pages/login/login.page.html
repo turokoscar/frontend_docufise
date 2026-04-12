@@ -58,7 +58,7 @@
                 placeholder="Ingrese su usuario"
                 [(ngModel)]="usuario"
                 name="usuario"
-                class="w-full pl-10 font-ui bg-muted/50 border-border h-11"
+                class="w-full pl-10 font-ui bg-muted/30 border border-[#CBD5E1] h-11 focus:border-primary transition-colors outline-none rounded-lg"
               />
             </div>
           </div>
@@ -78,7 +78,7 @@
                 placeholder="••••••••••••"
                 [(ngModel)]="contrasena"
                 name="contrasena"
-                class="w-full pl-10 pr-10 font-ui bg-muted/50 border-border h-11"
+                class="w-full pl-10 pr-10 font-ui bg-muted/30 border border-[#CBD5E1] h-11 focus:border-primary transition-colors outline-none rounded-lg"
               />
               <button
                 type="button"
@@ -114,7 +114,7 @@
               <button
                 type="button"
                 (click)="quickLogin(u.user, u.pass)"
-                class="text-[10px] font-ui px-3 py-2 rounded-md border border-border hover:bg-primary/5 hover:border-primary/30 transition-colors text-center"
+                class="text-[10px] font-ui px-3 py-2 rounded-md border border-[#CBD5E1] bg-secondary/10 hover:bg-primary/5 hover:border-primary/30 transition-colors text-center shadow-sm"
               >
                 <span class="font-semibold block text-foreground">{{ u.label }}</span>
                 <span class="text-muted-foreground">{{ u.user }}/{{ u.pass }}</span>

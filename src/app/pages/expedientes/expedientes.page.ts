@@ -31,7 +31,9 @@ import {
   lucideClock,
   lucideCircleCheck,
   lucideCheck,
-  lucideFile
+  lucideFile,
+  lucideChevronLeft,
+  lucideChevronRight
 } from '@ng-icons/lucide';
 import * as XLSX from 'xlsx';
 
@@ -46,7 +48,8 @@ import * as XLSX from 'xlsx';
       lucideFileSpreadsheet, lucidePlus, lucideCircleHelp, lucidePencil, 
       lucideTrash2, lucideArrowRight, lucideSend, lucideUpload,
       lucideTriangleAlert, lucideX, lucideInfo, lucideListFilter,
-      lucideClock, lucideCircleCheck, lucideCheck, lucideFile
+      lucideClock, lucideCircleCheck, lucideCheck, lucideFile,
+      lucideChevronLeft, lucideChevronRight
     })
   ],
   templateUrl: './expedientes.page.html',
@@ -205,6 +208,14 @@ export class ExpedientesPage implements OnInit {
   });
 
   totalPages = computed(() => Math.ceil(this.filteredDocumentos().length / this.itemsPerPage));
+  
+  paginationSummary = computed(() => {
+    const total = this.filteredDocumentos().length;
+    if (total === 0) return '0 registros';
+    const start = (this.currentPage() - 1) * this.itemsPerPage + 1;
+    const end = Math.min(this.currentPage() * this.itemsPerPage, total);
+    return `${start}–${end} de ${total} registros`;
+  });
 
   paginatedPages(): number[] {
     const total = this.totalPages();
@@ -226,13 +237,13 @@ export class ExpedientesPage implements OnInit {
   getEstadoBadgeClass(estado?: string): string {
     if (!estado) return '';
     const styles: Record<string, string> = {
-      'REGISTRADO': 'bg-[#3B7DCC]/15 text-[#3B7DCC] border border-[#3B7DCC]/30',
-      'INGRESADO': 'bg-[#2C5AAB]/15 text-[#2C5AAB] border border-[#2C5AAB]/30',
-      'PENDIENTE': 'bg-[#F2B801]/15 text-[#F2B801] border border-[#F2B801]/30',
-      'OBSERVADO': 'bg-[#AB2741]/15 text-[#AB2741] border border-[#AB2741]/30',
-      'FIRMADO': 'bg-[#0FBF90]/15 text-[#0FBF90] border border-[#0FBF90]/30',
+      'REGISTRADO': 'bg-[#E8F0FE] text-[#1967D2] border border-[#D2E3FC]',
+      'INGRESADO': 'bg-[#F3E8FD] text-[#8430CE] border border-[#E9D2FD]',
+      'PENDIENTE': 'bg-[#FEF7E0] text-[#B06000] border border-[#FEEFC3]',
+      'OBSERVADO': 'bg-[#FCE8E6] text-[#C5221F] border border-[#FAD2CF]',
+      'FIRMADO': 'bg-[#E6F4EA] text-[#137333] border border-[#CEEAD6]',
     };
-    return `font-ui text-[11px] font-semibold px-2 py-0.5 rounded-full ${styles[estado] || ''}`;
+    return `font-ui text-[11px] font-bold px-3 py-1 rounded-full ${styles[estado] || ''}`;
   }
 
   exportToExcel(): void {
