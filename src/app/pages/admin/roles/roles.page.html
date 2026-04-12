@@ -80,11 +80,13 @@
                 {{ rol.descripcion }}
               </td>
               <td class="px-6 py-4">
-                <div class="flex flex-wrap gap-1">
-                  @for (menuName of getMenuNames(rol.menus).split(', '); track menuName) {
+                <div class="flex flex-wrap gap-1.5 mt-1">
+                  @for (menuName of getMenuNames(rol).split(', '); track menuName) {
+                    @if(menuName !== '') {
                     <span class="bg-primary/5 text-primary text-[9px] font-ui font-bold px-1.5 py-0.5 rounded border border-primary/10">
                       {{ menuName }}
                     </span>
+                    }
                   }
                 </div>
               </td>
@@ -93,6 +95,7 @@
                   <button 
                     (click)="openEditModal(rol)"
                     class="p-2 rounded-lg hover:bg-blue-100 text-blue-600 transition-colors"
+                    title="Editar"
                   >
                     <ng-icon name="lucidePencil" class="text-lg"></ng-icon>
                   </button>
@@ -166,22 +169,24 @@
               Menús y Módulos Permitidos
             </label>
             <div class="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-1 bg-muted/20 border border-border/50 rounded-xl">
-              @for (menu of allMenus; track menu.id) {
+              @for (menu of allMenus(); track menu.id) {
                 <button 
                   type="button"
                   (click)="toggleMenuSelection(menu.id)"
-                  class="flex items-center gap-3 p-3 rounded-lg border transition-all text-left group"
-                  [ngClass]="formData.menus.includes(menu.id) ? 'bg-primary/10 border-primary text-primary shadow-sm' : 'bg-white border-border hover:border-primary/30 text-muted-foreground'"
+                  [ngClass]="formData.menuIds.includes(menu.id) ? 'bg-primary/10 text-primary border-primary/20' : 'bg-transparent text-muted-foreground border-transparent hover:bg-muted'"
+                  class="flex items-center gap-2 p-2 rounded-lg border text-xs font-bold transition-all text-left"
                 >
-                  <div class="w-4 h-4 rounded border flex items-center justify-center transition-colors"
-                       [ngClass]="formData.menus.includes(menu.id) ? 'bg-primary border-primary' : 'bg-white border-border group-hover:border-primary'">
-                    <ng-icon *ngIf="formData.menus.includes(menu.id)" name="lucideCheckCircle2" class="text-[10px] text-white"></ng-icon>
-                  </div>
-                  <span class="text-xs font-semibold">{{ menu.nombre }}</span>
+                  <ng-icon [name]="formData.menuIds.includes(menu.id) ? 'lucideCheckCircle2' : 'lucideInfo'" class="text-sm shrink-0"></ng-icon>
+                  <span class="truncate">{{ menu.nombre }}</span>
                 </button>
               }
             </div>
           </div>
+
+            <div class="flex items-center gap-3 py-2 px-1">
+              <input type="checkbox" [(ngModel)]="formData.activo" name="activo" id="ractivo" class="w-4 h-4 rounded text-primary border-border focus:ring-primary">
+              <label for="ractivo" class="font-ui text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Rol Activo en el Sistema</label>
+            </div>
 
           <div class="flex gap-3 pt-4">
             <button 

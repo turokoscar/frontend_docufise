@@ -1,8 +1,9 @@
 import { Injectable, signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
-import { ApiService, LoginResponse } from './api.service';
+import { ApiService } from './api.service';
 import { CatalogService } from './catalog.service';
-import { MenuSistema } from '../models/user.model';
+import { LoginResponse } from '../models/auth.model';
+import { MenuSistema } from '../models/menu.model';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -28,7 +29,7 @@ export class AuthService {
         const user = JSON.parse(userJson);
         this.tokenSignal.set(token);
         this.userSignal.set(user);
-        this.catalogService.loadAll(user.rolId);
+        this.catalogService.loadMenusByRol(user.rolId);
       } catch {
         this.clearSession();
       }
@@ -38,43 +39,37 @@ export class AuthService {
   login(usuario: string, contrasena: string): Promise<boolean> {
     return new Promise((resolve) => {
       this.apiService.login(usuario, contrasena).subscribe({
-        next: (response) => {
-          if (response.exitoso && response.datos) {
-            this.saveSession(response.datos);
-            resolve(true);
-          } else {
-            resolve(false);
-          }
+        next: (data) => {
+           this.saveSession(data);
+           this.catalogService.loadMenusByRol(data.rolId);
+           
+           setTimeout(() => {
+             resolve(true);
+           }, 500);
         },
-        error: () => resolve(false)
+        error: (err) => {
+          resolve(false)
+        }
       });
     });
   }
 
   private saveSession(data: LoginResponse): void {
+    const userInfo: UsuarioInfo = {
+      id: data.usuarioId,
+      usuario: data.nombreUsuario,
+      nombre: data.nombreCompleto,
+      correo: data.correo,
+      rol: data.rol,
+      rolId: data.rolId,
+      area: data.area
+    };
+
     localStorage.setItem('token', data.token);
-    localStorage.setItem('user', JSON.stringify({
-      id: data.usuarioId,
-      usuario: data.nombreUsuario,
-      nombre: data.nombreCompleto,
-      correo: data.correo,
-      rol: data.rol,
-      rolId: data.rolId,
-      area: data.area
-    }));
-    this.tokenSignal.set(data.token);
-    this.userSignal.set({
-      id: data.usuarioId,
-      usuario: data.nombreUsuario,
-      nombre: data.nombreCompleto,
-      correo: data.correo,
-      rol: data.rol,
-      rolId: data.rolId,
-      area: data.area
-    });
+    localStorage.setItem('user', JSON.stringify(userInfo));
     
-    // Cargar catálogos DESPUÉS de tener token, pasando rolId
-    this.catalogService.loadAll(data.rolId);
+    this.tokenSignal.set(data.token);
+    this.userSignal.set(userInfo);
   }
 
   logout(): void {
@@ -89,14 +84,15 @@ export class AuthService {
     localStorage.removeItem('user');
     this.tokenSignal.set(null);
     this.userSignal.set(null);
+    this.catalogService.clearAll();
     this.router.navigate(['/login']);
   }
 
   getMenus(): MenuSistema[] {
     const user = this.userSignal();
     if (!user) return [];
-    return this.catalogService.getMenusByRol(user.rol).map(m => ({
-      id: String(m.id),
+    return this.catalogService.getMenusByRol(user.rol).map((m: MenuSistema) => ({
+      id: m.id,
       nombre: m.nombre,
       ruta: m.ruta,
       icono: m.icono,
@@ -126,10 +122,8 @@ export class AuthService {
 
   refreshToken(): void {
     this.apiService.refreshToken().subscribe({
-      next: (response) => {
-        if (response.exitoso && response.datos) {
-          this.saveSession(response.datos);
-        }
+      next: (data) => {
+        this.saveSession(data);
       }
     });
   }

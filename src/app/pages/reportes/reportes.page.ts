@@ -2,7 +2,7 @@ import { Component, signal, computed, inject, OnInit, ChangeDetectionStrategy } 
 import { CommonModule } from '@angular/common';
 import { DocumentoService } from '../../core/services/documento.service';
 import { AuthService } from '../../core/services/auth.service';
-import { Expediente, EstadoExpediente } from '../../core/models/user.model';
+import { Documento, EstadoDocumentoLabel } from '../../core/models/documento.model';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { 
   lucideHome, 
@@ -47,64 +47,56 @@ export class ReportesPage implements OnInit {
   private authService = inject(AuthService);
 
   user = this.authService.user;
-  private allExpedientes = signal<Expediente[]>([]);
+  private allDocumentos = signal<Documento[]>([]);
   
-  constructor() {
+  constructor() { }
+
+  ngOnInit(): void {
     // Load from API for reports
     this.documentoService.loadAll();
     const sync = setInterval(() => {
       const docs = this.documentoService.documentos();
       if (docs.length > 0) {
-        this.allExpedientes.set([...docs]);
+        this.allDocumentos.set([...docs]);
         clearInterval(sync);
       }
     }, 500);
   }
-  // Toast
-  toastMessage = signal('');
-  toastType = signal<'success' | 'error'>('success');
-  showToast = signal(false);
-
-  private showNotification(message: string, type: 'success' | 'error' = 'success'): void {
-    this.toastMessage.set(message);
-    this.toastType.set(type);
-    this.showToast.set(true);
-    setTimeout(() => this.showToast.set(false), 3000);
-  }
 
   recentActivity = [
-    { action: 'Expediente firmado', detail: '001-2026-FISE', time: 'Hace 2h', type: 'success' },
-    { action: 'Nuevo expediente registrado', detail: '012-2026-FISE', time: 'Hace 4h', type: 'info' },
-    { action: 'Firma pendiente', detail: 'FIR-008', time: 'Hace 5h', type: 'warning' },
-    { action: 'Documento observado', detail: 'FIR-005', time: 'Hace 1d', type: 'error' },
-    { action: 'Expediente derivado', detail: '006-2026-FISE', time: 'Hace 1d', type: 'info' },
+    { action: 'Documento firmado', detail: '001-2026-FISE', time: 'Hace 2h', type: 'success' },
+    { action: 'Nuevo documento registrado', detail: '012-2026-FISE', time: 'Hace 4h', type: 'info' },
+    { action: 'Firma pendiente', detail: 'REG-552', time: 'Hace 5h', type: 'warning' },
+    { action: 'Documento observado', detail: 'REG-102', time: 'Hace 1d', type: 'error' },
+    { action: 'Documento derivado', detail: '006-2026-FISE', time: 'Hace 1d', type: 'info' },
   ];
 
   kpis = computed(() => {
-    const exp = this.allExpedientes();
-    const count = (s: EstadoExpediente) => exp.filter(e => e.estado === s).length;
-    const countFirmas = (s: string) => exp.filter((f: any) => f.estado === s).length;
-    const firmasFirmadas = countFirmas('Firmado');
-    const totalFirmas = exp.length;
-    const tasaFirma = totalFirmas > 0 ? Math.round((firmasFirmadas / totalFirmas) * 100) : 0;
+    const docs = this.allDocumentos();
+    const count = (s: string) => docs.filter(doc => doc.estado === s).length;
+    
+    const firmados = count('FIRMADO');
+    const total = docs.length;
+    const tasaFirma = total > 0 ? Math.round((firmados / total) * 100) : 0;
+    
     return [
-      { label: 'Total Expedientes', value: exp.length, icon: 'lucideFileText', color: '#2C5AAB' },
-      { label: 'Firmas Completadas', value: firmasFirmadas, icon: 'lucidePenTool', color: '#0FBF90' },
-      { label: 'Pendientes de Firma', value: countFirmas('Pendiente'), icon: 'lucideClock', color: '#F2B801' },
+      { label: 'Total Documentos', value: total, icon: 'lucideFileText', color: '#2C5AAB' },
+      { label: 'Firmados', value: firmados, icon: 'lucidePenTool', color: '#0FBF90' },
+      { label: 'Pendientes', value: count('PENDIENTE'), icon: 'lucideClock', color: '#F2B801' },
       { label: 'Tasa de Firma', value: tasaFirma + '%', icon: 'lucideTrendingUp', color: '#0FAEBF' },
     ];
   });
 
   // Datos dinámicos para gráfica
   datosReporte = computed(() => {
-    const exp = this.allExpedientes();
-    const count = (s: EstadoExpediente) => exp.filter(e => e.estado === s).length;
+    const docs = this.allDocumentos();
+    const count = (s: string) => docs.filter(doc => doc.estado === s).length;
     return [
-      { estado: 'Registrados', cantidad: count('Registrado'), color: '#3B7DCC' },
-      { estado: 'Ingresados', cantidad: count('Ingresado'), color: '#2C5AAB' },
-      { estado: 'Pendientes', cantidad: count('Pendiente'), color: '#F2B801' },
-      { estado: 'Observados', cantidad: count('Observado'), color: '#AB2741' },
-      { estado: 'Firmados', cantidad: count('Firmado'), color: '#0FBF90' },
+      { estado: 'Registrados', cantidad: count('REGISTRADO'), color: '#3B7DCC' },
+      { estado: 'Ingresados', cantidad: count('INGRESADO'), color: '#2C5AAB' },
+      { estado: 'Pendientes', cantidad: count('PENDIENTE'), color: '#F2B801' },
+      { estado: 'Observados', cantidad: count('OBSERVADO'), color: '#AB2741' },
+      { estado: 'Firmados', cantidad: count('FIRMADO'), color: '#0FBF90' },
     ];
   });
 
@@ -119,7 +111,7 @@ export class ReportesPage implements OnInit {
   };
   public pieChartType: ChartType = 'pie';
 
-  // Chart 2: Bar (Tendencia Mensual - Mock data for now based on React version)
+  // Chart 2: Bar (Tendencia Mensual)
   public barChartOptions: ChartConfiguration['options'] = {
     responsive: true,
     maintainAspectRatio: false,
@@ -137,7 +129,7 @@ export class ReportesPage implements OnInit {
     datasets: [
       { 
         data: [15, 28, 42, 35, 56, 48], 
-        label: 'Expedientes', 
+        label: 'Documentos', 
         backgroundColor: '#2C5AAB',
         borderRadius: 8,
         barThickness: 24
@@ -152,10 +144,6 @@ export class ReportesPage implements OnInit {
     ]
   };
   public barChartType: ChartType = 'bar';
-
-  ngOnInit(): void {
-    // Los datos ya se cargan en el constructor desde API
-  }
 
   get pieChartData(): ChartData<'pie', number[], string | string[]> {
     const data = this.datosReporte();
@@ -179,8 +167,7 @@ export class ReportesPage implements OnInit {
     const ws = XLSX.utils.json_to_sheet(wsData);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Reporte General');
-    XLSX.writeFile(wb, `Reporte_Ejecutivo_${new Date().toISOString().split('T')[0]}.xlsx`);
-    this.showNotification('Archivo Excel descargado exitosamente', 'success');
+    XLSX.writeFile(wb, `Reporte_Documentos_${new Date().toISOString().split('T')[0]}.xlsx`);
   }
 
   Math = Math;

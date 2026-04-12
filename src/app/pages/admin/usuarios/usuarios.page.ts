@@ -1,8 +1,10 @@
 import { Component, signal, computed, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { DataService } from '../../../core/services/data.service';
-import { UsuarioSistema, RolUsuario } from '../../../core/models/user.model';
+import { ApiService } from '../../../core/services/api.service';
+import { UsuarioSistema } from '../../../core/models/usuario.model';
+import { AreaSistema } from '../../../core/models/area.model';
+import { RolSistema } from '../../../core/models/rol.model';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { 
   lucideHome, 
@@ -37,10 +39,13 @@ import {
   styleUrl: './usuarios.page.css'
 })
 export class UsuariosPage implements OnInit {
-  private dataService = inject(DataService);
+  private apiService = inject(ApiService);
 
   // State
   usuarios = signal<UsuarioSistema[]>([]);
+  areas = signal<AreaSistema[]>([]);
+  roles = signal<RolSistema[]>([]);
+  
   showModal = signal(false);
   editingUsuario = signal<UsuarioSistema | null>(null);
 
@@ -56,29 +61,36 @@ export class UsuariosPage implements OnInit {
     setTimeout(() => this.showToast.set(false), 3000);
   }
 
-  // Filters
   filters = signal({
     search: '',
-    rol: 'all',
-    area: 'all'
+    rolId: 'all',
+    areaId: 'all'
   });
 
   // Form Fields (linked to modal)
   formData: any = {
-    nombre: '',
-    usuario: '',
+    nombreCompleto: '',
+    nombreUsuario: '',
     correo: '',
-    rol: 'Firmante',
-    area: '',
+    rolId: null as any,
+    areaId: null as any,
     activo: true
   };
 
-  roles = ['Administrador', 'CTD', 'Firmante'];
-  areas = this.dataService.areasMock.map(a => a.nombre);
-
   ngOnInit(): void {
-    this.usuarios.set(this.dataService.usuariosMock);
-    if (this.areas.length > 0) this.formData.area = this.areas[0];
+    this.loadData();
+  }
+
+  loadData(): void {
+    this.apiService.getUsuarios().subscribe({
+      next: (res) => this.usuarios.set(res)
+    });
+    this.apiService.getAreas().subscribe({
+      next: (res) => this.areas.set(res.filter(a => a.activo))
+    });
+    this.apiService.getRoles().subscribe({
+      next: (res) => this.roles.set(res.filter(r => r.activo))
+    });
   }
 
   filteredUsuarios = computed(() => {
@@ -88,16 +100,16 @@ export class UsuariosPage implements OnInit {
     if (f.search) {
       const s = f.search.toLowerCase();
       result = result.filter((u: UsuarioSistema) => 
-        u.nombre.toLowerCase().includes(s) || 
-        u.usuario.toLowerCase().includes(s) || 
-        u.correo.toLowerCase().includes(s)
+        (u.nombreCompleto?.toLowerCase().includes(s) || false) || 
+        (u.nombreUsuario?.toLowerCase().includes(s) || false) || 
+        (u.correo?.toLowerCase().includes(s) || false)
       );
     }
-    if (f.rol !== 'all') {
-      result = result.filter((u: UsuarioSistema) => u.rol === f.rol);
+    if (f.rolId !== 'all') {
+      result = result.filter((u: UsuarioSistema) => u.rolId === Number(f.rolId));
     }
-    if (f.area !== 'all') {
-      result = result.filter((u: UsuarioSistema) => u.area === f.area);
+    if (f.areaId !== 'all') {
+      result = result.filter((u: UsuarioSistema) => u.areaId === Number(f.areaId));
     }
     return result;
   });
@@ -109,11 +121,11 @@ export class UsuariosPage implements OnInit {
   openCreateModal(): void {
     this.editingUsuario.set(null);
     this.formData = {
-      nombre: '',
-      usuario: '',
+      nombreCompleto: '',
+      nombreUsuario: '',
       correo: '',
-      rol: 'Firmante',
-      area: this.areas[0] || '',
+      rolId: this.roles().length > 0 ? this.roles()[0].id : null,
+      areaId: this.areas().length > 0 ? this.areas()[0].id : null,
       activo: true
     };
     this.showModal.set(true);
@@ -121,49 +133,76 @@ export class UsuariosPage implements OnInit {
 
   openEditModal(user: UsuarioSistema): void {
     this.editingUsuario.set(user);
-    this.formData = { ...user } as unknown as UsuarioSistema;
+    this.formData = { ...user };
     this.showModal.set(true);
   }
 
   saveUsuario(): void {
-    const editing = this.editingUsuario();
-    if (!this.formData.nombre || !this.formData.usuario || !this.formData.rol || !this.formData.area) {
+    if (!this.formData.nombreCompleto || !this.formData.nombreUsuario || !this.formData.rolId || !this.formData.areaId) {
       this.showNotification('Complete todos los campos obligatorios', 'error');
       return;
     }
+
+    const payload: Partial<UsuarioSistema> = {
+      nombreCompleto: this.formData.nombreCompleto,
+      nombreUsuario: this.formData.nombreUsuario,
+      correo: this.formData.correo,
+      rolId: Number(this.formData.rolId),
+      areaId: Number(this.formData.areaId),
+      activo: this.formData.activo
+    };
+
+    const editing = this.editingUsuario();
     if (editing) {
-      this.usuarios.update((prev: UsuarioSistema[]) => 
-        prev.map((u: UsuarioSistema) => u.id === editing.id ? { ...u, ...this.formData } : u)
-      );
-      this.showNotification('Usuario actualizado exitosamente', 'success');
+      this.apiService.updateUsuario(editing.id, payload).subscribe({
+        next: () => {
+          this.showNotification('Usuario actualizado exitosamente', 'success');
+          this.loadData();
+          this.showModal.set(false);
+        },
+        error: () => this.showNotification('Error al actualizar usuario', 'error')
+      });
     } else {
-      const newId = `USR-${(this.usuarios().length + 1).toString().padStart(2, '0')}`;
-      this.usuarios.update((prev: UsuarioSistema[]) => [...prev, { ...this.formData, id: newId, contrasena: '1234' } as UsuarioSistema]);
-      this.showNotification('Usuario registrado exitosamente', 'success');
+      this.apiService.createUsuario(payload).subscribe({
+        next: () => {
+          this.showNotification('Usuario registrado exitosamente', 'success');
+          this.loadData();
+          this.showModal.set(false);
+        },
+        error: () => this.showNotification('Error al registrar usuario', 'error')
+      });
     }
-    this.showModal.set(false);
   }
 
   toggleStatus(user: UsuarioSistema): void {
-    this.usuarios.update(prev => 
-      prev.map(u => u.id === user.id ? { ...u, activo: !u.activo } : u)
-    );
-    this.showNotification(`Usuario ${user.activo ? 'desactivado' : 'activado'} exitosamente`, 'success');
+    this.apiService.updateUsuario(user.id, { activo: !user.activo }).subscribe({
+      next: () => {
+        this.showNotification(`Usuario ${user.activo ? 'desactivado' : 'activado'} exitosamente`, 'success');
+        this.loadData();
+      },
+      error: () => this.showNotification('Error al cambiar estado.', 'error')
+    });
   }
 
   deleteUsuario(user: UsuarioSistema): void {
-    if (confirm(`¿Está seguro de eliminar al usuario ${user.nombre}?`)) {
-      this.usuarios.update(prev => prev.filter(u => u.id !== user.id));
-      this.showNotification('Usuario eliminado', 'error');
+    if (confirm(`¿Está seguro de eliminar al usuario ${user.nombreCompleto}?`)) {
+      this.apiService.deleteUsuario(user.id).subscribe({
+        next: () => {
+          this.showNotification('Usuario eliminado', 'success');
+          this.loadData();
+        },
+        error: () => this.showNotification('Error al eliminar usuario', 'error')
+      });
     }
   }
 
-  getRoleBadgeClass(rol: string): string {
+  getRoleBadgeClass(rolNombre?: string): string {
+    if (!rolNombre) return 'bg-muted text-muted-foreground';
     const styles: Record<string, string> = {
       'Administrador': 'bg-primary/10 text-primary border-primary/20',
       'CTD': 'bg-success/10 text-success border-success/20',
       'Firmante': 'bg-secondary/10 text-secondary border-secondary/20'
     };
-    return `px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${styles[rol] || 'bg-muted text-muted-foreground'}`;
+    return `px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${styles[rolNombre] || 'bg-muted text-muted-foreground'}`;
   }
 }

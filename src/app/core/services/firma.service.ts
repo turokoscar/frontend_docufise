@@ -1,9 +1,10 @@
 import { Injectable, signal } from '@angular/core';
-import { ApiService, Firma, FirmasParams } from './api.service';
+import { ApiService } from './api.service';
+import { Firma, FirmasParams } from '../models/firma.model';
 
 @Injectable({ providedIn: 'root' })
 export class FirmaService {
-  private _firmas = signal<any[]>([]);
+  private _firmas = signal<Firma[]>([]);
   private _loading = signal(false);
 
   readonly firmas = this._firmas.asReadonly();
@@ -15,7 +16,7 @@ export class FirmaService {
     this._loading.set(true);
     this.api.getFirmas(params).subscribe({
       next: (res) => {
-        if (res.exitoso) this._firmas.set(res.datos);
+        this._firmas.set(res);
         this._loading.set(false);
       },
       error: () => this._loading.set(false)
@@ -26,21 +27,30 @@ export class FirmaService {
     this._loading.set(true);
     this.api.getFirmas({ usuarioAsignadoId: usuarioId }).subscribe({
       next: (res) => {
-        if (res.exitoso) {
-          const pendientes = res.datos.filter((f: any) => f.estado?.nombre === 'Pendiente');
-          this._firmas.set(pendientes);
-        }
+        const pendientes = res.filter((f: Firma) => f.estado === 'PENDIENTE');
+        this._firmas.set(pendientes);
         this._loading.set(false);
       },
       error: () => this._loading.set(false)
     });
   }
 
-  firmar(id: number, rutaArchivoFirmado: string): void {
+  descargar(id: number, ip: string): void {
     this._loading.set(true);
-    this.api.FirmarDocumento(id, rutaArchivoFirmado).subscribe({
-      next: (res) => {
-        if (res.exitoso) this.loadAll();
+    this.api.marcarDescargado(id, ip).subscribe({
+      next: () => {
+        this.loadAll();
+        this._loading.set(false);
+      },
+      error: () => this._loading.set(false)
+    });
+  }
+
+  firmar(id: number, rutaArchivoFirmado: string, ip: string): void {
+    this._loading.set(true);
+    this.api.FirmarDocumento(id, { rutaArchivoFirmado, ipFirma: ip }).subscribe({
+      next: () => {
+        this.loadAll();
         this._loading.set(false);
       },
       error: () => this._loading.set(false)
@@ -50,8 +60,8 @@ export class FirmaService {
   rechazar(id: number, motivo: string): void {
     this._loading.set(true);
     this.api.RechazarFirma(id, motivo).subscribe({
-      next: (res) => {
-        if (res.exitoso) this.loadAll();
+      next: () => {
+        this.loadAll();
         this._loading.set(false);
       },
       error: () => this._loading.set(false)

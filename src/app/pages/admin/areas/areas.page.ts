@@ -1,7 +1,8 @@
 import { Component, signal, computed, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CatalogService, AreaSistema } from '../../../core/services/catalog.service';
+import { ApiService } from '../../../core/services/api.service';
+import { AreaSistema } from '../../../core/models/area.model';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { 
   lucideHome, 
@@ -34,10 +35,10 @@ import {
   styleUrl: './areas.page.css'
 })
 export class AreasPage implements OnInit {
-  private catalogService = inject(CatalogService);
+  private apiService = inject(ApiService);
 
-  // State - usa CatalogService
-  get allAreas() { return this.catalogService.areas(); }
+  // State
+  areas = signal<AreaSistema[]>([]);
   showModal = signal(false);
   editingArea = signal<AreaSistema | null>(null);
 
@@ -57,24 +58,29 @@ export class AreasPage implements OnInit {
   searchTerm = signal('');
 
   // Form Fields
-  formData = {
+  formData: any = {
     nombre: '',
     descripcion: '',
     activo: true
   };
 
   ngOnInit(): void {
-    // Áreas se cargan desde CatalogService (API)
-    //elshacer está disponible a través del getter this.areas
+    this.loadData();
+  }
+
+  loadData(): void {
+    this.apiService.getAreas().subscribe({
+      next: (res) => this.areas.set(res)
+    });
   }
 
   filteredAreas = computed(() => {
-    let result = this.allAreas;
+    let result = this.areas();
     const s = this.searchTerm().toLowerCase();
     if (s) {
       result = result.filter((a: AreaSistema) => 
-        a.nombre.toLowerCase().includes(s) || 
-        a.descripcion.toLowerCase().includes(s)
+        (a.nombre?.toLowerCase().includes(s) || false) || 
+        (a.descripcion?.toLowerCase().includes(s) || false)
       );
     }
     return result;
@@ -101,20 +107,54 @@ export class AreasPage implements OnInit {
       this.showNotification('Complete todos los campos obligatorios', 'error');
       return;
     }
-    // TODO: Implementar API call para create/update
-    this.showNotification('Área guardada (API no implementada)', 'success');
-    this.showModal.set(false);
+    
+    const payload: Partial<AreaSistema> = {
+      nombre: this.formData.nombre,
+      descripcion: this.formData.descripcion,
+      activo: this.formData.activo
+    };
+
+    const editing = this.editingArea();
+    if (editing) {
+      this.apiService.updateArea(editing.id, payload).subscribe({
+        next: () => {
+          this.showNotification('Área actualizada exitosamente', 'success');
+          this.loadData();
+          this.showModal.set(false);
+        },
+        error: () => this.showNotification('Error al actualizar área', 'error')
+      });
+    } else {
+      this.apiService.createArea(payload).subscribe({
+        next: () => {
+          this.showNotification('Área registrada exitosamente', 'success');
+          this.loadData();
+          this.showModal.set(false);
+        },
+        error: () => this.showNotification('Error al registrar área', 'error')
+      });
+    }
   }
 
   toggleStatus(area: AreaSistema): void {
-    // TODO: Implementar API call para toggle
-    this.showNotification(`Área ${area.activo ? 'desactivada' : 'activada'} (API no implementada)`, 'success');
+    this.apiService.updateArea(area.id, { activo: !area.activo }).subscribe({
+      next: () => {
+        this.showNotification(`Área ${area.activo ? 'desactivada' : 'activada'} exitosamente`, 'success');
+        this.loadData();
+      },
+      error: () => this.showNotification('Error al cambiar estado.', 'error')
+    });
   }
 
   deleteArea(area: AreaSistema): void {
     if (confirm(`¿Está seguro de eliminar el área ${area.nombre}?`)) {
-      // TODO: Implementar API call para delete
-      this.showNotification('Área eliminada (API no implementada)', 'error');
+      this.apiService.deleteArea(area.id).subscribe({
+        next: () => {
+          this.showNotification('Área eliminada', 'success');
+          this.loadData();
+        },
+        error: () => this.showNotification('Error al eliminar área', 'error')
+      });
     }
   }
 }

@@ -79,7 +79,7 @@
         <div class="flex items-center gap-2">
             <div class="flex items-center gap-1.5 mr-2">
               <div class="w-2.5 h-2.5 rounded bg-primary"></div>
-              <span class="text-[9px] font-ui font-bold text-muted-foreground">EXP</span>
+              <span class="text-[9px] font-ui font-bold text-muted-foreground">DOC</span>
             </div>
             <div class="flex items-center gap-1.5">
               <div class="w-2.5 h-2.5 rounded bg-success"></div>
@@ -116,15 +116,4 @@
   </div>
 </div>
 
-<!-- Toast Notification -->
-@if (showToast()) {
-  <div 
-    class="fixed top-4 right-4 z-[200] px-4 py-3 rounded-xl shadow-lg font-ui text-sm flex items-center gap-2"
-    [class.bg-success]="toastType() === 'success'"
-    [class.text-success-foreground]="toastType() === 'success'"
-    [class.bg-destructive]="toastType() === 'error'"
-    [class.text-destructive-foreground]="toastType() === 'error'"
-  >
-    {{ toastMessage() }}
-  </div>
-}
+

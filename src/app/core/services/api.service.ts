@@ -1,14 +1,26 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpEvent, HttpEventType, HttpRequest } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map, tap } from 'rxjs/operators';
+import { 
+  UsuarioSistema
+} from '../models/usuario.model';
+import { AreaSistema } from '../models/area.model';
+import { RolSistema } from '../models/rol.model';
+import { MenuSistema } from '../models/menu.model';
+import { 
+  Documento, 
+  TipoDocumento, 
+  Estado,
+  DocumentoParams
+} from '../models/documento.model';
+import { Firma, FirmasParams } from '../models/firma.model';
+import { LoginResponse, SesionResponse } from '../models/auth.model';
 
-export interface ApiResponse<T> {
-  exitoso: boolean;
-  respuesta: number;
-  codigo: number | null;
-  mensaje: string;
-  datos: T;
-  total: number | null;
+export interface UploadProgress {
+  loaded: number;
+  total: number;
+  percentage: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -18,292 +30,258 @@ export class ApiService {
   constructor(private http: HttpClient) {}
 
   // Auth endpoints
-  login(usuario: string, contrasena: string): Observable<ApiResponse<LoginResponse>> {
-    return this.http.post<ApiResponse<LoginResponse>>(`${this.baseUrl}/auth/login`, {
+  login(usuario: string, contrasena: string): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(`${this.baseUrl}/auth/login`, {
       nombreUsuario: usuario,
       contrasena: contrasena
     });
   }
 
-  logout(): Observable<ApiResponse<void>> {
-    return this.http.post<ApiResponse<void>>(`${this.baseUrl}/auth/logout`, {});
+  logout(): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/auth/logout`, {});
   }
 
-  refreshToken(): Observable<ApiResponse<LoginResponse>> {
-    return this.http.post<ApiResponse<LoginResponse>>(`${this.baseUrl}/auth/refresh`, {});
+  refreshToken(): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(`${this.baseUrl}/auth/refresh`, {});
   }
 
-  getSesiones(): Observable<ApiResponse<SesionResponse[]>> {
-    return this.http.get<ApiResponse<SesionResponse[]>>(`${this.baseUrl}/auth/sesiones`);
+  getSesiones(): Observable<SesionResponse[]> {
+    return this.http.get<SesionResponse[]>(`${this.baseUrl}/auth/sesiones`);
   }
 
-  cerrarSesion(id: number): Observable<ApiResponse<void>> {
-    return this.http.delete<ApiResponse<void>>(`${this.baseUrl}/auth/sesiones/${id}`);
+  cerrarSesion(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/auth/sesiones/${id}`);
   }
 
-  cerrarTodasSesiones(): Observable<ApiResponse<void>> {
-    return this.http.delete<ApiResponse<void>>(`${this.baseUrl}/auth/sesiones`);
+  cerrarTodasSesiones(): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/auth/sesiones`);
   }
 
   // Areas
-  getAreas(): Observable<ApiResponse<Area[]>> {
-    return this.http.get<ApiResponse<Area[]>>(`${this.baseUrl}/areas`);
+  getAreas(): Observable<AreaSistema[]> {
+    return this.http.get<AreaSistema[]>(`${this.baseUrl}/areas`);
   }
 
-  getArea(id: number): Observable<ApiResponse<Area>> {
-    return this.http.get<ApiResponse<Area>>(`${this.baseUrl}/areas/${id}`);
+  getArea(id: number): Observable<AreaSistema> {
+    return this.http.get<AreaSistema>(`${this.baseUrl}/areas/${id}`);
   }
 
-  createArea(area: Partial<Area>): Observable<ApiResponse<Area>> {
-    return this.http.post<ApiResponse<Area>>(`${this.baseUrl}/areas`, area);
+  createArea(area: Partial<AreaSistema>): Observable<AreaSistema> {
+    return this.http.post<AreaSistema>(`${this.baseUrl}/areas`, area);
   }
 
-  updateArea(id: number, area: Partial<Area>): Observable<ApiResponse<Area>> {
-    return this.http.put<ApiResponse<Area>>(`${this.baseUrl}/areas/${id}`, area);
+  updateArea(id: number, area: Partial<AreaSistema>): Observable<AreaSistema> {
+    return this.http.patch<AreaSistema>(`${this.baseUrl}/areas/${id}`, area);
   }
 
-  deleteArea(id: number): Observable<ApiResponse<void>> {
-    return this.http.delete<ApiResponse<void>>(`${this.baseUrl}/areas/${id}`);
+  deleteArea(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/areas/${id}`);
   }
 
   // Roles
-  getRoles(): Observable<ApiResponse<Rol[]>> {
-    return this.http.get<ApiResponse<Rol[]>>(`${this.baseUrl}/roles`);
+  getRoles(): Observable<RolSistema[]> {
+    return this.http.get<RolSistema[]>(`${this.baseUrl}/roles`);
   }
 
-  getRol(id: number): Observable<ApiResponse<Rol>> {
-    return this.http.get<ApiResponse<Rol>>(`${this.baseUrl}/roles/${id}`);
+  getRol(id: number): Observable<RolSistema> {
+    return this.http.get<RolSistema>(`${this.baseUrl}/roles/${id}`);
   }
 
-  createRol(rol: Partial<Rol>): Observable<ApiResponse<Rol>> {
-    return this.http.post<ApiResponse<Rol>>(`${this.baseUrl}/roles`, rol);
+  createRol(rol: Partial<RolSistema>): Observable<RolSistema> {
+    return this.http.post<RolSistema>(`${this.baseUrl}/roles`, rol);
   }
 
-  updateRol(id: number, rol: Partial<Rol>): Observable<ApiResponse<Rol>> {
-    return this.http.put<ApiResponse<Rol>>(`${this.baseUrl}/roles/${id}`, rol);
+  updateRol(id: number, rol: Partial<RolSistema>): Observable<RolSistema> {
+    return this.http.patch<RolSistema>(`${this.baseUrl}/roles/${id}`, rol);
   }
 
-  deleteRol(id: number): Observable<ApiResponse<void>> {
-    return this.http.delete<ApiResponse<void>>(`${this.baseUrl}/roles/${id}`);
+  deleteRol(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/roles/${id}`);
   }
 
   // Menus
-  getMenus(): Observable<ApiResponse<MenuApi[]>> {
-    return this.http.get<ApiResponse<MenuApi[]>>(`${this.baseUrl}/menus`);
+  getMenus(): Observable<MenuSistema[]> {
+    return this.http.get<MenuSistema[]>(`${this.baseUrl}/menus`);
   }
 
-  getMenusByRol(rolId: number): Observable<ApiResponse<MenuApi[]>> {
-    return this.http.get<ApiResponse<MenuApi[]>>(`${this.baseUrl}/menus/rol/${rolId}`);
+  getMenusByRol(rolId: number): Observable<MenuSistema[]> {
+    return this.http.get<MenuSistema[]>(`${this.baseUrl}/menus/rol/${rolId}`);
   }
 
   // Tipos de Documento
-  getTiposDocumento(): Observable<ApiResponse<TipoDocumento[]>> {
-    return this.http.get<ApiResponse<TipoDocumento[]>>(`${this.baseUrl}/tipos-documento`);
+  getTiposDocumento(): Observable<TipoDocumento[]> {
+    return this.http.get<TipoDocumento[]>(`${this.baseUrl}/tipos-documento`);
   }
 
   // Estados
-  getEstados(): Observable<ApiResponse<Estado[]>> {
-    return this.http.get<ApiResponse<Estado[]>>(`${this.baseUrl}/estados`);
+  getEstados(): Observable<Estado[]> {
+    return this.http.get<Estado[]>(`${this.baseUrl}/estados`);
   }
 
   // Documentos
-  getDocumentos(params?: DocumentoParams): Observable<ApiResponse<Documento[]>> {
+  getDocumentos(params?: DocumentoParams): Observable<Documento[]> {
     let httpParams = new HttpParams();
     if (params) {
       if (params.estado) httpParams = httpParams.set('estado', params.estado);
       if (params.tipoDocumentoId) httpParams = httpParams.set('tipoDocumentoId', params.tipoDocumentoId.toString());
       if (params.areaDestinoId) httpParams = httpParams.set('areaDestinoId', params.areaDestinoId.toString());
     }
-    return this.http.get<ApiResponse<Documento[]>>(`${this.baseUrl}/documentos`, { params: httpParams });
+    return this.http.get<Documento[]>(`${this.baseUrl}/documentos`, { params: httpParams });
   }
 
-  getDocumento(id: number): Observable<ApiResponse<Documento>> {
-    return this.http.get<ApiResponse<Documento>>(`${this.baseUrl}/documentos/${id}`);
+  getDocumento(id: number): Observable<Documento> {
+    return this.http.get<Documento>(`${this.baseUrl}/documentos/${id}`);
   }
 
-  createDocumento(documento: Partial<Documento>): Observable<ApiResponse<Documento>> {
-    return this.http.post<ApiResponse<Documento>>(`${this.baseUrl}/documentos`, documento);
+  createDocumento(documento: Partial<Documento>): Observable<Documento> {
+    return this.http.post<Documento>(`${this.baseUrl}/documentos`, documento);
   }
 
-  updateDocumento(id: number, documento: Partial<Documento>): Observable<ApiResponse<Documento>> {
-    return this.http.patch<ApiResponse<Documento>>(`${this.baseUrl}/documentos/${id}`, documento);
+  updateDocumento(id: number, documento: Partial<Documento>): Observable<Documento> {
+    return this.http.patch<Documento>(`${this.baseUrl}/documentos/${id}`, documento);
   }
 
-  deleteDocumento(id: number): Observable<ApiResponse<void>> {
-    return this.http.delete<ApiResponse<void>>(`${this.baseUrl}/documentos/${id}`);
+  deleteDocumento(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/documentos/${id}`);
   }
 
   // Firmas
-  getFirmas(params?: FirmasParams): Observable<ApiResponse<Firma[]>> {
+  getFirmas(params?: FirmasParams): Observable<Firma[]> {
     let httpParams = new HttpParams();
     if (params) {
       if (params.estado) httpParams = httpParams.set('estado', params.estado);
       if (params.usuarioAsignadoId) httpParams = httpParams.set('usuarioAsignadoId', params.usuarioAsignadoId.toString());
     }
-    return this.http.get<ApiResponse<Firma[]>>(`${this.baseUrl}/firmas`, { params: httpParams });
+    return this.http.get<Firma[]>(`${this.baseUrl}/firmas`, { params: httpParams });
   }
 
-  getFirma(id: number): Observable<ApiResponse<Firma>> {
-    return this.http.get<ApiResponse<Firma>>(`${this.baseUrl}/firmas/${id}`);
+  getFirma(id: number): Observable<Firma> {
+    return this.http.get<Firma>(`${this.baseUrl}/firmas/${id}`);
   }
 
-  createFirma(firma: Partial<Firma>): Observable<ApiResponse<Firma>> {
-    return this.http.post<ApiResponse<Firma>>(`${this.baseUrl}/firmas`, firma);
+  createFirma(firma: Partial<Firma>): Observable<Firma> {
+    return this.http.post<Firma>(`${this.baseUrl}/firmas`, firma);
   }
 
-  FirmarDocumento(id: number, rutaArchivoFirmado: string): Observable<ApiResponse<Firma>> {
-    return this.http.post<ApiResponse<Firma>>(`${this.baseUrl}/firmas/${id}/firmar`, { rutaArchivoFirmado });
+  marcarDescargado(id: number, ip: string): Observable<Firma> {
+    return this.http.patch<Firma>(`${this.baseUrl}/firmas/${id}/descargar`, { ipDescarga: ip });
   }
 
-  RechazarFirma(id: number, motivo: string): Observable<ApiResponse<Firma>> {
-    return this.http.post<ApiResponse<Firma>>(`${this.baseUrl}/firmas/${id}/rechazar`, { motivoRechazo: motivo });
+  FirmarDocumento(id: number, data: { rutaArchivoFirmado: string, ipFirma: string }): Observable<Firma> {
+    return this.http.patch<Firma>(`${this.baseUrl}/firmas/${id}/firmar`, data);
+  }
+
+  RechazarFirma(id: number, motivo: string): Observable<Firma> {
+    return this.http.patch<Firma>(`${this.baseUrl}/firmas/${id}/rechazar`, { motivoRechazo: motivo });
   }
 
   // Usuarios
-  getUsuarios(): Observable<ApiResponse<Usuario[]>> {
-    return this.http.get<ApiResponse<Usuario[]>>(`${this.baseUrl}/usuarios`);
+  getUsuarios(): Observable<UsuarioSistema[]> {
+    return this.http.get<UsuarioSistema[]>(`${this.baseUrl}/usuarios`);
   }
 
-  getUsuario(id: number): Observable<ApiResponse<Usuario>> {
-    return this.http.get<ApiResponse<Usuario>>(`${this.baseUrl}/usuarios/${id}`);
+  getUsuario(id: number): Observable<UsuarioSistema> {
+    return this.http.get<UsuarioSistema>(`${this.baseUrl}/usuarios/${id}`);
   }
 
-  createUsuario(usuario: Partial<Usuario>): Observable<ApiResponse<Usuario>> {
-    return this.http.post<ApiResponse<Usuario>>(`${this.baseUrl}/usuarios`, usuario);
+  createUsuario(usuario: Partial<UsuarioSistema>): Observable<UsuarioSistema> {
+    return this.http.post<UsuarioSistema>(`${this.baseUrl}/usuarios`, usuario);
   }
 
-  updateUsuario(id: number, usuario: Partial<Usuario>): Observable<ApiResponse<Usuario>> {
-    return this.http.put<ApiResponse<Usuario>>(`${this.baseUrl}/usuarios/${id}`, usuario);
+  updateUsuario(id: number, usuario: Partial<UsuarioSistema>): Observable<UsuarioSistema> {
+    return this.http.patch<UsuarioSistema>(`${this.baseUrl}/usuarios/${id}`, usuario);
   }
 
-  deleteUsuario(id: number): Observable<ApiResponse<void>> {
-    return this.http.delete<ApiResponse<void>>(`${this.baseUrl}/usuarios/${id}`);
+  deleteUsuario(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/usuarios/${id}`);
   }
-}
 
-// Types
-export interface LoginResponse {
-  token: string;
-  usuarioId: number;
-  nombreUsuario: string;
-  nombreCompleto: string;
-  correo: string;
-  rol: string;
-  rolId: number;
-  area: string;
-}
+  // Files - Upload with progress
+  uploadFile(file: File, subfolder?: string): Observable<UploadProgress> {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (subfolder) {
+      formData.append('subfolder', subfolder);
+    }
 
-export interface SesionResponse {
-  id: number;
-  ipAddress: string;
-  userAgent: string;
-  fechaLogin: string;
-  ultimaActividad: string;
-  activo: boolean;
-}
+    const req = new HttpRequest('POST', `${this.baseUrl}/files/upload`, formData, {
+      reportProgress: true
+    });
 
-export interface Area {
-  id: number;
-  nombre: string;
-  descripcion: string;
-  codigo: string;
-  activo: boolean;
-}
+    return this.http.request(req).pipe(
+      map((event: HttpEvent<any>) => {
+        switch (event.type) {
+          case HttpEventType.UploadProgress:
+            const loaded = event.loaded;
+            const total = event.total ?? 0;
+            return {
+              loaded,
+              total,
+              percentage: Math.round((loaded / total) * 100)
+            } as UploadProgress;
+          case HttpEventType.Response:
+            return {
+              loaded: event.body?.datos?.size ?? file.size,
+              total: file.size,
+              percentage: 100
+            } as UploadProgress;
+          default:
+            return { loaded: 0, total: file.size, percentage: 0 } as UploadProgress;
+        }
+      })
+    );
+  }
 
-export interface Documento {
-  id: number;
-  numeracion: string;
-  tipoDocumentoId: number;
-  tipoDocumento?: TipoDocumento;
-  usuarioElaboraId: number;
-  usuarioElabora?: Usuario;
-  usuarioEnviaId?: number;
-  fechaElaboracion: string;
-  fechaHoraEnvio?: string;
-  estadoId: number;
-  estado?: Estado;
-  rutaArchivoOriginal?: string;
-  rutaArchivoFirmado?: string;
-  areaDestinoId?: number;
-  areaDestino?: Area;
-  usuarioDestinoId?: number;
-  usuarioDestino?: Usuario;
-  observaciones?: string;
-}
+  uploadFileToDocument(documento: FormData): Observable<Documento> {
+    return this.http.post<Documento>(`${this.baseUrl}/documentos`, documento);
+  }
 
-export interface DocumentoParams {
-  estado?: string;
-  tipoDocumentoId?: number;
-  areaDestinoId?: number;
-}
+  updateDocumentWithFile(id: number, documento: FormData): Observable<Documento> {
+    return this.http.put<Documento>(`${this.baseUrl}/documentos/${id}`, documento);
+  }
 
-export interface Firma {
-  id: number;
-  documentoId: number;
-  documento?: Documento;
-  usuarioAsignadoId: number;
-  usuarioAsignado?: Usuario;
-  estadoId: number;
-  estado?: Estado;
-  fechaAsignacion: string;
-  fechaDescarga?: string;
-  fechaFirma?: string;
-  rutaArchivoOriginal?: string;
-  rutaArchivoFirmado?: string;
-  motivoRechazo?: string;
-  ipDescarga?: string;
-  ipFirma?: string;
-}
+  uploadFirma(id: number, file: File, ip: string): Observable<UploadProgress> {
+    const formData = new FormData();
+    formData.append('archivoFirmado', file);
+    formData.append('ip', ip);
 
-export interface FirmasParams {
-  estado?: string;
-  usuarioAsignadoId?: number;
-}
+    const req = new HttpRequest('PATCH', `${this.baseUrl}/firmas/${id}/firmar`, formData, {
+      reportProgress: true
+    });
 
-export interface Usuario {
-  id: number;
-  nombreUsuario: string;
-  nombreCompleto: string;
-  correo: string;
-  areaId?: number;
-  area?: Area;
-  rolId?: number;
-  rol?: Rol;
-  ultimoLogin?: string;
-  intentosFallo?: number;
-  bloqueoHasta?: string;
-  activo: boolean;
-}
+    return this.http.request(req).pipe(
+      map((event: HttpEvent<any>) => {
+        switch (event.type) {
+          case HttpEventType.UploadProgress:
+            const loaded = event.loaded;
+            const total = event.total ?? 0;
+            return {
+              loaded,
+              total,
+              percentage: Math.round((loaded / total) * 100)
+            } as UploadProgress;
+          case HttpEventType.Response:
+            return {
+              loaded: file.size,
+              total: file.size,
+              percentage: 100
+            } as UploadProgress;
+          default:
+            return { loaded: 0, total: file.size, percentage: 0 } as UploadProgress;
+        }
+      })
+    );
+  }
 
-export interface Rol {
-  id: number;
-  nombre: string;
-  descripcion: string;
-  nivelPermiso: number;
-  activo: boolean;
-}
+  downloadDocumento(filename: string): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/files/${filename}`, {
+      responseType: 'blob'
+    });
+  }
 
-export interface TipoDocumento {
-  id: number;
-  nombre: string;
-  descripcion: string;
-  activo: boolean;
-}
-
-export interface Estado {
-  id: number;
-  nombre: string;
-  descripcion: string;
-  colorHex: string;
-  orden: number;
-  activo: boolean;
-}
-
-export interface MenuApi {
-  id: number;
-  nombre: string;
-  ruta: string;
-  icono: string;
-  orden: number;
-  activo: boolean;
+  downloadFirmaDocumento(firmaId: number): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/firmas/${firmaId}/descargar-archivo`, {
+      responseType: 'blob'
+    });
+  }
 }

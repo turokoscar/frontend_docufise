@@ -59,12 +59,12 @@
         <label class="font-ui text-[10px] font-bold text-primary uppercase tracking-widest ml-1">Rol</label>
         <div class="relative font-body text-sm">
           <select 
-            (change)="updateFilters('rol', $any($event.target).value)"
+            (change)="updateFilters('rolId', $any($event.target).value)"
             class="w-full pl-4 pr-10 h-11 rounded-xl bg-muted/30 border-transparent outline-none appearance-none cursor-pointer"
           >
             <option value="all">Todos los roles</option>
-            @for (rol of roles; track rol) {
-              <option [value]="rol">{{ rol }}</option>
+            @for (rol of roles(); track rol.id) {
+              <option [value]="rol.id">{{ rol.nombre }}</option>
             }
           </select>
           <ng-icon name="lucideChevronDown" class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground"></ng-icon>
@@ -75,12 +75,12 @@
         <label class="font-ui text-[10px] font-bold text-primary uppercase tracking-widest ml-1">Área</label>
         <div class="relative font-body text-sm">
           <select 
-            (change)="updateFilters('area', $any($event.target).value)"
+            (change)="updateFilters('areaId', $any($event.target).value)"
             class="w-full pl-4 pr-10 h-11 rounded-xl bg-muted/30 border-transparent outline-none appearance-none cursor-pointer"
           >
             <option value="all">Todas las áreas</option>
-            @for (area of areas; track area) {
-              <option [value]="area">{{ area }}</option>
+            @for (area of areas(); track area.id) {
+              <option [value]="area.id">{{ area.nombre }}</option>
             }
           </select>
           <ng-icon name="lucideChevronDown" class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground"></ng-icon>
@@ -109,11 +109,11 @@
               <td class="px-6 py-4">
                 <div class="flex items-center gap-3">
                   <div class="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center font-display font-bold text-primary">
-                    {{ user.nombre.charAt(0) }}
+                    {{ (user.nombreCompleto || 'U').charAt(0) }}
                   </div>
                   <div class="flex flex-col">
-                    <span class="font-bold text-foreground">{{ user.nombre }}</span>
-                    <span class="text-[10px] font-ui text-muted-foreground uppercase tracking-widest">{{ user.usuario }}</span>
+                    <span class="font-bold text-foreground">{{ user.nombreCompleto }}</span>
+                    <span class="text-[10px] font-ui text-muted-foreground uppercase tracking-widest">{{ user.nombreUsuario }}</span>
                   </div>
                 </div>
               </td>
@@ -126,11 +126,11 @@
               <td class="px-6 py-4">
                 <div class="flex items-center gap-2">
                   <ng-icon name="lucideBuilding2" class="text-primary/40"></ng-icon>
-                  <span class="font-semibold text-foreground/80">{{ user.area }}</span>
+                  <span class="font-semibold text-foreground/80">{{ user.area?.nombre || 'Sin Área' }}</span>
                 </div>
               </td>
               <td class="px-6 py-4">
-                <span [class]="getRoleBadgeClass(user.rol)">{{ user.rol }}</span>
+                <span [class]="getRoleBadgeClass(user.rol?.nombre)">{{ user.rol?.nombre || 'Sin Rol' }}</span>
               </td>
               <td class="px-6 py-4 text-center">
                 <span 
@@ -201,8 +201,8 @@
               <label class="font-ui text-[10px] font-bold text-primary uppercase tracking-widest ml-1">Nombre Completo</label>
               <input 
                 type="text" 
-                [(ngModel)]="formData.nombre" 
-                name="nombre"
+                [(ngModel)]="formData.nombreCompleto" 
+                name="nombreCompleto"
                 required
                 class="w-full px-4 h-11 rounded-xl bg-muted/50 border-transparent focus:bg-white focus:border-primary transition-all outline-none"
               />
@@ -214,8 +214,8 @@
                 <ng-icon name="lucideInfo" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"></ng-icon>
                 <input 
                   type="text" 
-                  [(ngModel)]="formData.usuario" 
-                  name="usuario" 
+                  [(ngModel)]="formData.nombreUsuario" 
+                  name="nombreUsuario" 
                   required
                   class="w-full pl-10 pr-4 h-11 rounded-xl bg-muted/50 border-transparent focus:bg-white focus:border-primary transition-all outline-none"
                 />
@@ -240,12 +240,12 @@
               <label class="font-ui text-[10px] font-bold text-primary uppercase tracking-widest ml-1">Área Institucional</label>
               <div class="relative">
                 <select 
-                  [(ngModel)]="formData.area" 
-                  name="area" 
+                  [(ngModel)]="formData.areaId" 
+                  name="areaId" 
                   class="w-full pl-4 pr-10 h-11 rounded-xl bg-muted/50 border-transparent outline-none appearance-none"
                 >
-                  @for (area of areas; track area) {
-                    <option [value]="area">{{ area }}</option>
+                  @for (area of areas(); track area.id) {
+                    <option [value]="area.id">{{ area.nombre }}</option>
                   }
                 </select>
                 <ng-icon name="lucideChevronDown" class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground"></ng-icon>
@@ -256,12 +256,12 @@
               <label class="font-ui text-[10px] font-bold text-primary uppercase tracking-widest ml-1">Rol de Acceso</label>
               <div class="relative">
                 <select 
-                  [(ngModel)]="formData.rol" 
-                  name="rol" 
+                  [(ngModel)]="formData.rolId" 
+                  name="rolId" 
                   class="w-full pl-4 pr-10 h-11 rounded-xl bg-muted/50 border-transparent outline-none appearance-none font-bold"
                 >
-                  @for (rol of roles; track rol) {
-                    <option [value]="rol">{{ rol }}</option>
+                  @for (rol of roles(); track rol.id) {
+                    <option [value]="rol.id">{{ rol.nombre }}</option>
                   }
                 </select>
                 <ng-icon name="lucideChevronDown" class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground"></ng-icon>

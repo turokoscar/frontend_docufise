@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
-import { DataService } from '../../core/services/data.service';
+import { CatalogService } from '../../core/services/catalog.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { lucideUser, lucideLock, lucideEye, lucideEyeOff, lucideArrowRight, lucideInfo } from '@ng-icons/lucide';
 
@@ -20,7 +20,7 @@ import { lucideUser, lucideLock, lucideEye, lucideEyeOff, lucideArrowRight, luci
 })
 export class LoginPage {
   private authService = inject(AuthService);
-  private dataService = inject(DataService);
+  private catalogService = inject(CatalogService);
   private router = inject(Router);
 
   usuario = '';
@@ -41,9 +41,14 @@ export class LoginPage {
     if (success) {
       const user = this.authService.user();
       if (user) {
-        const rol = user.rol as 'CTD' | 'Firmante' | 'Administrador';
-        const route = this.dataService.getDefaultRouteByRol(rol);
-        this.router.navigate([route]);
+        const menus = this.catalogService.getMenusByRol(user.rol);
+        
+        if (menus.length > 0) {
+          const route = menus[0].ruta;
+          this.router.navigate([route]);
+        } else {
+          this.error.set('No tiene menús asignados');
+        }
       }
     } else {
       this.error.set('Credenciales incorrectas');

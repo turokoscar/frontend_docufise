@@ -1,8 +1,9 @@
 import { Component, signal, computed, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { DataService } from '../../../core/services/data.service';
-import { RolSistema } from '../../../core/models/user.model';
+import { ApiService } from '../../../core/services/api.service';
+import { RolSistema } from '../../../core/models/rol.model';
+import { MenuSistema } from '../../../core/models/menu.model';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { 
   lucideHome, 
@@ -35,11 +36,11 @@ import {
   styleUrl: './roles.page.css'
 })
 export class RolesPage implements OnInit {
-  private dataService = inject(DataService);
+  private apiService = inject(ApiService);
 
   // State
   roles = signal<RolSistema[]>([]);
-  allMenus = this.dataService.menusMock;
+  allMenus = signal<MenuSistema[]>([]);
   showModal = signal(false);
   editingRol = signal<RolSistema | null>(null);
 
@@ -60,13 +61,23 @@ export class RolesPage implements OnInit {
 
   // Form Fields
   formData = {
-    nombre: '' as any,
+    nombre: '',
     descripcion: '',
-    menus: [] as string[]
+    activo: true,
+    menuIds: [] as number[]
   };
 
   ngOnInit(): void {
-    this.roles.set(this.dataService.rolesMock);
+    this.loadData();
+  }
+
+  loadData(): void {
+    this.apiService.getRoles().subscribe({
+      next: (res) => this.roles.set(res)
+    });
+    this.apiService.getMenus().subscribe({
+      next: (res) => this.allMenus.set(res.filter(m => m.activo))
+    });
   }
 
   filteredRoles = computed(() => {
@@ -74,8 +85,8 @@ export class RolesPage implements OnInit {
     const s = this.searchTerm().toLowerCase();
     if (s) {
       result = result.filter((r: RolSistema) => 
-        r.nombre.toLowerCase().includes(s) || 
-        r.descripcion.toLowerCase().includes(s)
+        (r.nombre?.toLowerCase().includes(s) || false) || 
+        (r.descripcion?.toLowerCase().includes(s) || false)
       );
     }
     return result;
@@ -84,24 +95,32 @@ export class RolesPage implements OnInit {
   openCreateModal(): void {
     this.editingRol.set(null);
     this.formData = {
-      nombre: '' as any,
+      nombre: '',
       descripcion: '',
-      menus: []
+      activo: true,
+      menuIds: []
     };
     this.showModal.set(true);
   }
 
   openEditModal(rol: RolSistema): void {
     this.editingRol.set(rol);
-    this.formData = { ...rol, menus: [...rol.menus] };
+    // Extraer los menuIds para el toggle, si existen
+    const mIds = rol.menus ? rol.menus.map(m => m.id) : (rol.menuIds || []);
+    this.formData = { 
+      nombre: rol.nombre,
+      descripcion: rol.descripcion,
+      activo: rol.activo,
+      menuIds: [...mIds]
+    };
     this.showModal.set(true);
   }
 
-  toggleMenuSelection(menuId: string): void {
-    if (this.formData.menus.includes(menuId)) {
-      this.formData.menus = this.formData.menus.filter((id: string) => id !== menuId);
+  toggleMenuSelection(menuId: number): void {
+    if (this.formData.menuIds.includes(menuId)) {
+      this.formData.menuIds = this.formData.menuIds.filter((id) => id !== menuId);
     } else {
-      this.formData.menus.push(menuId);
+      this.formData.menuIds.push(menuId);
     }
   }
 
@@ -110,35 +129,59 @@ export class RolesPage implements OnInit {
       this.showNotification('Complete todos los campos obligatorios', 'error');
       return;
     }
-    if (this.formData.menus.length === 0) {
-      this.showNotification('Seleccione al menos un menú para el rol', 'error');
-      return;
-    }
+    
+    const payload: Partial<RolSistema> = {
+      nombre: this.formData.nombre,
+      descripcion: this.formData.descripcion,
+      menuIds: this.formData.menuIds,
+      activo: this.formData.activo
+    };
+
     const editing = this.editingRol();
     if (editing) {
-      this.roles.update((prev: RolSistema[]) => 
-        prev.map((r: RolSistema) => r.id === editing.id ? { ...r, ...this.formData } : r)
-      );
-      this.showNotification('Rol actualizado exitosamente', 'success');
+      this.apiService.updateRol(editing.id, payload).subscribe({
+        next: () => {
+          this.showNotification('Rol actualizado exitosamente', 'success');
+          this.loadData();
+          this.showModal.set(false);
+        },
+        error: () => this.showNotification('Error al actualizar rol', 'error')
+      });
     } else {
-      const newId = `ROL-${(this.roles().length + 1).toString().padStart(2, '0')}`;
-      this.roles.update((prev: RolSistema[]) => [...prev, { ...this.formData, id: newId } as RolSistema]);
-      this.showNotification('Rol registrado exitosamente', 'success');
+      this.apiService.createRol(payload).subscribe({
+        next: () => {
+          this.showNotification('Rol registrado exitosamente', 'success');
+          this.loadData();
+          this.showModal.set(false);
+        },
+        error: () => this.showNotification('Error al registrar rol', 'error')
+      });
     }
-    this.showModal.set(false);
   }
 
   deleteRol(rol: RolSistema): void {
     if (confirm(`¿Está seguro de eliminar el rol ${rol.nombre}?`)) {
-      this.roles.update(prev => prev.filter(r => r.id !== rol.id));
-      this.showNotification('Rol eliminado', 'error');
+      this.apiService.deleteRol(rol.id).subscribe({
+        next: () => {
+          this.showNotification('Rol eliminado', 'success');
+          this.loadData();
+        },
+        error: () => this.showNotification('Error al eliminar rol', 'error')
+      });
     }
   }
 
-  getMenuNames(menuIds: string[]): string {
-    return this.allMenus
-      .filter(m => menuIds.includes(m.id))
-      .map(m => m.nombre)
-      .join(', ');
+  getMenuNames(rol: RolSistema): string {
+    if (rol.menus && rol.menus.length > 0) {
+      return rol.menus.map(m => m.nombre).join(', ');
+    }
+    const mIds = rol.menuIds || [];
+    if (mIds.length > 0) {
+      return this.allMenus()
+        .filter(m => mIds.includes(m.id))
+        .map(m => m.nombre)
+        .join(', ');
+    }
+    return '';
   }
 }

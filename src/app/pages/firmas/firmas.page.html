@@ -89,7 +89,7 @@
           >
             <option value="all">Todos los tipos</option>
             @for (tipo of tiposDocumento; track tipo.id) {
-              <option [value]="tipo.nombre">{{ tipo.nombre }}</option>
+              <option [value]="tipo.id">{{ tipo.nombre }}</option>
             }
           </select>
           <ng-icon name="lucideChevronDown" class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground"></ng-icon>
@@ -104,10 +104,10 @@
             class="w-full pl-4 pr-10 h-11 rounded-xl bg-muted/30 border-transparent outline-none appearance-none cursor-pointer font-body text-sm"
           >
             <option value="all">Todos los estados</option>
-            <option value="Ingresado">Ingresado</option>
-            <option value="Pendiente">Pendiente</option>
-            <option value="Observado">Observado</option>
-            <option value="Firmado">Firmado</option>
+            <option value="INGRESADO">Ingresado</option>
+            <option value="PENDIENTE">Pendiente</option>
+            <option value="OBSERVADO">Observado</option>
+            <option value="FIRMADO">Firmado</option>
           </select>
           <ng-icon name="lucideChevronDown" class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground"></ng-icon>
         </div>
@@ -121,11 +121,11 @@
       <table class="w-full text-left border-collapse">
         <thead class="bg-primary text-primary-foreground">
           <tr class="h-12 border-b border-white/10">
-            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest">ID Firma</th>
-            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest">Expediente</th>
+            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest">ID Registro</th>
+            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest">Documento</th>
             <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest">Tipo Documento</th>
             <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest">Elaborado por</th>
-            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest">Fecha y Hora</th>
+            <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest">Fecha Asignación</th>
             <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest text-center">Estado</th>
             <th class="px-6 font-ui text-[10px] font-bold uppercase tracking-widest text-right">Acciones</th>
           </tr>
@@ -136,15 +136,11 @@
               <td class="px-6 py-4">
                 <span class="font-display font-bold text-primary text-sm">{{ f.id }}</span>
               </td>
-              <td class="px-6 py-4 font-ui text-xs font-bold text-muted-foreground">{{ f.expedienteId }}</td>
+              <td class="px-6 py-4 font-ui text-xs font-bold text-muted-foreground">{{ f.documentoNumeracion }}</td>
               <td class="px-6 py-4">
-                <div class="flex items-center gap-2">
-                  <ng-icon name="lucideFileText" class="text-muted-foreground"></ng-icon>
-                  <span class="font-body text-sm">{{ f.tipoDocumento }}</span>
-                </div>
+                  <span class="font-body text-sm">{{ f.documentoTipoDocumento }}</span>
               </td>
-              <td class="px-6 py-4 font-body text-sm font-semibold text-foreground/80">{{ f.elaboradoPor }}</td>
-              <td class="px-6 py-4 font-body text-xs text-muted-foreground italic">{{ f.fechaHora }}</td>
+              <td class="px-6 py-4 font-body text-sm font-semibold text-foreground/80">{{ f.documentoUsuarioElabora }}</td>
               <td class="px-6 py-4 text-center">
                 <span [class]="getEstadoBadgeClass(f.estado)">{{ f.estado }}</span>
               </td>
@@ -153,7 +149,7 @@
                   <!-- Descargar (Ingresado → Pendiente) -->
                   <button 
                     (click)="handleDescargar(f)"
-                    *ngIf="f.estado === 'Ingresado'"
+                    *ngIf="f.estado === 'INGRESADO'"
                     class="p-2 rounded-lg hover:bg-blue-100 text-blue-600 transition-colors flex items-center gap-1.5 px-3 mb-1"
                     title="Descargar para revisión"
                   >
@@ -162,7 +158,7 @@
                   </button>
                   
                   <!-- Firmar y Rechazar (Pendiente) -->
-                  @if (f.estado === 'Pendiente') {
+                  @if (f.estado === 'PENDIENTE') {
                     <button 
                       (click)="openSignModal(f)"
                       class="p-2 rounded-lg bg-success/10 text-success hover:bg-success hover:text-white transition-all shadow-sm border border-success/20 mr-1"
@@ -181,7 +177,7 @@
 
                   <!-- Visualizar (Firmado) -->
                   <button 
-                    *ngIf="f.estado === 'Firmado'"
+                    *ngIf="f.estado === 'FIRMADO'"
                     class="p-2 rounded-lg bg-muted text-foreground/60 hover:bg-muted/80 transition-all border border-border"
                     title="Ver archivo firmado"
                   >
@@ -206,11 +202,24 @@
       </table>
     </div>
 
-    <!-- Pagination simple -->
+    <!-- Pagination -->
     <div class="flex items-center justify-end gap-2 px-6 py-4 border-t border-border">
-      <button (click)="setPage(currentPage() - 1)" [disabled]="currentPage() === 1" class="p-2 rounded-lg border border-border hover:bg-primary/5 disabled:opacity-50">←</button>
-      <span class="text-sm font-ui">{{ currentPage() }} / {{ totalPages() }}</span>
-      <button (click)="setPage(currentPage() + 1)" [disabled]="currentPage() === totalPages()" class="p-2 rounded-lg border border-border hover:bg-primary/5 disabled:opacity-50">→</button>
+      <button (click)="setPage(currentPage() - 1)" [disabled]="currentPage() === 1" class="p-2 rounded-lg border border-border hover:bg-primary/5 disabled:opacity-50 transition-colors">←</button>
+      <div class="flex items-center gap-1">
+        @for (page of paginatedPages(); track page) {
+          <button 
+            (click)="setPage(page)" 
+            class="w-8 h-8 rounded-lg text-xs font-ui transition-colors"
+            [ngClass]="{
+              'bg-primary text-primary-foreground': currentPage() === page,
+              'hover:bg-primary/10': currentPage() !== page
+            }"
+          >
+            {{ page }}
+          </button>
+        }
+      </div>
+      <button (click)="setPage(currentPage() + 1)" [disabled]="currentPage() === totalPages()" class="p-2 rounded-lg border border-border hover:bg-primary/5 disabled:opacity-50 transition-colors">→</button>
     </div>
   </div>
 
@@ -231,7 +240,17 @@
       <div class="p-4 space-y-4">
         <div class="bg-muted/50 rounded-lg p-3 border border-border/50">
           <p class="text-[10px] font-ui text-muted-foreground uppercase">Documento</p>
-          <p class="font-display font-bold">{{ selectedFirma()?.id }}</p>
+          <p class="font-display font-bold">{{ selectedFirma()?.documentoNumeracion }}</p>
+        </div>
+        
+        <div>
+          <label class="font-ui text-xs text-muted-foreground uppercase block mb-2">Cargar documento firmado</label>
+          <app-file-upload
+            [maxSizeMB]="10"
+            acceptedTypes=".pdf"
+            subfolder="firmados"
+            (fileSelected)="onSignedFileSelected($event)"
+          ></app-file-upload>
         </div>
         
         <div class="flex gap-3">
@@ -243,9 +262,15 @@
           </button>
           <button 
             (click)="confirmSign()"
-            class="flex-1 bg-primary text-white px-4 py-2 rounded-lg font-ui text-sm font-semibold hover:bg-primary/90 transition-colors"
+            [disabled]="!selectedSignedFile() || isUploadingSigned()"
+            class="flex-1 bg-primary text-white px-4 py-2 rounded-lg font-ui text-sm font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
           >
-            Confirmar Firma
+            @if (isUploadingSigned()) {
+              <span>Subiendo...</span>
+            } @else {
+              <ng-icon name="lucideCheck" class="h-4 w-4"></ng-icon>
+              <span>Confirmar Firma</span>
+            }
           </button>
         </div>
       </div>
@@ -264,12 +289,12 @@
           <p class="text-xs text-muted-foreground font-body">Indique el motivo del rechazo</p>
         </div>
       </div>
-      <form (submit)="confirmReject(); $event.preventDefault()" class="p-4 space-y-4">
+      <div class="p-4 space-y-4 text-foreground">
         <div class="space-y-2">
           <label class="font-ui text-xs text-destructive font-semibold uppercase">Motivo de observación</label>
           <textarea 
-            [(ngModel)]="motivoRechazo"
-            name="motivo"
+            [value]="motivoRechazo()"
+            (input)="motivoRechazo.set($any($event.target).value)"
             placeholder="Ej: Falta firma de supervisor en anexo 4, datos incorrectos..."
             class="w-full p-3 rounded-lg bg-muted/50 border border-border focus:border-destructive focus:ring-2 focus:ring-destructive/10 transition-all outline-none font-body text-sm min-h-[100px]"
             required
@@ -279,34 +304,19 @@
         <div class="flex gap-3">
           <button 
             (click)="showRejectModal.set(false)"
-            type="button"
             class="flex-1 px-4 py-2 rounded-lg border border-border hover:bg-muted font-ui text-sm transition-colors"
           >
             Cancelar
           </button>
           <button 
-            type="submit"
+            (click)="confirmReject()"
             [disabled]="!motivoRechazo().trim()"
             class="flex-1 bg-destructive text-white px-4 py-2 rounded-lg font-ui text-sm font-semibold hover:bg-destructive/90 transition-colors disabled:opacity-50"
           >
             Enviar Observación
           </button>
         </div>
-      </form>
+      </div>
     </div>
   </div>
 </div>
-
-<!-- Toast Notification -->
-@if (showToast()) {
-  <div 
-    class="fixed top-4 right-4 z-[200] px-4 py-3 rounded-xl shadow-lg font-ui text-sm flex items-center gap-2"
-    [class.bg-success]="toastType() === 'success'"
-    [class.text-success-foreground]="toastType() === 'success'"
-    [class.bg-destructive]="toastType() === 'error'"
-    [class.text-destructive-foreground]="toastType() === 'error'"
-  >
-    <ng-icon [name]="toastType() === 'success' ? 'lucideCheck' : 'lucideAlertTriangle'" class="text-lg"></ng-icon>
-    {{ toastMessage() }}
-  </div>
-}

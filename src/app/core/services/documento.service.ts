@@ -1,9 +1,10 @@
 import { Injectable, signal } from '@angular/core';
-import { ApiService, Documento, DocumentoParams } from './api.service';
+import { ApiService } from './api.service';
+import { Documento, DocumentoParams } from '../models/documento.model';
 
 @Injectable({ providedIn: 'root' })
 export class DocumentoService {
-  private _documentos = signal<any[]>([]);
+  private _documentos = signal<Documento[]>([]);
   private _loading = signal(false);
   private _total = signal(0);
 
@@ -17,10 +18,9 @@ export class DocumentoService {
     this._loading.set(true);
     this.api.getDocumentos(params).subscribe({
       next: (res) => {
-        if (res.exitoso) {
-          this._documentos.set(res.datos);
-          this._total.set(res.total || res.datos.length);
-        }
+        // Interceptor already unwrapped res.datos
+        this._documentos.set(res);
+        this._total.set(res.length); 
         this._loading.set(false);
       },
       error: () => this._loading.set(false)
@@ -30,8 +30,8 @@ export class DocumentoService {
   create(data: Partial<Documento>): void {
     this._loading.set(true);
     this.api.createDocumento(data).subscribe({
-      next: (res) => {
-        if (res.exitoso) this.loadAll();
+      next: () => {
+        this.loadAll();
         this._loading.set(false);
       },
       error: () => this._loading.set(false)
@@ -41,8 +41,8 @@ export class DocumentoService {
   update(id: number, data: Partial<Documento>): void {
     this._loading.set(true);
     this.api.updateDocumento(id, data).subscribe({
-      next: (res) => {
-        if (res.exitoso) this.loadAll();
+      next: () => {
+        this.loadAll();
         this._loading.set(false);
       },
       error: () => this._loading.set(false)
@@ -52,8 +52,8 @@ export class DocumentoService {
   delete(id: number): void {
     this._loading.set(true);
     this.api.deleteDocumento(id).subscribe({
-      next: (res) => {
-        if (res.exitoso) this.loadAll();
+      next: () => {
+        this.loadAll();
         this._loading.set(false);
       },
       error: () => this._loading.set(false)

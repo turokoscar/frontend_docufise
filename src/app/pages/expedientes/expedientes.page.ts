@@ -1,10 +1,12 @@
-import { Component, signal, computed, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, computed, inject, OnInit, ChangeDetectionStrategy, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DocumentoService } from '../../core/services/documento.service';
 import { CatalogService } from '../../core/services/catalog.service';
 import { AuthService } from '../../core/services/auth.service';
-import { Expediente, EstadoExpediente } from '../../core/models/user.model';
+import { ApiService, UploadProgress } from '../../core/services/api.service';
+import { Documento, EstadoDocumentoLabel } from '../../core/models/documento.model';
+import { FileUploadComponent } from '../../shared/components/file-upload/file-upload.component';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { 
   lucideHome, 
@@ -34,7 +36,7 @@ import * as XLSX from 'xlsx';
   selector: 'app-expedientes',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, NgIconComponent],
+  imports: [CommonModule, FormsModule, NgIconComponent, FileUploadComponent],
   providers: [
     provideIcons({ 
       lucideHome, lucideFileText, lucideSearch, lucideChevronDown, 
@@ -51,11 +53,20 @@ export class ExpedientesPage implements OnInit {
   private documentoService = inject(DocumentoService);
   private catalogService = inject(CatalogService);
   private authService = inject(AuthService);
+  private apiService = inject(ApiService);
 
   user = this.authService.user;
   
-  // Catálogos desde API
+  // Upload state
+  selectedFile = signal<File | null>(null);
+  uploadProgress = signal(0);
+  isUploading = signal(false);
+  uploadedFilename = signal('');
+  
+  // Catálogos desde API - se cargan a demanda
   get tiposDocumento() { return this.catalogService.tiposDocumento(); }
+  get areas() { return this.catalogService.areas(); }
+  get estados() { return this.catalogService.estados(); }
   
   // Helpers
   get elaboradores(): string[] { return ['Marco Tomy', 'Ana García', 'Carlos Mendoza']; }
@@ -63,17 +74,17 @@ export class ExpedientesPage implements OnInit {
   get usuariosPorArea(): Record<string, string[]> { return {}; }
   
   // State local que sincroniza con el servicio
-  allExpedientes = signal<Expediente[]>([]);
+  allDocumentos = signal<Documento[]>([]);
   loading = this.documentoService.loading;
 
   // Modal state
   showModal = signal(false);
   showDerivarModal = signal(false);
-  editingExpediente = signal<Expediente | null>(null);
-  derivandoExpediente = signal<Expediente | null>(null);
+  editingDocumento = signal<Documento | null>(null);
+  derivandoDocumento = signal<Documento | null>(null);
   
   // Dropdown state
-  openDropdownId = signal<string | null>(null);
+  openDropdownId = signal<number | null>(null);
 
   // Form fields
   formTipoDoc = signal('');
@@ -92,46 +103,38 @@ export class ExpedientesPage implements OnInit {
     tipo: 'all'
   });
 
-  // Toast message
-  toastMessage = signal('');
-  toastType = signal<'success' | 'error'>('success');
-  showToast = signal(false);
-
   // Pagination
   currentPage = signal(1);
   itemsPerPage = 10;
 
-ngOnInit(): void {
-    // Cargar documentos desde API y sincronizar con señal local
+  ngOnInit(): void {
+    // Cargar catálogos a demanda solo cuando se necesita esta página
+    this.catalogService.loadAreas();
+    this.catalogService.loadTiposDocumento();
+    this.catalogService.loadEstados();
+    
+    // Cargar documentos
     this.documentoService.loadAll();
-    // Sincronizar cuando lleguen datos
-    const sync = setInterval(() => {
-      const docs = this.documentoService.documentos();
-      if (docs.length > 0) {
-        this.allExpedientes.set([...docs]);
-        clearInterval(sync);
-      }
-    }, 500);
   }
   
-  toggleDropdown(id: string, event: Event): void {
+  // Sincronizar con signal del servicio (se actualiza automáticamente)
+  private syncDocumentos() {
+    const docs = this.documentoService.documentos();
+    this.allDocumentos.set([...docs]);
+  }
+  
+  toggleDropdown(id: number, event: Event): void {
     event.stopPropagation();
     this.openDropdownId.update(current => current === id ? null : id);
   }
   
-closeDropdown(): void {
+  closeDropdown(): void {
     this.openDropdownId.set(null);
   }
   
-  private showNotification(message: string, type: 'success' | 'error' = 'success'): void {
-    this.toastMessage.set(message);
-    this.toastType.set(type);
-    this.showToast.set(true);
-    setTimeout(() => this.showToast.set(false), 3000);
-  }
-
-  canEdit(exp: Expediente): boolean {
-    return exp.estado === 'Registrado' || exp.estado === 'Observado';
+  canEdit(doc: Documento): boolean {
+    const estado = doc.estado;
+    return estado === 'REGISTRADO' || estado === 'OBSERVADO';
   }
 
   get usuariosDisponibles(): string[] {
@@ -140,74 +143,73 @@ closeDropdown(): void {
   }
 
   get autoNumeracion(): string {
-    const editing = this.editingExpediente();
+    const editing = this.editingDocumento();
     if (editing) return editing.numeracion;
-    const nextNum = this.allExpedientes().length + 1;
+    const nextNum = this.allDocumentos().length + 1;
     return `${String(nextNum).padStart(3, '0')}-2026-FISE`;
   }
 
   get autoFechaElab(): string {
-    const editing = this.editingExpediente();
+    const editing = this.editingDocumento();
     if (editing) return editing.fechaElaboracion;
     return new Date().toISOString().split('T')[0];
   }
 
   get autoFechaEnvio(): string {
-    const editing = this.editingExpediente();
+    const editing = this.editingDocumento();
     if (editing?.fechaHoraEnvio) return editing.fechaHoraEnvio;
     const now = new Date();
     return `${now.toISOString().split('T')[0]} ${now.toTimeString().slice(0, 5)}`;
   }
 
-  // KPIs (Calculados dinámicamente) - Coincide con React
+  // KPIs (Calculados dinámicamente)
   kpis = computed(() => {
-    const data = this.allExpedientes();
-    const countByState = (s: EstadoExpediente) => data.filter((e: Expediente) => e.estado === s).length;
+    const data = this.allDocumentos();
+    const countByState = (s: EstadoDocumentoLabel) => data.filter((doc: Documento) => doc.estado === s).length;
     return [
       { label: "Total", value: data.length, icon: 'lucideFile', color: "#2C5AAB" },
-      { label: "Registrados", value: countByState("Registrado"), icon: 'lucideFile', color: "#3B7DCC" },
-      { label: "Pendientes", value: countByState("Pendiente"), icon: 'lucideClock', color: "#F2B801" },
-      { label: "Firmados", value: countByState("Firmado"), icon: 'lucideCheckCircle2', color: "#0FBF90" },
-      { label: "Observados", value: countByState("Observado"), icon: 'lucideAlertTriangle', color: "#AB2741" },
+      { label: "Registrados", value: countByState("REGISTRADO"), icon: 'lucideFile', color: "#3B7DCC" },
+      { label: "Pendientes", value: countByState("PENDIENTE"), icon: 'lucideClock', color: "#F2B801" },
+      { label: "Firmados", value: countByState("FIRMADO"), icon: 'lucideCheckCircle2', color: "#0FBF90" },
+      { label: "Observados", value: countByState("OBSERVADO"), icon: 'lucideAlertTriangle', color: "#AB2741" },
     ];
   });
 
-  filteredExpedientes = computed(() => {
-    let result = this.allExpedientes();
+  filteredDocumentos = computed(() => {
+    let result = this.allDocumentos();
     const f = this.filters();
 
     if (f.search) {
       const s = f.search.toLowerCase();
-      result = result.filter((e: Expediente) => 
-        e.numeracion.toLowerCase().includes(s) || 
-        e.elaboradoPor.toLowerCase().includes(s) ||
-        (e.enviadoPor && e.enviadoPor.toLowerCase().includes(s)) ||
-        e.tipoDocumento.toLowerCase().includes(s)
+      result = result.filter((doc: Documento) => 
+        doc.numeracion.toLowerCase().includes(s) || 
+        (doc.usuarioElabora || '').toLowerCase().includes(s) ||
+        (doc.usuarioEnvia || '').toLowerCase().includes(s) ||
+        (doc.tipoDocumento || '').toLowerCase().includes(s)
       );
     }
     if (f.estado !== 'all') {
-      result = result.filter((e: Expediente) => e.estado === f.estado);
+      result = result.filter((doc: Documento) => doc.estado === f.estado);
     }
     if (f.tipo !== 'all') {
-      result = result.filter((e: Expediente) => e.tipoDocumento === f.tipo);
+      result = result.filter((doc: Documento) => String(doc.tipoDocumentoId) === f.tipo);
     }
     return result;
   });
 
-  paginatedExpedientes = computed(() => {
-    const data = this.filteredExpedientes();
+  paginatedDocumentos = computed(() => {
+    const data = this.filteredDocumentos();
     const start = (this.currentPage() - 1) * this.itemsPerPage;
     return data.slice(start, start + this.itemsPerPage);
   });
 
-  totalPages = computed(() => Math.ceil(this.filteredExpedientes().length / this.itemsPerPage));
+  totalPages = computed(() => Math.ceil(this.filteredDocumentos().length / this.itemsPerPage));
 
   paginatedPages(): number[] {
     const total = this.totalPages();
     if (total <= 5) {
       return Array.from({ length: total }, (_, i) => i + 1);
     }
-    // Show first, current-1, current, current+1, last
     const current = this.currentPage();
     if (current <= 2) return [1, 2, 3, 4, total];
     if (current >= total - 1) return [1, total - 3, total - 2, total - 1, total];
@@ -220,33 +222,33 @@ closeDropdown(): void {
     this.currentPage.set(1);
   }
 
-  getEstadoBadgeClass(estado: EstadoExpediente): string {
-    const styles: Record<EstadoExpediente, string> = {
-      'Registrado': 'bg-[#3B7DCC]/15 text-[#3B7DCC] border border-[#3B7DCC]/30',
-      'Ingresado': 'bg-[#2C5AAB]/15 text-[#2C5AAB] border border-[#2C5AAB]/30',
-      'Pendiente': 'bg-[#F2B801]/15 text-[#F2B801] border border-[#F2B801]/30',
-      'Observado': 'bg-[#AB2741]/15 text-[#AB2741] border border-[#AB2741]/30',
-      'Firmado': 'bg-[#0FBF90]/15 text-[#0FBF90] border border-[#0FBF90]/30',
+  getEstadoBadgeClass(estado?: string): string {
+    if (!estado) return '';
+    const styles: Record<string, string> = {
+      'REGISTRADO': 'bg-[#3B7DCC]/15 text-[#3B7DCC] border border-[#3B7DCC]/30',
+      'INGRESADO': 'bg-[#2C5AAB]/15 text-[#2C5AAB] border border-[#2C5AAB]/30',
+      'PENDIENTE': 'bg-[#F2B801]/15 text-[#F2B801] border border-[#F2B801]/30',
+      'OBSERVADO': 'bg-[#AB2741]/15 text-[#AB2741] border border-[#AB2741]/30',
+      'FIRMADO': 'bg-[#0FBF90]/15 text-[#0FBF90] border border-[#0FBF90]/30',
     };
-    return `font-ui text-[11px] font-semibold px-2 py-0.5 rounded-full ${styles[estado]}`;
+    return `font-ui text-[11px] font-semibold px-2 py-0.5 rounded-full ${styles[estado] || ''}`;
   }
 
   exportToExcel(): void {
-    const data = this.filteredExpedientes().map((e: Expediente) => ({
-      'Numeración': e.numeracion,
-      'Tipo Documento': e.tipoDocumento,
-      'Elaborado por': e.elaboradoPor,
-      'Enviado por': e.enviadoPor || '',
-      'Fecha Elaboración': e.fechaElaboracion,
-      'Fecha/Hora Envío': e.fechaHoraEnvio,
-      'Estado': e.estado,
+    const data = this.filteredDocumentos().map((doc: Documento) => ({
+      'Numeración': doc.numeracion,
+      'Tipo Documento': doc.tipoDocumento,
+      'Elaborado por': doc.usuarioElabora,
+      'Enviado por': doc.usuarioEnvia || '',
+      'Fecha Elaboración': doc.fechaElaboracion,
+      'Fecha/Hora Envío': doc.fechaHoraEnvio,
+      'Estado': doc.estado,
     }));
     
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Expedientes');
     XLSX.writeFile(wb, `Expedientes_${new Date().toISOString().split('T')[0]}.xlsx`);
-    this.showNotification('Archivo Excel descargado exitosamente', 'success');
   }
 
   setPage(page: number): void {
@@ -257,81 +259,114 @@ closeDropdown(): void {
 
   // CRUD Operations
   openNewForm(): void {
-    this.editingExpediente.set(null);
+    this.editingDocumento.set(null);
     this.formTipoDoc.set('');
     this.formElaborado.set('');
     this.formEnviado.set('');
+    this.selectedFile.set(null);
+    this.uploadProgress.set(0);
+    this.uploadedFilename.set('');
     this.showModal.set(true);
   }
 
-  openEditForm(exp: Expediente): void {
-    if (!this.canEdit(exp)) return;
-    this.editingExpediente.set(exp);
-    this.formTipoDoc.set(exp.tipoDocumento);
-    this.formElaborado.set(exp.elaboradoPor);
-    this.formEnviado.set(exp.enviadoPor || '');
+  openEditForm(doc: Documento): void {
+    if (!this.canEdit(doc)) return;
+    this.editingDocumento.set(doc);
+    this.formTipoDoc.set(String(doc.tipoDocumentoId || ''));
+    this.formElaborado.set(String(doc.usuarioElaboraId || ''));
+    this.formEnviado.set(String(doc.usuarioEnviaId || ''));
+    this.selectedFile.set(null);
+    this.uploadProgress.set(0);
+    this.uploadedFilename.set(doc.rutaArchivoOriginal ? doc.rutaArchivoOriginal : '');
     this.showModal.set(true);
   }
 
   closeModal(): void {
     this.showModal.set(false);
-    this.editingExpediente.set(null);
+    this.editingDocumento.set(null);
     this.formTipoDoc.set('');
     this.formElaborado.set('');
     this.formEnviado.set('');
+    this.selectedFile.set(null);
+    this.uploadProgress.set(0);
+    this.uploadedFilename.set('');
   }
 
-  saveExpediente(): void {
-    const tipoDoc = this.formTipoDoc();
-    const elaborado = this.formElaborado();
+  onFileSelected(file: File): void {
+    this.selectedFile.set(file);
+    this.uploadedFilename.set('');
+  }
 
-    if (!tipoDoc || !elaborado) {
-      this.showNotification('Complete todos los campos obligatorios', 'error');
+  saveDocumento(): void {
+    const tipoDocId = Number(this.formTipoDoc());
+    const elaboradoId = Number(this.formElaborado());
+
+    if (!tipoDocId || !elaboradoId) {
       return;
     }
 
-    const editing = this.editingExpediente();
-    if (editing) {
-      this.allExpedientes.update(prev => 
-        prev.map(e => 
-          e.id === editing.id
-            ? { ...e, tipoDocumento: tipoDoc, elaboradoPor: elaborado, enviadoPor: this.formEnviado() }
-            : e
-        )
-      );
-      this.showNotification(`${editing.numeracion} actualizado exitosamente`, 'success');
+    const editing = this.editingDocumento();
+    const file = this.selectedFile();
+
+    if (file) {
+      this.isUploading.set(true);
+      const formData = new FormData();
+      formData.append('documento', new Blob([JSON.stringify({
+        numeracion: editing?.numeracion || this.autoNumeracion,
+        tipoDocumentoId: tipoDocId,
+        usuarioElaboraId: elaboradoId,
+        usuarioEnviaId: Number(this.formEnviado()) || null,
+        fechaElaboracion: new Date().toISOString().split('T')[0],
+        estadoId: editing?.estadoId || 1,
+        rutaArchivoOriginal: editing?.rutaArchivoOriginal || null
+      })], { type: 'application/json' }));
+      formData.append('archivo', file);
+
+      const request = editing 
+        ? this.apiService.updateDocumentWithFile(editing.id, formData)
+        : this.apiService.uploadFileToDocument(formData);
+
+      request.subscribe({
+        next: (doc) => {
+          this.isUploading.set(false);
+          this.uploadedFilename.set(doc.rutaArchivoOriginal || '');
+          this.documentoService.loadAll();
+          this.closeModal();
+        },
+        error: (err) => {
+          this.isUploading.set(false);
+          alert('Error al guardar documento: ' + (err.message || 'Error desconocido'));
+        }
+      });
     } else {
-      const now = new Date();
-      const nextNum = this.allExpedientes().length + 1;
-      const nuevo: Expediente = {
-        id: `EXP-2026-${String(nextNum).padStart(3, '0')}`,
-        numeracion: `${String(nextNum).padStart(3, '0')}-2026-FISE`,
-        tipoDocumento: tipoDoc,
-        elaboradoPor: elaborado,
-        enviadoPor: this.formEnviado() || '',
-        fechaElaboracion: now.toISOString().split('T')[0],
-        fechaHoraEnvio: `${now.toISOString().split('T')[0]} ${now.toTimeString().slice(0, 5)}`,
-        estado: 'Registrado',
-        archivoOriginal: 'documento_adjunto.pdf',
-      };
-      this.allExpedientes.update(prev => [nuevo, ...prev]);
-      this.showNotification(`${nuevo.numeracion} registrado con estado REGISTRADO`, 'success');
+      if (editing) {
+        this.documentoService.update(editing.id, {
+          tipoDocumentoId: tipoDocId,
+          usuarioElaboraId: elaboradoId,
+          usuarioEnviaId: Number(this.formEnviado()) || undefined
+        });
+      } else {
+        this.documentoService.create({
+          tipoDocumentoId: tipoDocId,
+          usuarioElaboraId: elaboradoId,
+          fechaElaboracion: new Date().toISOString().split('T')[0]
+        });
+      }
+      this.closeModal();
     }
-    this.closeModal();
   }
 
-  deleteExpediente(exp: Expediente): void {
-    if (!this.canEdit(exp)) return;
-    if (confirm(`¿Está seguro de eliminar el expediente ${exp.numeracion}?`)) {
-      this.allExpedientes.update(prev => prev.filter(e => e.id !== exp.id));
-      this.showNotification(`${exp.numeracion} eliminado`, 'error');
+  deleteDocumento(doc: Documento): void {
+    if (!this.canEdit(doc)) return;
+    if (confirm(`¿Está seguro de eliminar el expediente ${doc.numeracion}?`)) {
+      this.documentoService.delete(doc.id);
     }
   }
 
   // Derivar operations
-  openDerivarModal(exp: Expediente): void {
-    if (exp.estado !== 'Registrado') return;
-    this.derivandoExpediente.set(exp);
+  openDerivarModal(doc: Documento): void {
+    if (doc.estado !== 'REGISTRADO') return;
+    this.derivandoDocumento.set(doc);
     this.derivarArea.set('');
     this.derivarUsuario.set('');
     this.derivarObs.set('');
@@ -340,37 +375,27 @@ closeDropdown(): void {
 
   closeDerivarModal(): void {
     this.showDerivarModal.set(false);
-    this.derivandoExpediente.set(null);
+    this.derivandoDocumento.set(null);
     this.derivarArea.set('');
     this.derivarUsuario.set('');
     this.derivarObs.set('');
   }
 
   confirmarDerivacion(): void {
-    const area = this.derivarArea();
-    const usuario = this.derivarUsuario();
-    const exp = this.derivandoExpediente();
+    const areaId = Number(this.derivarArea());
+    const usuarioId = Number(this.derivarUsuario());
+    const doc = this.derivandoDocumento();
 
-    if (!area || !usuario || !exp) {
-      this.showNotification('Seleccione área y usuario destino', 'error');
+    if (!areaId || !usuarioId || !doc) {
       return;
     }
 
-    this.allExpedientes.update(prev => 
-      prev.map(e => 
-        e.id === exp.id
-          ? { 
-              ...e, 
-              estado: 'Ingresado' as EstadoExpediente, 
-              areaDestino: area, 
-              usuarioDestino: usuario, 
-              observaciones: this.derivarObs(),
-              enviadoPor: e.enviadoPor || e.elaboradoPor
-            } 
-          : e
-      )
-    );
-    this.showNotification(`Expediente ${exp.numeracion} derivado exitosamente. Estado: INGRESADO`, 'success');
+    this.documentoService.update(doc.id, {
+      areaDestinoId: areaId,
+      usuarioDestinoId: usuarioId,
+      observaciones: this.derivarObs(),
+      estadoId: 2 // INGRESADO
+    });
     this.closeDerivarModal();
   }
 
