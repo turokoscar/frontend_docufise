@@ -3,6 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DocumentoService } from '../../core/services/documento.service';
 import { CatalogService } from '../../core/services/catalog.service';
+import { 
+  UsuarioSistema
+} from '../../core/models/usuario.model';
 import { AuthService } from '../../core/services/auth.service';
 import { ApiService, UploadProgress } from '../../core/services/api.service';
 import { Documento, EstadoDocumentoLabel } from '../../core/models/documento.model';
@@ -74,7 +77,7 @@ export class ExpedientesPage implements OnInit {
   get usuariosPorArea(): Record<string, string[]> { return {}; }
   
   // State local que sincroniza con el servicio
-  allDocumentos = signal<Documento[]>([]);
+  allDocumentos = computed(() => this.documentoService.documentos());
   loading = this.documentoService.loading;
 
   // Modal state
@@ -92,9 +95,11 @@ export class ExpedientesPage implements OnInit {
   formEnviado = signal('');
 
   // Derivar fields
-  derivarArea = signal('');
-  derivarUsuario = signal('');
+  derivarAreaId = signal<number | null>(null);
+  derivarUsuarioId = signal<number | null>(null);
   derivarObs = signal('');
+  usuariosDestino = signal<UsuarioSistema[]>([]);
+  isLoadingUsuarios = signal(false);
 
   // Filters
   filters = signal({
@@ -117,12 +122,6 @@ export class ExpedientesPage implements OnInit {
     this.documentoService.loadAll();
   }
   
-  // Sincronizar con signal del servicio (se actualiza automáticamente)
-  private syncDocumentos() {
-    const docs = this.documentoService.documentos();
-    this.allDocumentos.set([...docs]);
-  }
-  
   toggleDropdown(id: number, event: Event): void {
     event.stopPropagation();
     this.openDropdownId.update(current => current === id ? null : id);
@@ -138,8 +137,10 @@ export class ExpedientesPage implements OnInit {
   }
 
   get usuariosDisponibles(): string[] {
-    const area = this.derivarArea();
-    return area ? this.usuariosPorArea[area] || [] : [];
+    const areaId = this.derivarAreaId();
+    // Este getter ahora es menos relevante con la carga reactiva, 
+    // pero lo fixeo para evitar el error de compilación.
+    return []; 
   }
 
   get autoNumeracion(): string {
@@ -367,41 +368,57 @@ export class ExpedientesPage implements OnInit {
   openDerivarModal(doc: Documento): void {
     if (doc.estado !== 'REGISTRADO') return;
     this.derivandoDocumento.set(doc);
-    this.derivarArea.set('');
-    this.derivarUsuario.set('');
+    this.derivarAreaId.set(null);
+    this.derivarUsuarioId.set(null);
     this.derivarObs.set('');
+    this.usuariosDestino.set([]);
     this.showDerivarModal.set(true);
   }
 
   closeDerivarModal(): void {
     this.showDerivarModal.set(false);
     this.derivandoDocumento.set(null);
-    this.derivarArea.set('');
-    this.derivarUsuario.set('');
+    this.derivarAreaId.set(null);
+    this.derivarUsuarioId.set(null);
     this.derivarObs.set('');
+    this.usuariosDestino.set([]);
+  }
+
+  onAreaDestinoChange(areaId: any): void {
+    const id = Number(areaId);
+    this.derivarAreaId.set(id);
+    this.derivarUsuarioId.set(null);
+    this.usuariosDestino.set([]);
+    
+    if (id) {
+      this.isLoadingUsuarios.set(true);
+      this.apiService.getUsuarios(id).subscribe({
+        next: (users) => {
+          this.usuariosDestino.set(users);
+          this.isLoadingUsuarios.set(false);
+        },
+        error: () => this.isLoadingUsuarios.set(false)
+      });
+    }
   }
 
   confirmarDerivacion(): void {
-    const areaId = Number(this.derivarArea());
-    const usuarioId = Number(this.derivarUsuario());
+    const areaId = this.derivarAreaId();
+    const usuarioId = this.derivarUsuarioId();
     const doc = this.derivandoDocumento();
+    const currentUser = this.user();
 
     if (!areaId || !usuarioId || !doc) {
       return;
     }
 
-    this.documentoService.update(doc.id, {
-      areaDestinoId: areaId,
-      usuarioDestinoId: usuarioId,
-      observaciones: this.derivarObs(),
-      estadoId: 2 // INGRESADO
-    });
+    this.documentoService.derivar(
+      doc.id, 
+      areaId, 
+      usuarioId, 
+      currentUser ? currentUser.id : undefined
+    );
     this.closeDerivarModal();
-  }
-
-  onAreaChange(area: string): void {
-    this.derivarArea.set(area);
-    this.derivarUsuario.set('');
   }
 
   Math = Math;

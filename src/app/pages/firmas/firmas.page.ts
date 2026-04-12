@@ -60,8 +60,8 @@ export class FirmasPage implements OnInit {
   get tiposDocumento() { return this.catalogService.tiposDocumento(); }
   get estados() { return this.catalogService.estados(); }
   
-  // State
-  allFirmas = signal<Firma[]>([]);
+  // State local que sincroniza con el servicio
+  allFirmas = computed(() => this.firmaService.firmas());
   loading = this.firmaService.loading;
   selectedFirma = signal<Firma | null>(null);
   showSignModal = signal(false);
@@ -89,19 +89,10 @@ export class FirmasPage implements OnInit {
     this.catalogService.loadEstados();
     
     // Cargar firmas desde API usando el ID del usuario actual
-    const usuarioId = this.user()?.id;
+    const usuarioId = this.authService.user()?.id;
     if (usuarioId) {
       this.firmaService.loadAll({ usuarioAsignadoId: usuarioId });
     }
-    
-    // Sincronizar con señal local
-    const sync = setInterval(() => {
-      const firmas = this.firmaService.firmas();
-      if (firmas.length > 0) {
-        this.allFirmas.set([...firmas]);
-        clearInterval(sync);
-      }
-    }, 500);
   }
 
   // KPIs
@@ -188,20 +179,33 @@ export class FirmasPage implements OnInit {
         a.click();
         window.URL.revokeObjectURL(url);
         
-        // Marcar como descargado
-        this.firmaService.descargar(firma.id, '127.0.0.1');
+        // Recargar el listado para reflejar el cambio de estado automático del backend
+        const usuarioId = this.authService.user()?.id;
+        if (usuarioId) {
+          this.firmaService.loadAll({ usuarioAsignadoId: usuarioId });
+        }
         
         Swal.fire({
           toast: true,
           position: 'top-end',
           icon: 'success',
-          title: 'Documento descargado. Estado actualizado a PENDIENTE.',
+          title: 'Documento descargado',
+          text: 'El estado se ha actualizado a PENDIENTE.',
           showConfirmButton: false,
-          timer: 3000
+          timer: 3000,
+          timerProgressBar: true,
+          iconColor: '#2C5AAB',
+          background: '#fff',
+          color: '#2C5AAB'
         });
       },
       error: (err) => {
-        alert('Error al descargar: ' + (err.message || 'Error desconocido'));
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al descargar',
+          text: err.message || 'Error desconocido',
+          confirmButtonColor: '#AB2741'
+        });
       }
     });
   }

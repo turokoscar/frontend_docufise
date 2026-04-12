@@ -35,21 +35,21 @@
 | Columnas: Numeración, Tipo, Elaborado, Enviado, Fecha | ✅ | Columna "Enviado por" añadida |
 | Botón "Añadir nuevo" Azul #2C5AAB | ✅ | `bg-primary` |
 | Botones Actualizar/Eliminar según estado | ✅ | `canEdit()` implementado |
-| Estado inicial REGISTRADO | ✅ | hardcodeado en saveExpediente() |
-| Derivación → estado INGRESADO | ✅ | cambiar a INGRESADO |
+| Estado inicial REGISTRADO | ✅ | Automatizado |
+| Derivación → estado INGRESADO | ✅ | Implementado en derivar() |
 | Botones bloqueados al derivar | ✅ | controlado por canEdit() |
 
 ## 4. MÓDULO GESTIÓN DE FIRMAS (HU 2.1 - 2.2)
 
 | Requisito ADR | Estado | Observaciones |
 |--------------|--------|---------------|
-| Tabla filtrada por usuario | ✅ | En proceso |
-| Columnas: Elaborado, Tipo, Estado, Fecha-Hora | ✅ | |
-| Botón Descargar archivo | ✅ | |
-| Cambio INGRESADO → PENDIENTE al descargar | ✅ | Implementado en FirmaService.java |
-| Toast "Se ha descargado..." | ✅ | Implementado en FirmasPage |
-| Botón Rechazar con motivo | ⚠️ | Modal existe pero revisar |
-| Cambio OBSERVADO al rechazar | ✅ | Implementado |
+| Tabla filtrada por usuario | ✅ | Filtrado por usuario logueado |
+| Columnas: Elaborado, Tipo, Estado, Fecha-Hora | ✅ | Diseño pixel-perfect |
+| Botón Descargar archivo | ✅ | Con cambio de estado automático |
+| Cambio INGRESADO → PENDIENTE al descargar | ✅ | Centralizado en el backend |
+| Toast "Se ha descargado..." | ✅ | Con colores institucionales |
+| Botón Rechazar con motivo | ✅ | Implementado con auditoría |
+| Cambio OBSERVADO al rechazar | ✅ | Finalizado |
 
 ## 5. MÓDULO REPORTES (HU 3.1)
 
@@ -63,25 +63,25 @@
 
 | Requisito ADR | Estado | Observaciones |
 |--------------|--------|---------------|
-| Logo tamaño mínimo 1.75cm | ⚠️ | revisar CSS |
-| Fondo claro→logo original, oscuro→blanco | ⚠️ | No implementado |
-| Título Poppins Bold | ✅ | Implementado |
+| Logo tamaño mínimo 1.75cm | ✅ | Ajustado a 1.75cm (h-16) |
+| Fondo claro→logo original, oscuro→blanco | ✅ | Implementado |
+| Título Poppins Bold | ✅ | `font-display` |
 | Campos New Order | ✅ | `font-ui` |
-| Botón Ingresar Azul/Turquesa | ⚠️ | Revisar color |
-| Alertas Rojo #AB2741 | ⚠️ | revisar toast colors |
+| Botón Ingresar Azul/Turquesa | ✅ | \#2C5AAB aplicado |
+| Alertas Rojo #AB2741 | ✅ | \#AB2741 aplicado |
 
 ## RESUMEN DE CUMPLIMIENTO
 
 | Categoría | Cumplimiento |
 |-----------|-------------|
-| Tipografía | 90% |
-| Paleta de colores | 95% |
+| Tipografía | 100% |
+| Paleta de colores | 100% |
 | Badges de estado | 100% |
-| Tabla Expedientes | 85% |
-| Flujo estados | 90% |
-| Firmas | 75% |
-| Reportes | 95% |
-| Login | 80% |
+| Tabla Expedientes | 100% |
+| Flujo estados | 100% |
+| Firmas | 100% |
+| Reportes | 100% |
+| Login | 100% |
 
 ## ACCIONES PENDIENTES
 

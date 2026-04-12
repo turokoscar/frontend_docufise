@@ -59,4 +59,15 @@ export class DocumentoService {
       error: () => this._loading.set(false)
     });
   }
+
+  derivar(id: number, areaDestinoId?: number, usuarioDestinoId?: number, usuarioEnviaId?: number): void {
+    this._loading.set(true);
+    this.api.derivarDocumento(id, areaDestinoId, usuarioDestinoId, usuarioEnviaId).subscribe({
+      next: () => {
+        this.loadAll();
+        this._loading.set(false);
+      },
+      error: () => this._loading.set(false)
+    });
+  }
 }

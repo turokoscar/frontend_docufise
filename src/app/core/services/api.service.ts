@@ -145,6 +145,15 @@ export class ApiService {
     return this.http.delete<void>(`${this.baseUrl}/documentos/${id}`);
   }
 
+  derivarDocumento(id: number, areaDestinoId?: number, usuarioDestinoId?: number, usuarioEnviaId?: number): Observable<Documento> {
+    let params = new HttpParams();
+    if (areaDestinoId) params = params.set('areaDestinoId', areaDestinoId.toString());
+    if (usuarioDestinoId) params = params.set('usuarioDestinoId', usuarioDestinoId.toString());
+    if (usuarioEnviaId) params = params.set('usuarioEnviaId', usuarioEnviaId.toString());
+    
+    return this.http.patch<Documento>(`${this.baseUrl}/documentos/${id}/derivar`, {}, { params });
+  }
+
   // Firmas
   getFirmas(params?: FirmasParams): Observable<Firma[]> {
     let httpParams = new HttpParams();
@@ -176,8 +185,10 @@ export class ApiService {
   }
 
   // Usuarios
-  getUsuarios(): Observable<UsuarioSistema[]> {
-    return this.http.get<UsuarioSistema[]>(`${this.baseUrl}/usuarios`);
+  getUsuarios(areaId?: number): Observable<UsuarioSistema[]> {
+    let params = new HttpParams();
+    if (areaId) params = params.set('areaId', areaId.toString());
+    return this.http.get<UsuarioSistema[]>(`${this.baseUrl}/usuarios`, { params });
   }
 
   getUsuario(id: number): Observable<UsuarioSistema> {
