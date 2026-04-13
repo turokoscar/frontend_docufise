@@ -16,8 +16,8 @@
     icon="lucideFileText"
   >
     <div actions class="flex items-center gap-3">
-      <app-ui-button variant="white" size="lg" (onClick)="exportToExcel()">
-        <ng-icon name="lucideFileSpreadsheet" class="h-4 w-4 text-[#2C5AAB]"></ng-icon>
+      <app-ui-button variant="outline" size="lg" (onClick)="exportToExcel()">
+        <ng-icon name="lucideFileSpreadsheet" class="h-4 w-4"></ng-icon>
         Exportar Excel
       </app-ui-button>
       <app-ui-button variant="primary" size="lg" (onClick)="openNewForm()">
@@ -28,24 +28,21 @@
   </app-ui-page-header>
 
   <!-- KPI Section -->
-  <div class="space-y-0">
-    <app-ui-section-label label="Resumen General"></app-ui-section-label>
-    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-      @for (kpi of kpis(); track kpi.label) {
-        <app-ui-kpi-card
-          [label]="kpi.label"
-          [value]="kpi.value"
-          [icon]="kpi.icon"
-          [color]="kpi.color"
-        ></app-ui-kpi-card>
-      }
-    </div>
+  <app-ui-section-label label="Resumen General"></app-ui-section-label>
+  <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+    @for (kpi of kpis(); track kpi.label) {
+      <app-ui-kpi-card
+        [label]="kpi.label"
+        [value]="kpi.value"
+        [icon]="kpi.icon"
+        [color]="kpi.color"
+      ></app-ui-kpi-card>
+    }
   </div>
 
   <!-- Filters Section -->
-  <div class="space-y-0 pt-2">
-    <app-ui-section-label label="Filtros de búsqueda"></app-ui-section-label>
-    <app-ui-filter-panel>
+  <app-ui-section-label label="Filtros de búsqueda" tooltip="Use los filtros para buscar expedientes por numeración, elaborador, tipo o estado"></app-ui-section-label>
+  <app-ui-filter-panel>
       <!-- Search -->
       <app-ui-input 
         label="Buscar" 
@@ -87,15 +84,11 @@
     </app-ui-filter-panel>
   </div>
 
-  <div class="flex items-center justify-between pt-4">
-    <div class="flex items-center gap-2">
-      <div class="w-1 h-4 bg-[#2C5AAB] rounded-full"></div>
-      <h3 class="font-ui text-[11px] font-bold text-muted-foreground uppercase tracking-widest">Bandeja de Expedientes</h3>
-    </div>
+  <app-ui-section-label label="Bandeja de Expedientes">
     <div class="text-[11px] font-ui text-[#64748B] tracking-tight">
       {{ paginationSummary() }}
     </div>
-  </div>
+  </app-ui-section-label>
 
   <!-- Main Table -->
   <app-ui-table>
@@ -114,31 +107,28 @@
       @for (doc of paginatedDocumentos(); track doc.id; let i = $index) {
         <tr class="hover:bg-primary/5 transition-colors" [ngClass]="{'bg-muted/10': i % 2 !== 0}">
           <td class="px-6 py-4">
-            <span class="font-ui font-bold text-[#2C5AAB] text-sm">{{ doc.numeracion }}</span>
+            <span class="font-ui font-bold text-[#2C5AAB] text-sm hover:underline cursor-pointer">{{ doc.numeracion }}</span>
           </td>
           <td class="px-6 py-4">
             <div class="flex items-center gap-2">
-              <ng-icon name="lucideFile" class="text-[#2C5AAB]"></ng-icon>
-              <span class="font-body text-sm font-medium">{{ doc.tipoDocumento }}</span>
+              <ng-icon name="lucideFile" class="text-[#64748B] text-xs"></ng-icon>
+              <span class="font-body text-[13px] font-medium text-[#1E293B]">{{ doc.tipoDocumento }}</span>
             </div>
           </td>
-          <td class="px-6 py-4 font-body text-sm font-bold text-foreground">
+          <td class="px-6 py-4 font-body text-[13px] font-bold text-[#1E293B]">
             {{ doc.usuarioElabora }}
           </td>
-          <td class="px-6 py-4 font-body text-sm text-foreground font-medium">
+          <td class="px-6 py-4 font-body text-[13px] text-[#64748B] font-medium">
             {{ doc.usuarioEnvia || '---' }}
           </td>
-          <td class="px-6 py-4 font-body text-sm text-primary/80 font-semibold">
+          <td class="px-6 py-4 font-body text-[13px] text-[#2C5AAB]/80 font-semibold">
             {{ doc.areaDestino || '---' }}
           </td>
-          <td class="px-6 py-4 font-body text-sm text-muted-foreground tabular-nums">
+          <td class="px-6 py-4 font-body text-[13px] text-[#64748B] tabular-nums">
             {{ doc.fechaElaboracion }}
           </td>
           <td class="px-6 py-4 text-center">
-            <app-ui-badge [variant]="(doc.estado || '').toLowerCase() === 'firmado' ? 'success' : 
-                                    (doc.estado || '').toLowerCase() === 'pendiente' ? 'warning' : 
-                                    (doc.estado || '').toLowerCase() === 'observado' ? 'destructive' : 
-                                    (doc.estado || '').toLowerCase() === 'ingresado' ? 'primary' : 'muted'">
+            <app-ui-badge [variant]="getBadgeVariant(doc.estado)">
               {{ doc.estado }}
             </app-ui-badge>
           </td>
@@ -150,7 +140,7 @@
               </app-ui-button>
               
               <div items>
-                @if ((doc.estado || '').toUpperCase() === 'INGRESADO') {
+                @if ((doc.estado || '').toUpperCase() === 'REGISTRADO') {
                   <button (click)="openDerivarModal(doc)" class="w-full flex items-center gap-2 px-3 py-2 text-xs font-ui hover:bg-muted text-left">
                     <ng-icon name="lucideSend" class="h-4 w-4 text-primary"></ng-icon>
                     Derivar expediente
@@ -158,11 +148,11 @@
                 }
                 <button (click)="openEditForm(doc)" [disabled]="!canEdit(doc)" class="w-full flex items-center gap-2 px-3 py-2 text-xs font-ui hover:bg-muted text-left disabled:opacity-50">
                   <ng-icon name="lucidePencil" class="h-4 w-4 text-secondary"></ng-icon>
-                  Actualizar expediente
+                  Actualizar
                 </button>
                 <button (click)="deleteDocumento(doc)" [disabled]="!canEdit(doc)" class="w-full flex items-center gap-2 px-3 py-2 text-xs font-ui hover:bg-muted text-destructive text-left disabled:opacity-50">
                   <ng-icon name="lucideTrash2" class="h-4 w-4"></ng-icon>
-                  Eliminar expediente
+                  Eliminar
                 </button>
               </div>
             </app-ui-dropdown>
@@ -221,7 +211,6 @@
       </app-ui-button>
     </div>
   </app-ui-table>
-</div>
 
 <!-- Modal Components -->
 <app-expediente-form

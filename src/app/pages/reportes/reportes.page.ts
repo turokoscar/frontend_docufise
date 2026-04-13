@@ -1,7 +1,8 @@
-import { Component, signal, computed, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, computed, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DocumentoService } from '../../core/services/documento.service';
 import { AuthService } from '../../core/services/auth.service';
+import { ApiService } from '../../core/services/api.service';
 import { Documento } from '../../core/models/documento.model';
 import { ESTADOS_EXPEDIENTE } from '../../core/constants/states.constants';
 
@@ -36,7 +37,6 @@ import * as XLSX from 'xlsx';
 @Component({
   selector: 'app-reportes',
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule, 
     NgIconComponent, 
@@ -58,15 +58,18 @@ import * as XLSX from 'xlsx';
 export class ReportesPage implements OnInit {
   private documentoService = inject(DocumentoService);
   private authService = inject(AuthService);
+  private apiService = inject(ApiService);
+  private cdr = inject(ChangeDetectorRef);
 
   user = this.authService.user;
   private allDocumentos = signal<Documento[]>([]);
+  private estadisticas = signal<any>(null);
   
   constructor() { }
 
   ngOnInit(): void {
     this.documentoService.loadAll();
-    // Simple polling for initial data sync (could be improved with a selector)
+    this.loadEstadisticas();
     const sync = setInterval(() => {
       const docs = this.documentoService.documentos();
       if (docs.length > 0) {
@@ -74,6 +77,49 @@ export class ReportesPage implements OnInit {
         clearInterval(sync);
       }
     }, 500);
+  }
+
+  private loadEstadisticas(): void {
+    this.apiService.getEstadisticas().subscribe({
+      next: (response: any) => {
+        // El interceptor ya desenvuelve la respuesta, response YA ES datos
+        if (response) {
+          this.estadisticas.set(response);
+          this.updateBarChart();
+          this.cdr.detectChanges();
+        }
+      },
+      error: (err) => console.error('Error cargando estadísticas:', err)
+    });
+  }
+
+  private updateBarChart(): void {
+    const stats = this.estadisticas();
+    if (!stats || !stats.tendenciaMensual) return;
+    
+    const meses = stats.tendenciaMensual.map((m: any) => m.mes);
+    const cantidadDocs = stats.tendenciaMensual.map((m: any) => m.cantidadDocumentos);
+    const cantidadFirmas = stats.tendenciaMensual.map((m: any) => m.cantidadFirmas);
+    
+    this.barChartData.set({
+      labels: meses,
+      datasets: [
+        { 
+          data: cantidadDocs, 
+          label: 'Documentos', 
+          backgroundColor: '#2C5AAB',
+          borderRadius: 8,
+          barThickness: 24
+        },
+        { 
+          data: cantidadFirmas, 
+          label: 'Firmas', 
+          backgroundColor: '#0FBF90',
+          borderRadius: 8,
+          barThickness: 24
+        }
+      ]
+    });
   }
 
   kpis = computed(() => {
@@ -129,25 +175,26 @@ export class ReportesPage implements OnInit {
       tooltip: { padding: 12 }
     }
   };
-  public barChartData: ChartData<'bar'> = {
+  
+  barChartData = signal<ChartData<'bar'>>({
     labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
     datasets: [
       { 
-        data: [15, 28, 42, 35, 56, 48], 
+        data: [0, 0, 0, 0, 0, 0], 
         label: 'Documentos', 
         backgroundColor: '#2C5AAB',
         borderRadius: 8,
         barThickness: 24
       },
       { 
-        data: [10, 22, 38, 30, 48, 42], 
+        data: [0, 0, 0, 0, 0, 0], 
         label: 'Firmas', 
         backgroundColor: '#0FBF90',
         borderRadius: 8,
         barThickness: 24
       }
     ]
-  };
+  });
   public barChartType: ChartType = 'bar';
 
   get pieChartData(): ChartData<'pie', number[], string | string[]> {

@@ -6,22 +6,22 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="bg-card border-none shadow-sm overflow-visible rounded-2xl">
-      <div class="overflow-x-auto overflow-y-visible rounded-2xl">
+    <div class="bg-card border border-border/40 shadow-sm overflow-visible">
+      <div class="overflow-x-auto overflow-y-visible">
         <table class="w-full text-left border-collapse">
           <thead class="bg-[#2C5AAB] text-white">
-            <tr class="h-12 uppercase">
+            <tr class="h-11">
               <ng-content select="[headers]"></ng-content>
             </tr>
           </thead>
-          <tbody class="divide-y divide-border/30">
+          <tbody class="divide-y divide-border/30 bg-white">
             <ng-content select="[rows]"></ng-content>
           </tbody>
         </table>
       </div>
       
       <!-- Footer/Pagination Slot -->
-      <div class="border-t border-border bg-[#F9FAFB]/50 rounded-b-2xl">
+      <div class="border-t border-border/50 bg-[#F9FAFB] py-3 px-4">
         <ng-content select="[footer]"></ng-content>
       </div>
     </div>

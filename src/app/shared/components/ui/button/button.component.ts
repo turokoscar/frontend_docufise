@@ -38,15 +38,15 @@ export class UiButtonComponent {
   onClick = output<MouseEvent>();
 
   protected buttonClasses = computed(() => {
-    const baseClasses = 'inline-flex items-center justify-center rounded-xl font-ui font-bold transition-all duration-200 outline-none focus:ring-4 disabled:opacity-50 disabled:cursor-not-allowed';
+    const baseClasses = 'inline-flex items-center justify-center rounded-lg font-ui font-bold transition-all duration-200 outline-none focus:ring-4 disabled:opacity-50 disabled:cursor-not-allowed';
     
     const variantClasses: Record<ButtonVariant, string> = {
-      primary: 'bg-[#2C5AAB] text-white hover:bg-[#244b8f] shadow-md shadow-[#2C5AAB]/20 focus:ring-[#2C5AAB]/10',
+      primary: 'bg-[#2C5AAB] text-white hover:bg-[#204381] shadow-md shadow-[#2C5AAB]/20 focus:ring-[#2C5AAB]/10',
       secondary: 'bg-[#0FAEBF] text-white hover:bg-[#0d9aa9] shadow-md shadow-[#0FAEBF]/20 focus:ring-[#0FAEBF]/10',
-      outline: 'bg-white border border-[#CBD5E1] text-[#334155] hover:bg-[#F8FAFC] focus:ring-[#F8FAFC]',
-      ghost: 'bg-transparent text-muted-foreground hover:bg-muted focus:ring-muted',
-      destructive: 'bg-[#AB2741] text-white hover:bg-[#8e2036] shadow-md shadow-[#AB2741]/20 focus:ring-[#AB2741]/10',
-      white: 'bg-white text-[#334155] hover:bg-[#F8FAFC] border border-[#CBD5E1] shadow-sm'
+      outline: 'bg-white border border-[#E2E8F0] text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#2C5AAB] hover:border-[#2C5AAB]/30 focus:ring-[#F1F5F9]',
+      ghost: 'bg-transparent text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#2C5AAB] focus:ring-muted',
+      destructive: 'bg-[#AB2741] text-white hover:bg-[#8B1F33] shadow-sm focus:ring-[#AB2741]/10',
+      white: 'bg-white text-[#334155] hover:bg-[#F8FAFC] border border-[#E2E8F0] shadow-sm'
     };
 
     const sizeClasses: Record<ButtonSize, string> = {

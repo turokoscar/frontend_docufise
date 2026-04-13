@@ -141,7 +141,7 @@ export class ExpedientesPage implements OnInit {
   }
   
   canEdit(doc: Documento): boolean {
-    const estado = doc.estado;
+    const estado = (doc.estado || '').toUpperCase();
     return estado === ESTADOS_EXPEDIENTE.REGISTRADO || estado === ESTADOS_EXPEDIENTE.OBSERVADO;
   }
 
@@ -164,10 +164,10 @@ export class ExpedientesPage implements OnInit {
     const countByState = (s: string) => data.filter((doc: Documento) => (doc.estado || '').toUpperCase() === s.toUpperCase()).length;
     return [
       { label: "Total", value: data.length, icon: 'lucideFile', color: "#2C5AAB" },
-      { label: "Registrados", value: countByState(ESTADOS_EXPEDIENTE.REGISTRADO), icon: 'lucideFile', color: "#3B7DCC" },
-      { label: "Pendientes", value: countByState(ESTADOS_EXPEDIENTE.PENDIENTE), icon: 'lucideClock', color: "#F2B801" },
-      { label: "Firmados", value: countByState(ESTADOS_EXPEDIENTE.FIRMADO), icon: 'lucideCircleCheck', color: "#0FBF90" },
-      { label: "Observados", value: countByState(ESTADOS_EXPEDIENTE.OBSERVADO), icon: 'lucideTriangleAlert', color: "#AB2741" },
+      { label: "Registrados", value: countByState(ESTADOS_EXPEDIENTE.REGISTRADO), icon: 'lucideFile', color: "#3B82F6" },
+      { label: "Pendientes", value: countByState(ESTADOS_EXPEDIENTE.PENDIENTE), icon: 'lucideClock', color: "#F59E0B" },
+      { label: "Firmados", value: countByState(ESTADOS_EXPEDIENTE.FIRMADO), icon: 'lucideCircleCheck', color: "#10B981" },
+      { label: "Observados", value: countByState(ESTADOS_EXPEDIENTE.OBSERVADO), icon: 'lucideTriangleAlert', color: "#EF4444" },
     ];
   });
 
@@ -237,6 +237,12 @@ export class ExpedientesPage implements OnInit {
     if (page >= 1 && page <= this.totalPages()) this.currentPage.set(page);
   }
 
+  getBadgeVariant(estado: string | undefined): any {
+    const e = (estado || '').toLowerCase();
+    const variants = ['firmado', 'pendiente', 'observado', 'ingresado', 'registrado', 'success', 'warning', 'destructive', 'primary', 'muted', 'none'];
+    return variants.includes(e) ? e : 'none';
+  }
+
   // CRUD Handlers
   openNewForm(): void {
     this.editingDocumento.set(null);
@@ -257,7 +263,7 @@ export class ExpedientesPage implements OnInit {
   }
 
   openDerivarModal(doc: Documento): void {
-    if (doc.estado !== ESTADOS_EXPEDIENTE.REGISTRADO) return;
+    if ((doc.estado || '').toUpperCase() !== ESTADOS_EXPEDIENTE.REGISTRADO) return;
     this.derivandoDocumento.set(doc);
     this.showDerivarModal.set(true);
   }

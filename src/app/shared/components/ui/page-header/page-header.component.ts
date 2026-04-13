@@ -7,18 +7,19 @@ import { NgIconComponent } from '@ng-icons/core';
   standalone: true,
   imports: [CommonModule, NgIconComponent],
   template: `
-    <div class="bg-card border border-primary/10 shadow-sm relative overflow-hidden rounded-xl">
-      <!-- Subtle gradient bg -->
-      <div class="absolute inset-0 bg-gradient-to-r from-primary/5 via-primary/3 to-transparent"></div>
+    <div class="bg-card border border-border/40 shadow-sm relative overflow-hidden rounded-xl">
+      <!-- Clean background pattern -->
+      <div class="absolute inset-0 bg-[#F8FAFC]"></div>
+      <div class="absolute top-0 right-0 w-64 h-64 bg-[#2C5AAB]/5 rounded-full blur-3xl -mr-32 -mt-32"></div>
       
-      <div class="flex flex-col md:flex-row md:items-center justify-between p-5 relative z-10">
-        <div class="flex items-center gap-4">
-          <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 backdrop-blur-md border border-primary/10 transition-transform hover:scale-105 duration-300">
-            <ng-icon [name]="icon" class="text-3xl text-primary"></ng-icon>
+      <div class="flex flex-col md:flex-row md:items-center justify-between p-6 relative z-10">
+        <div class="flex items-center gap-5">
+          <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-white shadow-sm border border-border/10">
+            <ng-icon [name]="icon" class="text-3xl text-[#2C5AAB]"></ng-icon>
           </div>
           <div>
-            <h2 class="font-display text-2xl font-extrabold text-foreground tracking-tight">{{ title }}</h2>
-            <p class="text-sm text-muted-foreground font-body mt-0.5 max-w-md leading-relaxed">{{ subtitle }}</p>
+            <h2 class="font-display text-2xl font-extrabold text-[#1E293B] tracking-tight">{{ title }}</h2>
+            <p class="text-[13px] text-[#64748B] font-body mt-0.5 max-w-md leading-relaxed">{{ subtitle }}</p>
           </div>
         </div>
         

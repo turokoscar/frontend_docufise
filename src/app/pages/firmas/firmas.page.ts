@@ -112,10 +112,10 @@ export class FirmasPage implements OnInit {
     const countByState = (s: string) => data.filter((f: Firma) => (f.estado || '').toUpperCase() === s.toUpperCase()).length;
     return [
       { label: "Bandeja", value: data.length, icon: 'lucideInbox', color: "#2C5AAB" },
-      { label: "Ingresados", value: countByState(ESTADOS_EXPEDIENTE.INGRESADO), icon: 'lucideDownload', color: "#2C5AAB" },
-      { label: "Pendientes", value: countByState(ESTADOS_EXPEDIENTE.PENDIENTE), icon: 'lucideClock', color: "#F2B801" },
-      { label: "Firmados", value: countByState(ESTADOS_EXPEDIENTE.FIRMADO), icon: 'lucideCircleCheck', color: "#0FBF90" },
-      { label: "Observados", value: countByState(ESTADOS_EXPEDIENTE.OBSERVADO), icon: 'lucideTriangleAlert', color: "#AB2741" },
+      { label: "Ingresados", value: countByState(ESTADOS_EXPEDIENTE.INGRESADO), icon: 'lucideDownload', color: "#6366F1" },
+      { label: "Pendientes", value: countByState(ESTADOS_EXPEDIENTE.PENDIENTE), icon: 'lucideClock', color: "#F59E0B" },
+      { label: "Firmados", value: countByState(ESTADOS_EXPEDIENTE.FIRMADO), icon: 'lucideCircleCheck', color: "#10B981" },
+      { label: "Observados", value: countByState(ESTADOS_EXPEDIENTE.OBSERVADO), icon: 'lucideTriangleAlert', color: "#EF4444" },
     ];
   });
 
@@ -254,5 +254,11 @@ export class FirmasPage implements OnInit {
 
   setPage(page: number): void {
     if (page >= 1 && page <= this.totalPages()) this.currentPage.set(page);
+  }
+
+  getBadgeVariant(estado: string | undefined): any {
+    const e = (estado || '').toLowerCase();
+    const variants = ['firmado', 'pendiente', 'observado', 'ingresado', 'registrado', 'success', 'warning', 'destructive', 'primary', 'muted', 'none'];
+    return variants.includes(e) ? e : 'none';
   }
 }

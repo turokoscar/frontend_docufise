@@ -16,32 +16,29 @@
     icon="lucidePenTool"
   >
     <div actions>
-      <app-ui-button variant="white" size="lg" (onClick)="exportToExcel()">
-        <ng-icon name="lucideFileSpreadsheet" class="h-4 w-4 text-[#2C5AAB]"></ng-icon>
+      <app-ui-button variant="outline" size="lg" (onClick)="exportToExcel()">
+        <ng-icon name="lucideFileSpreadsheet" class="h-4 w-4"></ng-icon>
         Exportar Reporte
       </app-ui-button>
     </div>
   </app-ui-page-header>
 
   <!-- KPI Strip -->
-  <div class="space-y-0">
-    <app-ui-section-label label="Resumen de Pendientes"></app-ui-section-label>
-    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-      @for (kpi of kpis(); track kpi.label) {
-        <app-ui-kpi-card
-          [label]="kpi.label"
-          [value]="kpi.value"
-          [icon]="kpi.icon"
-          [color]="kpi.color"
-        ></app-ui-kpi-card>
-      }
-    </div>
+  <app-ui-section-label label="Resumen de Pendientes"></app-ui-section-label>
+  <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+    @for (kpi of kpis(); track kpi.label) {
+      <app-ui-kpi-card
+        [label]="kpi.label"
+        [value]="kpi.value"
+        [icon]="kpi.icon"
+        [color]="kpi.color"
+      ></app-ui-kpi-card>
+    }
   </div>
 
   <!-- Filters Section -->
-  <div class="space-y-0 pt-2">
-    <app-ui-section-label label="Búsqueda y Filtros"></app-ui-section-label>
-    <app-ui-filter-panel>
+  <app-ui-section-label label="Búsqueda y Filtros"></app-ui-section-label>
+  <app-ui-filter-panel>
       <app-ui-input 
         label="Búsqueda rápida" 
         [icon]="true"
@@ -79,15 +76,11 @@
     </app-ui-filter-panel>
   </div>
 
-  <div class="flex items-center justify-between pt-4">
-    <div class="flex items-center gap-2">
-      <div class="w-1 h-4 bg-[#2C5AAB] rounded-full"></div>
-      <h3 class="font-ui text-[11px] font-bold text-muted-foreground uppercase tracking-widest">Documentos por Firmar</h3>
-    </div>
+  <app-ui-section-label label="Documentos por Firmar">
     <div class="text-[11px] font-ui text-[#64748B] tracking-tight">
       {{ paginationSummary() }}
     </div>
-  </div>
+  </app-ui-section-label>
 
   <!-- Main Table -->
   <app-ui-table>
@@ -120,10 +113,7 @@
             {{ f.fechaAsignacion | date:'dd/MM/yyyy HH:mm' }}
           </td>
           <td class="px-6 py-4 text-center">
-            <app-ui-badge [variant]="(f.estado || '').toLowerCase() === 'firmado' ? 'success' : 
-                                    (f.estado || '').toLowerCase() === 'pendiente' ? 'warning' : 
-                                    (f.estado || '').toLowerCase() === 'observado' ? 'destructive' : 
-                                    (f.estado || '').toLowerCase() === 'ingresado' ? 'primary' : 'muted'">
+            <app-ui-badge [variant]="getBadgeVariant(f.estado)">
               {{ f.estado }}
             </app-ui-badge>
           </td>
@@ -210,7 +200,6 @@
       </app-ui-button>
     </div>
   </app-ui-table>
-</div>
 
 <!-- Modal Components -->
 <app-sign-modal

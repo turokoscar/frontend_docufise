@@ -1,7 +1,7 @@
 export const ESTADOS_EXPEDIENTE = {
-  REGISTRADO: 'Registrado',
-  INGRESADO: 'Ingresado',
-  PENDIENTE: 'Pendiente',
-  OBSERVADO: 'Observado',
-  FIRMADO: 'Firmado'
+  REGISTRADO: 'REGISTRADO',
+  INGRESADO: 'INGRESADO',
+  PENDIENTE: 'PENDIENTE',
+  OBSERVADO: 'OBSERVADO',
+  FIRMADO: 'FIRMADO'
 };

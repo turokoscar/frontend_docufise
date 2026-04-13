@@ -304,4 +304,9 @@ export class ApiService {
       responseType: 'blob'
     });
   }
+
+  // Estadísticas
+  getEstadisticas(): Observable<any> {
+    return this.http.get(`${this.baseUrl}/documentos/estadisticas`);
+  }
 }
