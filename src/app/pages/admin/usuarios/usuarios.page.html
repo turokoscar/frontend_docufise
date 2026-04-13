@@ -191,11 +191,13 @@
   </app-ui-table>
 </div>
 
-<app-usuario-form
-  [isOpen]="showModal()"
-  [usuario]="editingUsuario()"
-  [roles]="roles()"
-  [areas]="areas()"
-  (onClose)="showModal.set(false)"
-  (onSaved)="saveUsuario($event)"
-></app-usuario-form>
+@if (showModal()) {
+  <app-usuario-form
+    [isOpen]="showModal()"
+    [usuario]="editingUsuario()"
+    [roles]="roles()"
+    [areas]="areas()"
+    (onClose)="showModal.set(false)"
+    (onSaved)="saveUsuario($event)"
+  ></app-usuario-form>
+}

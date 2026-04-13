@@ -52,6 +52,7 @@ import {
   lucideChevronRight
 } from '@ng-icons/lucide';
 import * as XLSX from 'xlsx';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-expedientes',
@@ -257,9 +258,20 @@ export class ExpedientesPage implements OnInit {
 
   deleteDocumento(doc: Documento): void {
     if (!this.canEdit(doc)) return;
-    if (confirm(`¿Está seguro de eliminar el expediente ${doc.numeracion}?`)) {
-      this.documentoService.delete(doc.id);
-    }
+    
+    Swal.fire({
+      title: '¿Eliminar expediente?',
+      text: `¿Confirma eliminar el expediente ${doc.numeracion}?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Eliminar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#AB2741'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.documentoService.delete(doc.id);
+      }
+    });
   }
 
   openDerivarModal(doc: Documento): void {

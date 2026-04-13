@@ -160,10 +160,12 @@
   </app-ui-table>
 </div>
 
-<app-menu-form
-  [isOpen]="showModal()"
-  [menu]="editingMenu()"
-  [nextOrden]="menus().length + 1"
-  (onClose)="showModal.set(false)"
-  (onSaved)="saveMenu($event)"
-></app-menu-form>
+@if (showModal()) {
+  <app-menu-form
+    [isOpen]="showModal()"
+    [menu]="editingMenu()"
+    [nextOrden]="menus().length + 1"
+    (onClose)="showModal.set(false)"
+    (onSaved)="saveMenu($event)"
+  ></app-menu-form>
+}

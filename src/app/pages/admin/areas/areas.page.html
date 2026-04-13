@@ -153,9 +153,11 @@
   </app-ui-table>
 </div>
 
-<app-area-form
-  [isOpen]="showModal()"
-  [area]="editingArea()"
-  (onClose)="showModal.set(false)"
-  (onSaved)="saveArea($event)"
-></app-area-form>
+@if (showModal()) {
+  <app-area-form
+    [isOpen]="showModal()"
+    [area]="editingArea()"
+    (onClose)="showModal.set(false)"
+    (onSaved)="saveArea($event)"
+  ></app-area-form>
+}

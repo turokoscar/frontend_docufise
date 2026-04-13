@@ -9,7 +9,7 @@ import { CommonModule } from '@angular/common';
     <div *ngIf="isOpen()" class="fixed inset-0 z-50 flex items-center justify-center p-4">
       <!-- Backdrop -->
       <div 
-        class="absolute inset-0 bg-black/40 backdrop-blur-sm animate-in fade-in duration-300" 
+        class="absolute inset-0 bg-black/40 backdrop-blur-sm animate-in fade-in duration-150" 
         (click)="onBackdropClick()"
       ></div>
       
@@ -66,7 +66,7 @@ export class UiModalComponent {
   }
 
   protected modalClasses(): string {
-    const base = 'relative bg-card rounded-[24px] shadow-2xl w-full overflow-hidden border border-border/50 animate-in fade-in zoom-in slide-in-from-bottom-4 duration-300';
+    const base = 'relative bg-card rounded-[24px] shadow-2xl w-full overflow-hidden border border-border/50 animate-in fade-in zoom-in-95 slide-in-from-bottom-2 duration-150';
     return `${base} ${this.maxWidth()}`;
   }
 

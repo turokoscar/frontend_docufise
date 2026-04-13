@@ -1,7 +1,7 @@
 import { Component, input, output, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'destructive' | 'white';
+export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'destructive' | 'white' | 'warning';
 export type ButtonSize = 'sm' | 'md' | 'lg' | 'xl';
 
 @Component({
@@ -46,7 +46,8 @@ export class UiButtonComponent {
       outline: 'bg-white border border-[#E2E8F0] text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#2C5AAB] hover:border-[#2C5AAB]/30 focus:ring-[#F1F5F9]',
       ghost: 'bg-transparent text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#2C5AAB] focus:ring-muted',
       destructive: 'bg-[#AB2741] text-white hover:bg-[#8B1F33] shadow-sm focus:ring-[#AB2741]/10',
-      white: 'bg-white text-[#334155] hover:bg-[#F8FAFC] border border-[#E2E8F0] shadow-sm'
+      white: 'bg-white text-[#334155] hover:bg-[#F8FAFC] border border-[#E2E8F0] shadow-sm',
+      warning: 'bg-[#F59E0B] text-white hover:bg-[#D97706] shadow-md shadow-[#F59E0B]/20 focus:ring-[#F59E0B]/10'
     };
 
     const sizeClasses: Record<ButtonSize, string> = {

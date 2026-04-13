@@ -158,10 +158,12 @@
   </app-ui-table>
 </div>
 
-<app-rol-form
-  [isOpen]="showModal()"
-  [rol]="editingRol()"
-  [menus]="allMenus()"
-  (onClose)="showModal.set(false)"
-  (onSaved)="saveRol($event)"
-></app-rol-form>
+@if (showModal()) {
+  <app-rol-form
+    [isOpen]="showModal()"
+    [rol]="editingRol()"
+    [menus]="allMenus()"
+    (onClose)="showModal.set(false)"
+    (onSaved)="saveRol($event)"
+  ></app-rol-form>
+}

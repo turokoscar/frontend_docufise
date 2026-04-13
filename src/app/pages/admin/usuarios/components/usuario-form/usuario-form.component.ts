@@ -1,4 +1,4 @@
-import { Component, input, output, signal, computed, effect } from '@angular/core';
+import { Component, input, output, model, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
@@ -33,37 +33,38 @@ import { RolSistema } from '../../../../../core/models/rol.model';
       [isOpen]="isOpen()" 
       (onClose)="close()"
       maxWidth="max-w-xl"
-      [paddingBody]="false"
     >
-      <div header class="bg-primary -m-6 mb-0 p-8 text-primary-foreground text-center relative rounded-t-2xl">
-        <div class="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mx-auto mb-4 border border-white/20 backdrop-blur-md">
-          <ng-icon name="lucideUsers" class="text-3xl"></ng-icon>
+      <div header class="flex items-center gap-3">
+        <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-primary/10">
+          <ng-icon name="lucideUsers" class="h-5 w-5 text-primary"></ng-icon>
         </div>
-        <h3 class="font-display text-2xl font-extrabold tracking-tight">
-          {{ usuario() ? 'Editar Perfil' : 'Nuevo Usuario' }}
-        </h3>
-        <p class="text-white/70 text-sm font-body mt-2">Control de accesos y configuración de perfil</p>
+        <div>
+          <h3 class="font-display text-lg font-bold">{{ usuario() ? 'Editar Perfil' : 'Nuevo Usuario' }}</h3>
+          <p class="text-xs text-muted-foreground font-body mt-0.5">
+            {{ usuario() ? 'Editando perfil de usuario' : 'Complete los campos para registrar un nuevo usuario' }}
+          </p>
+        </div>
       </div>
 
-      <div body class="p-8 space-y-6">
+      <div body class="space-y-6">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <app-ui-input 
             label="Nombre Completo" 
-            [(ngModel)]="formData.nombreCompleto" 
+            [(ngModel)]="nombreCompleto" 
             name="nombreCompleto"
             placeholder="Ej: Juan Pérez"
           ></app-ui-input>
 
           <app-ui-input 
             label="Usuario de Red" 
-            [(ngModel)]="formData.nombreUsuario" 
+            [(ngModel)]="nombreUsuario" 
             name="nombreUsuario"
             placeholder="jperez"
           ></app-ui-input>
 
           <app-ui-input 
             label="Correo Electrónico" 
-            [(ngModel)]="formData.correo" 
+            [(ngModel)]="correo" 
             name="correo"
             placeholder="ejemplo@fise.gob.pe"
             class="md:col-span-2"
@@ -71,7 +72,8 @@ import { RolSistema } from '../../../../../core/models/rol.model';
 
           <app-ui-select 
             label="Rol de Sistema" 
-            [(ngModel)]="formData.rolId" 
+            [value]="rolId() !== null ? '' + rolId() : ''"
+            (onValueChange)="onRolIdChange($event)"
             name="rolId"
           >
             @for (rol of roles(); track rol.id) {
@@ -81,7 +83,8 @@ import { RolSistema } from '../../../../../core/models/rol.model';
 
           <app-ui-select 
             label="Área Asignada" 
-            [(ngModel)]="formData.areaId" 
+            [value]="areaId() !== null ? '' + areaId() : ''"
+            (onValueChange)="onAreaIdChange($event)"
             name="areaId"
           >
             @for (area of areas(); track area.id) {
@@ -93,7 +96,7 @@ import { RolSistema } from '../../../../../core/models/rol.model';
         <div class="flex items-center gap-3 p-1 group">
           <input 
             type="checkbox" 
-            [(ngModel)]="formData.activo" 
+            [(ngModel)]="activo" 
             name="activo" 
             id="user_activo" 
             class="w-4 h-4 rounded border-border text-primary focus:ring-primary/20"
@@ -104,13 +107,11 @@ import { RolSistema } from '../../../../../core/models/rol.model';
         </div>
       </div>
 
-      <div footer class="flex gap-3">
-        <app-ui-button variant="outline" class="flex-1" (onClick)="close()">
-          Cancelar
-        </app-ui-button>
-        <app-ui-button variant="primary" class="flex-1" [loading]="isSaving()" (onClick)="save()">
+      <div footer class="flex justify-end gap-3">
+        <app-ui-button variant="outline" (onClick)="close()">Cancelar</app-ui-button>
+        <app-ui-button variant="primary" [loading]="isSaving()" (onClick)="save()">
           <ng-icon name="lucideCheck" class="mr-1"></ng-icon>
-          Guardar Usuario
+          {{ usuario() ? 'Actualizar' : 'Guardar' }}
         </app-ui-button>
       </div>
     </app-ui-modal>
@@ -123,56 +124,42 @@ export class UsuarioFormComponent {
   areas = input<AreaSistema[]>([]);
 
   onClose = output<void>();
-  onSaved = output<void>();
+  onSaved = output<any>();
 
   isSaving = signal(false);
+  nombreCompleto = model('');
+  nombreUsuario = model('');
+  correo = model('');
+  rolId = model<number | null>(null);
+  areaId = model<number | null>(null);
+  activo = model(true);
 
-  formData: any = {
-    nombreCompleto: '',
-    nombreUsuario: '',
-    correo: '',
-    rolId: null,
-    areaId: null,
-    activo: true
-  };
-
-  constructor() {
-    effect(() => {
-      const u = this.usuario();
-      if (u) {
-        this.formData = {
-          nombreCompleto: u.nombreCompleto,
-          nombreUsuario: u.nombreUsuario,
-          correo: u.correo,
-          rolId: u.rolId,
-          areaId: u.areaId,
-          activo: u.activo
-        };
-      } else {
-        this.resetForm();
-      }
-    }, { allowSignalWrites: true });
+  onRolIdChange(value: string): void {
+    this.rolId.set(value ? Number(value) : null);
   }
 
-  resetForm(): void {
-    this.formData = {
-      nombreCompleto: '',
-      nombreUsuario: '',
-      correo: '',
-      rolId: this.roles().length > 0 ? this.roles()[0].id : null,
-      areaId: this.areas().length > 0 ? this.areas()[0].id : null,
-      activo: true
+  onAreaIdChange(value: string): void {
+    this.areaId.set(value ? Number(value) : null);
+  }
+
+  save(): void {
+    if (!this.nombreCompleto() || !this.nombreUsuario()) {
+      return;
+    }
+
+    const formData = {
+      nombreCompleto: this.nombreCompleto(),
+      nombreUsuario: this.nombreUsuario(),
+      correo: this.correo(),
+      rolId: this.rolId(),
+      areaId: this.areaId(),
+      activo: this.activo()
     };
+
+    this.onSaved.emit(formData);
   }
 
   close(): void {
     this.onClose.emit();
-  }
-
-  save(): void {
-    if (!this.formData.nombreCompleto || !this.formData.nombreUsuario) {
-      return;
-    }
-    this.onSaved.emit(this.formData);
   }
 }

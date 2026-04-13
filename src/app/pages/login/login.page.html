@@ -5,7 +5,7 @@
     <img src="/assets/login-bg.jpg" alt="" class="absolute inset-0 w-full h-full object-cover">
     <!-- Institutional gradient overlay -->
     <div class="absolute inset-0 bg-gradient-to-t from-primary/95 via-primary/70 to-primary/40"></div>
-    
+
     <div class="relative z-10 p-12 pb-16 w-full space-y-8">
       <div>
         <span class="inline-block px-4 py-1.5 rounded-full border border-secondary/60 text-secondary text-[10px] font-ui tracking-widest uppercase mb-6">
@@ -49,8 +49,8 @@
           }
 
           <div class="space-y-5">
-            <app-ui-input 
-              label="Usuario de Red" 
+            <app-ui-input
+              label="Usuario de Red"
               [icon]="true"
               placeholder="Ingrese su usuario"
               [(ngModel)]="usuario"
@@ -59,8 +59,8 @@
               <ng-icon icon name="lucideUser" class="h-4 w-4"></ng-icon>
             </app-ui-input>
 
-            <app-ui-input 
-              label="Contraseña" 
+            <app-ui-input
+              label="Contraseña"
               [icon]="true"
               [type]="showPassword() ? 'text' : 'password'"
               placeholder="••••••••••••"
@@ -69,7 +69,7 @@
             >
               <ng-icon icon name="lucideLock" class="h-4 w-4"></ng-icon>
               <!-- Slot para el botón de ver password -->
-              <button 
+              <button
                 type="button"
                 (click)="togglePassword()"
                 class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors pr-2"
@@ -87,10 +87,10 @@
             <span class="text-[11px] text-primary cursor-pointer hover:underline font-ui font-semibold">¿Olvidó su contraseña?</span>
           </div>
 
-          <app-ui-button 
-            type="submit" 
-            variant="primary" 
-            size="lg" 
+          <app-ui-button
+            type="submit"
+            variant="primary"
+            size="lg"
             class="w-full"
             [loading]="loading()"
           >
@@ -107,9 +107,9 @@
           </div>
           <div class="grid grid-cols-3 gap-2">
             @for (u of [
-              { user: 'admin', pass: 'admin', label: 'Administrador' },
-              { user: 'ctd', pass: 'ctd', label: 'Recepción' },
-              { user: 'firmante', pass: 'firmante', label: 'Especialista' }
+              { user: 'admin', pass: 'admin123', label: 'Administrador' },
+              { user: 'ctd', pass: 'admin123', label: 'Recepción' },
+              { user: 'firmante', pass: 'admin123', label: 'Especialista' }
             ]; track u.user) {
               <button
                 type="button"
@@ -124,7 +124,7 @@
         </div>
 
         <p class="text-center text-[11px] text-muted-foreground font-body">
-          ¿Necesita asistencia técnica? 
+          ¿Necesita asistencia técnica?
           <span class="text-primary font-bold cursor-pointer hover:underline">Consultar Mesa de Ayuda</span>
         </p>
       </div>

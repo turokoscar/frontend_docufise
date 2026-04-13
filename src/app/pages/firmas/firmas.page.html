@@ -16,7 +16,7 @@
     icon="lucidePenTool"
   >
     <div actions>
-      <app-ui-button variant="outline" size="lg" (onClick)="exportToExcel()">
+      <app-ui-button variant="warning" size="lg" (onClick)="exportToExcel()">
         <ng-icon name="lucideFileSpreadsheet" class="h-4 w-4"></ng-icon>
         Exportar Reporte
       </app-ui-button>
@@ -121,7 +121,7 @@
             <div class="flex items-center justify-center gap-2">
               <!-- Visar (Ingresado → Pendiente) -->
               @if ((f.estado || '').toUpperCase() === ESTADOS.INGRESADO.toUpperCase()) {
-                <app-ui-button variant="white" size="sm" (onClick)="handleDescargar(f)" className="text-primary hover:bg-primary/10">
+                <app-ui-button variant="secondary" size="sm" (onClick)="handleDescargar(f)">
                   <ng-icon name="lucideDownload" class="h-4 w-4"></ng-icon>
                   Visar
                 </app-ui-button>
@@ -141,7 +141,7 @@
 
               <!-- Ver Firmado (Firmado) -->
               @if ((f.estado || '').toUpperCase() === ESTADOS.FIRMADO.toUpperCase()) {
-                <app-ui-button variant="ghost" size="sm" (onClick)="handleVerArchivoFirmado(f)" title="Ver archivo firmado">
+                <app-ui-button variant="secondary" size="sm" (onClick)="handleVerArchivoFirmado(f)" title="Ver archivo firmado">
                   <ng-icon name="lucideFileText" class="h-5 w-5"></ng-icon>
                 </app-ui-button>
               }
