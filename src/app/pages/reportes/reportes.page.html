@@ -31,6 +31,8 @@
           [value]="kpi.value"
           [icon]="kpi.icon"
           [color]="kpi.color"
+          variant="bottom"
+          [trend]="kpi.trend"
         ></app-ui-kpi-card>
       }
     </div>
@@ -43,7 +45,7 @@
       <div class="flex items-center justify-between mb-6">
         <div class="flex items-center gap-3">
           <div class="p-2 rounded-xl bg-primary/10">
-            <ng-icon name="lucidePieChart" class="text-lg text-primary"></ng-icon>
+            <ng-icon name="lucideChartPie" class="text-lg text-primary"></ng-icon>
           </div>
           <div>
             <h3 class="font-display text-lg font-extrabold text-foreground">Distribución de Estados</h3>
@@ -52,12 +54,12 @@
         </div>
         <ng-icon name="lucideInfo" class="text-muted-foreground/40 hover:text-primary cursor-help"></ng-icon>
       </div>
-      
+
       <div class="relative pb-4 h-[200px]">
-        <canvas 
-          baseChart 
-          [data]="pieChartData" 
-          [options]="pieChartOptions" 
+        <canvas
+          baseChart
+          [data]="pieChartData"
+          [options]="pieChartOptions"
           [type]="pieChartType"
         ></canvas>
       </div>
@@ -86,37 +88,31 @@
             </div>
         </div>
       </div>
-      
+
       <div class="relative pb-4 h-[200px]">
-        <canvas 
-          baseChart 
-          [data]="barChartData()" 
-          [options]="barChartOptions" 
+        <canvas
+          baseChart
+          [data]="barChartData()"
+          [options]="barChartOptions"
           [type]="barChartType"
         ></canvas>
       </div>
     </div>
   </div>
 
-  <!-- Additional Stats Section -->
+  <!-- Multi-state Summary (Mini KPIs) -->
   <div class="space-y-0 pt-2">
-    <app-ui-section-label label="Resumen por Sede"></app-ui-section-label>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div class="bg-card border border-border/50 rounded-[24px] p-6 flex items-center gap-4 group hover:border-primary/50 transition-all shadow-sm">
-          <div class="w-14 h-14 rounded-2xl bg-muted group-hover:bg-primary/5 flex items-center justify-center transition-all">
-              <ng-icon name="lucideLayoutGrid" class="text-2xl text-muted-foreground/40 group-hover:text-primary"></ng-icon>
-          </div>
-          <div>
-              <p class="text-[10px] font-ui font-bold text-muted-foreground uppercase tracking-widest">Sede Central</p>
-              <h4 class="font-display text-lg font-extrabold text-foreground">Principal FISE</h4>
-              <div class="flex items-center gap-2 mt-1">
-                  <span class="text-[11px] font-body text-success font-bold flex items-center gap-1">
-                    <ng-icon name="lucideTrendingUp"></ng-icon>
-                    +12% vs mes ant.
-                  </span>
-              </div>
-          </div>
-      </div>
+    <app-ui-section-label label="Estado de Expedientes"></app-ui-section-label>
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+      @for (item of datosReporte(); track item.estado) {
+        <app-ui-kpi-card
+          [label]="item.estado"
+          [value]="item.cantidad"
+          variant="mini"
+          [color]="item.color"
+        ></app-ui-kpi-card>
+      }
     </div>
   </div>
-</div>
+
+

@@ -123,18 +123,43 @@ export class ReportesPage implements OnInit {
   }
 
   kpis = computed(() => {
-    const docs = this.allDocumentos();
-    const count = (s: string) => docs.filter(doc => (doc.estado || '').toUpperCase() === s.toUpperCase()).length;
+    const stats = this.estadisticas();
     
-    const firmados = count(ESTADOS_EXPEDIENTE.FIRMADO);
-    const total = docs.length;
-    const tasaFirma = total > 0 ? Math.round((firmados / total) * 100) : 0;
-    
+    // Si no hay estadísticas cargadas aún, mostramos placeholders o ceros
+    const total = stats?.totalDocumentos || 0;
+    const firmados = stats?.totalFirmados || 0;
+    const pendientes = stats?.totalPendientes || 0;
+    const tasaFirma = stats?.tasaFirma || 0;
+
     return [
-      { label: 'Total Documentos', value: total, icon: 'lucideFileText', color: '#2C5AAB' },
-      { label: 'Firmados', value: firmados, icon: 'lucidePenTool', color: '#0FBF90' },
-      { label: 'Pendientes', value: count(ESTADOS_EXPEDIENTE.PENDIENTE), icon: 'lucideClock', color: '#F2B801' },
-      { label: 'Tasa de Firma', value: tasaFirma + '%', icon: 'lucideTrendingUp', color: '#0FAEBF' },
+      { 
+        label: 'Total Expedientes', 
+        value: total, 
+        icon: 'lucideFileText', 
+        color: '#2C5AAB',
+        trend: { value: stats?.tendenciaTotalDocumentos || 0, label: 'vs mes anterior' }
+      },
+      { 
+        label: 'Firmas Completadas', 
+        value: firmados, 
+        icon: 'lucidePenTool', 
+        color: '#0FBF90',
+        trend: { value: stats?.tendenciaTotalFirmados || 0, label: 'vs mes anterior' }
+      },
+      { 
+        label: 'Pendientes de Firma', 
+        value: pendientes, 
+        icon: 'lucideClock', 
+        color: '#F2B801',
+        trend: { value: stats?.tendenciaTotalPendientes || 0, label: 'vs mes anterior', reverse: true }
+      },
+      { 
+        label: 'Tasa de Firma', 
+        value: tasaFirma + '%', 
+        icon: 'lucideCircleCheck', 
+        color: '#0FAEBF',
+        trend: { value: stats?.tendenciaTasaFirma || 0, label: 'vs mes anterior' }
+      },
     ];
   });
 
