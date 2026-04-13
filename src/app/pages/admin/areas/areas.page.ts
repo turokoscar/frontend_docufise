@@ -16,12 +16,14 @@ import { UiInputComponent } from '../../../shared/components/ui/input/input.comp
 import { UiTableComponent } from '../../../shared/components/ui/table/table.component';
 import { UiModalComponent } from '../../../shared/components/ui/modal/modal.component';
 import { UiTextareaComponent } from '../../../shared/components/ui/textarea/textarea.component';
+import { UiDropdownComponent } from '../../../shared/components/ui/dropdown/dropdown.component';
+import { AreaFormComponent } from './components/area-form/area-form.component';
 
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { 
   lucideHouse, lucideBuilding2, lucidePlus, lucideSearch, lucideChevronDown, 
   lucidePencil, lucideTrash2, lucideCircleCheck, lucideCircleX, lucideArrowRight, 
-  lucideInfo, lucideLayoutGrid, lucideCheck, lucideX
+  lucideInfo, lucideLayoutGrid, lucideCheck, lucideX, lucideChevronLeft, lucideChevronRight
 } from '@ng-icons/lucide';
 import Swal from 'sweetalert2';
 
@@ -41,13 +43,15 @@ import Swal from 'sweetalert2';
     UiInputComponent,
     UiTableComponent,
     UiModalComponent,
-    UiTextareaComponent
+    UiTextareaComponent,
+    UiDropdownComponent,
+    AreaFormComponent
   ],
   providers: [
     provideIcons({ 
       lucideHouse, lucideBuilding2, lucidePlus, lucideSearch, lucideChevronDown, 
       lucidePencil, lucideTrash2, lucideCircleCheck, lucideCircleX, lucideArrowRight, 
-      lucideInfo, lucideLayoutGrid, lucideCheck, lucideX
+      lucideInfo, lucideLayoutGrid, lucideCheck, lucideX, lucideChevronLeft, lucideChevronRight
     })
   ],
   templateUrl: './areas.page.html',
@@ -56,18 +60,13 @@ import Swal from 'sweetalert2';
 export class AreasPage implements OnInit {
   private apiService = inject(ApiService);
 
-  // State
   areas = signal<AreaSistema[]>([]);
   showModal = signal(false);
   editingArea = signal<AreaSistema | null>(null);
   searchTerm = signal('');
 
-  // Form Fields
-  formData: any = {
-    nombre: '',
-    descripcion: '',
-    activo: true
-  };
+  currentPage = signal(1);
+  pageSize = signal(10);
 
   ngOnInit(): void {
     this.loadData();
@@ -91,32 +90,58 @@ export class AreasPage implements OnInit {
     return result;
   });
 
+  totalPages = computed(() => Math.ceil(this.filteredAreas().length / this.pageSize()));
+  
+  paginatedAreas = computed(() => {
+    const start = (this.currentPage() - 1) * this.pageSize();
+    return this.filteredAreas().slice(start, start + this.pageSize());
+  });
+
+  paginatedPages = computed(() => {
+    const total = this.totalPages();
+    const pages: number[] = [];
+    for (let i = 1; i <= total; i++) pages.push(i);
+    return pages;
+  });
+
+  paginationSummary = computed(() => {
+    const total = this.filteredAreas().length;
+    const start = (this.currentPage() - 1) * this.pageSize() + 1;
+    const end = Math.min(this.currentPage() * this.pageSize(), total);
+    return `Mostrando ${start}-${end} de ${total} registros`;
+  });
+
+  setPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages()) {
+      this.currentPage.set(page);
+    }
+  }
+
+  updateFilters(value: string): void {
+    this.searchTerm.set(value);
+    this.currentPage.set(1);
+  }
+
   openCreateModal(): void {
     this.editingArea.set(null);
-    this.formData = {
-      nombre: '',
-      descripcion: '',
-      activo: true
-    };
     this.showModal.set(true);
   }
 
   openEditModal(area: AreaSistema): void {
     this.editingArea.set(area);
-    this.formData = { ...area };
     this.showModal.set(true);
   }
 
-  saveArea(): void {
-    if (!this.formData.nombre || !this.formData.descripcion) {
+  saveArea(formData: any): void {
+    if (!formData.nombre || !formData.descripcion) {
       this.showToast('Complete todos los campos obligatorios', 'error');
       return;
     }
     
     const payload: Partial<AreaSistema> = {
-      nombre: this.formData.nombre,
-      descripcion: this.formData.descripcion,
-      activo: this.formData.activo
+      nombre: formData.nombre,
+      descripcion: formData.descripcion,
+      activo: formData.activo
     };
 
     const editing = this.editingArea();

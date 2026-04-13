@@ -19,6 +19,8 @@ import { UiInputComponent } from '../../../shared/components/ui/input/input.comp
 import { UiSelectComponent } from '../../../shared/components/ui/select/select.component';
 import { UiTableComponent } from '../../../shared/components/ui/table/table.component';
 import { UiModalComponent } from '../../../shared/components/ui/modal/modal.component';
+import { UiDropdownComponent } from '../../../shared/components/ui/dropdown/dropdown.component';
+import { UsuarioFormComponent } from './components/usuario-form/usuario-form.component';
 
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { 
@@ -45,7 +47,9 @@ import Swal from 'sweetalert2';
     UiInputComponent,
     UiSelectComponent,
     UiTableComponent,
-    UiModalComponent
+    UiModalComponent,
+    UiDropdownComponent,
+    UsuarioFormComponent
   ],
   providers: [
     provideIcons({ 
@@ -74,6 +78,52 @@ export class UsuariosPage implements OnInit {
     areaId: 'all'
   });
 
+  currentPage = signal(1);
+  pageSize = signal(10);
+
+  filteredUsuarios = computed(() => {
+    let result = this.usuarios();
+    const f = this.filters();
+    if (f.search) {
+      const s = f.search.toLowerCase();
+      result = result.filter((u: UsuarioSistema) => 
+        (u.nombreCompleto?.toLowerCase().includes(s) || false) || 
+        (u.nombreUsuario?.toLowerCase().includes(s) || false) || 
+        (u.correo?.toLowerCase().includes(s) || false)
+      );
+    }
+    if (f.rolId !== 'all') result = result.filter((u: UsuarioSistema) => u.rolId === Number(f.rolId));
+    if (f.areaId !== 'all') result = result.filter((u: UsuarioSistema) => u.areaId === Number(f.areaId));
+    return result;
+  });
+
+  totalPages = computed(() => Math.ceil(this.filteredUsuarios().length / this.pageSize()));
+  
+  paginatedUsuarios = computed(() => {
+    const start = (this.currentPage() - 1) * this.pageSize();
+    return this.filteredUsuarios().slice(start, start + this.pageSize());
+  });
+
+  paginatedPages = computed(() => {
+    const total = this.totalPages();
+    const pages: number[] = [];
+    for (let i = 1; i <= total; i++) pages.push(i);
+    return pages;
+  });
+
+  paginationSummary = computed(() => {
+    const total = this.filteredUsuarios().length;
+    const start = (this.currentPage() - 1) * this.pageSize() + 1;
+    const end = Math.min(this.currentPage() * this.pageSize(), total);
+    return `Mostrando ${start}-${end} de ${total} registros`;
+  });
+
+  setPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages()) {
+      this.currentPage.set(page);
+    }
+  }
+
   // Form Fields
   formData: any = {
     nombreCompleto: '',
@@ -100,24 +150,9 @@ export class UsuariosPage implements OnInit {
     });
   }
 
-  filteredUsuarios = computed(() => {
-    let result = this.usuarios();
-    const f = this.filters();
-    if (f.search) {
-      const s = f.search.toLowerCase();
-      result = result.filter((u: UsuarioSistema) => 
-        (u.nombreCompleto?.toLowerCase().includes(s) || false) || 
-        (u.nombreUsuario?.toLowerCase().includes(s) || false) || 
-        (u.correo?.toLowerCase().includes(s) || false)
-      );
-    }
-    if (f.rolId !== 'all') result = result.filter((u: UsuarioSistema) => u.rolId === Number(f.rolId));
-    if (f.areaId !== 'all') result = result.filter((u: UsuarioSistema) => u.areaId === Number(f.areaId));
-    return result;
-  });
-
   updateFilters(key: string, value: string): void {
     this.filters.update((f: any) => ({ ...f, [key]: value }));
+    this.currentPage.set(1);
   }
 
   openCreateModal(): void {
@@ -139,19 +174,19 @@ export class UsuariosPage implements OnInit {
     this.showModal.set(true);
   }
 
-  saveUsuario(): void {
-    if (!this.formData.nombreCompleto || !this.formData.nombreUsuario || !this.formData.rolId || !this.formData.areaId) {
+  saveUsuario(formData: any): void {
+    if (!formData.nombreCompleto || !formData.nombreUsuario || !formData.rolId || !formData.areaId) {
       this.showToast('Complete los campos obligatorios', 'error');
       return;
     }
 
     const payload: Partial<UsuarioSistema> = {
-      nombreCompleto: this.formData.nombreCompleto,
-      nombreUsuario: this.formData.nombreUsuario,
-      correo: this.formData.correo,
-      rolId: Number(this.formData.rolId),
-      areaId: Number(this.formData.areaId),
-      activo: this.formData.activo
+      nombreCompleto: formData.nombreCompleto,
+      nombreUsuario: formData.nombreUsuario,
+      correo: formData.correo,
+      rolId: Number(formData.rolId),
+      areaId: Number(formData.areaId),
+      activo: formData.activo
     };
 
     const editing = this.editingUsuario();

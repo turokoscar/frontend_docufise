@@ -15,12 +15,14 @@ import { UiBadgeComponent } from '../../../shared/components/ui/badge/badge.comp
 import { UiInputComponent } from '../../../shared/components/ui/input/input.component';
 import { UiTableComponent } from '../../../shared/components/ui/table/table.component';
 import { UiModalComponent } from '../../../shared/components/ui/modal/modal.component';
+import { UiDropdownComponent } from '../../../shared/components/ui/dropdown/dropdown.component';
+import { MenuFormComponent } from './components/menu-form/menu-form.component';
 
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { 
   lucideHouse, lucideLayoutList, lucidePlus, lucideSearch, lucideChevronDown, 
   lucidePencil, lucideTrash2, lucideCircleCheck, lucideCircleX, lucideArrowRight, 
-  lucideInfo, lucideMove, lucideCheck, lucideX
+  lucideInfo, lucideMove, lucideCheck, lucideX, lucideChevronLeft, lucideChevronRight
 } from '@ng-icons/lucide';
 import Swal from 'sweetalert2';
 
@@ -39,13 +41,15 @@ import Swal from 'sweetalert2';
     UiBadgeComponent,
     UiInputComponent,
     UiTableComponent,
-    UiModalComponent
+    UiModalComponent,
+    UiDropdownComponent,
+    MenuFormComponent
   ],
   providers: [
     provideIcons({ 
       lucideHouse, lucideLayoutList, lucidePlus, lucideSearch, lucideChevronDown, 
       lucidePencil, lucideTrash2, lucideCircleCheck, lucideCircleX, lucideArrowRight, 
-      lucideInfo, lucideMove, lucideCheck, lucideX
+      lucideInfo, lucideMove, lucideCheck, lucideX, lucideChevronLeft, lucideChevronRight
     })
   ],
   templateUrl: './menus.page.html',
@@ -54,20 +58,13 @@ import Swal from 'sweetalert2';
 export class MenusPage implements OnInit {
   private apiService = inject(ApiService);
 
-  // State
   menus = signal<MenuSistema[]>([]);
   showModal = signal(false);
   editingMenu = signal<MenuSistema | null>(null);
   searchTerm = signal('');
 
-  // Form Fields
-  formData = {
-    nombre: '',
-    ruta: '',
-    icono: '',
-    orden: 1,
-    activo: true
-  };
+  currentPage = signal(1);
+  pageSize = signal(10);
 
   ngOnInit(): void {
     this.loadData();
@@ -92,41 +89,64 @@ export class MenusPage implements OnInit {
     return [...result].sort((a, b) => a.orden - b.orden);
   });
 
+  totalPages = computed(() => Math.ceil(this.filteredMenus().length / this.pageSize()));
+  
+  paginatedMenus = computed(() => {
+    const start = (this.currentPage() - 1) * this.pageSize();
+    return this.filteredMenus().slice(start, start + this.pageSize());
+  });
+
+  paginatedPages = computed(() => {
+    const total = this.totalPages();
+    const pages: number[] = [];
+    for (let i = 1; i <= total; i++) pages.push(i);
+    return pages;
+  });
+
+  paginationSummary = computed(() => {
+    const total = this.filteredMenus().length;
+    const start = (this.currentPage() - 1) * this.pageSize() + 1;
+    const end = Math.min(this.currentPage() * this.pageSize(), total);
+    return `Mostrando ${start}-${end} de ${total} registros`;
+  });
+
+  setPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages()) {
+      this.currentPage.set(page);
+    }
+  }
+
+  updateFilters(value: string): void {
+    this.searchTerm.set(value);
+    this.currentPage.set(1);
+  }
+
   openCreateModal(): void {
     this.editingMenu.set(null);
-    this.formData = {
-      nombre: '',
-      ruta: '',
-      icono: '',
-      orden: this.menus().length + 1,
-      activo: true
-    };
     this.showModal.set(true);
   }
 
   openEditModal(menu: MenuSistema): void {
     this.editingMenu.set(menu);
-    this.formData = { ...menu };
     this.showModal.set(true);
   }
 
-  saveMenu(): void {
-    if (!this.formData.nombre || !this.formData.ruta) {
+  saveMenu(formData: any): void {
+    if (!formData.nombre || !formData.ruta) {
       this.showToast('Complete los campos obligatorios', 'error');
       return;
     }
 
     const payload: Partial<MenuSistema> = {
-      nombre: this.formData.nombre,
-      ruta: this.formData.ruta,
-      icono: this.formData.icono,
-      orden: this.formData.orden,
-      activo: this.formData.activo
+      nombre: formData.nombre,
+      ruta: formData.ruta,
+      icono: formData.icono,
+      orden: formData.orden,
+      activo: formData.activo
     };
 
     const editing = this.editingMenu();
     if (editing) {
-      // Usamos lógica reactiva local si el servicio no está completamente mapeado en el backend
       this.menus.update((prev: MenuSistema[]) => 
         prev.map(m => m.id === editing.id ? { ...m, ...payload } as MenuSistema : m)
       );

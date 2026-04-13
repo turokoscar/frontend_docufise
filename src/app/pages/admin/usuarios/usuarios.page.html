@@ -5,9 +5,9 @@
       <ng-icon name="lucideHouse" class="text-xs"></ng-icon>
       Inicio
     </a>
-    <ng-icon name="lucideArrowRight" class="text-[8px]"></ng-icon>
+    <ng-icon name="lucideChevronRight" class="text-[8px]"></ng-icon>
     <a routerLink="/admin/usuarios" class="hover:text-primary transition-colors font-bold text-foreground">Administración</a>
-    <ng-icon name="lucideArrowRight" class="text-[8px]"></ng-icon>
+    <ng-icon name="lucideChevronRight" class="text-[8px]"></ng-icon>
     <span class="font-bold text-foreground">Gestión de Usuarios</span>
   </nav>
 
@@ -17,7 +17,7 @@
     subtitle="Administración de cuentas de acceso y asignación de roles/áreas" 
     icon="lucideUsers"
   >
-    <div actions>
+    <div actions class="flex items-center gap-3">
       <app-ui-button variant="primary" size="lg" (onClick)="openCreateModal()">
         <ng-icon name="lucidePlus" class="h-4 w-4"></ng-icon>
         Nuevo Usuario
@@ -26,9 +26,8 @@
   </app-ui-page-header>
 
   <!-- Filters Section -->
-  <div>
-    <app-ui-section-label label="Parámetros de Búsqueda"></app-ui-section-label>
-    <app-ui-filter-panel>
+  <app-ui-section-label label="Parámetros de Búsqueda" tooltip="Use los filtros para buscar usuarios por nombre, usuario o correo"></app-ui-section-label>
+  <app-ui-filter-panel>
       <app-ui-input 
         label="Búsqueda rápida" 
         [icon]="true"
@@ -64,7 +63,12 @@
         }
       </app-ui-select>
     </app-ui-filter-panel>
-  </div>
+
+  <app-ui-section-label label="Listado de Usuarios">
+    <div class="text-[11px] font-ui text-[#64748B] tracking-tight">
+      {{ paginationSummary() }}
+    </div>
+  </app-ui-section-label>
 
   <!-- Main Table -->
   <app-ui-table>
@@ -78,7 +82,7 @@
     </ng-container>
 
     <ng-container rows>
-      @for (u of filteredUsuarios(); track u.id; let i = $index) {
+      @for (u of paginatedUsuarios(); track u.id; let i = $index) {
         <tr class="hover:bg-primary/5 transition-colors" [ngClass]="{'bg-muted/10': i % 2 !== 0}">
           <td class="px-6 py-4">
             <div class="flex flex-col">
@@ -105,123 +109,93 @@
             </div>
           </td>
           <td class="px-6 py-4 text-center">
-            <button (click)="toggleStatus(u)" class="group transition-all">
-              <app-ui-badge [variant]="u.activo ? 'success' : 'muted'" class="cursor-pointer group-hover:scale-105">
-                <ng-icon [name]="u.activo ? 'lucideUserCheck' : 'lucideUserX'" class="mr-1"></ng-icon>
-                {{ u.activo ? 'Activo' : 'Inactivo' }}
-              </app-ui-badge>
-            </button>
+            <app-ui-badge [variant]="u.activo ? 'success' : 'muted'">
+              <ng-icon [name]="u.activo ? 'lucideUserCheck' : 'lucideUserX'" class="mr-1"></ng-icon>
+              {{ u.activo ? 'Activo' : 'Inactivo' }}
+            </app-ui-badge>
           </td>
-          <td class="px-6 py-4 text-right">
-            <div class="flex items-center justify-end gap-1">
-              <app-ui-button variant="ghost" size="sm" (onClick)="openEditModal(u)" title="Editar usuario">
-                <ng-icon name="lucidePencil" class="h-4 w-4"></ng-icon>
+          <td class="px-6 py-4 text-center">
+            <app-ui-dropdown>
+              <app-ui-button trigger variant="outline" size="sm">
+                Opciones
+                <ng-icon name="lucideChevronDown" class="h-3 w-3 text-[#9CA3AF]"></ng-icon>
               </app-ui-button>
-              <app-ui-button variant="ghost" size="sm" (onClick)="deleteUsuario(u)" className="text-destructive" title="Eliminar cuenta">
-                <ng-icon name="lucideTrash2" class="h-4 w-4"></ng-icon>
-              </app-ui-button>
-            </div>
+              <div items>
+                <button (click)="openEditModal(u)" class="w-full flex items-center gap-2 px-3 py-2 text-xs font-ui hover:bg-muted text-left">
+                  <ng-icon name="lucidePencil" class="h-4 w-4 text-secondary"></ng-icon>
+                  Editar usuario
+                </button>
+                <button (click)="toggleStatus(u)" class="w-full flex items-center gap-2 px-3 py-2 text-xs font-ui hover:bg-muted text-left">
+                  <ng-icon [name]="u.activo ? 'lucideUserX' : 'lucideUserCheck'" class="h-4 w-4 text-warning"></ng-icon>
+                  {{ u.activo ? 'Desactivar' : 'Activar' }}
+                </button>
+                <button (click)="deleteUsuario(u)" class="w-full flex items-center gap-2 px-3 py-2 text-xs font-ui hover:bg-muted text-destructive text-left">
+                  <ng-icon name="lucideTrash2" class="h-4 w-4"></ng-icon>
+                  Eliminar
+                </button>
+              </div>
+            </app-ui-dropdown>
           </td>
         </tr>
       } @empty {
         <tr>
-          <td colspan="6" class="px-6 py-12 text-center text-muted-foreground">
+          <td colspan="6" class="px-6 py-12 text-center">
             <div class="flex flex-col items-center gap-3">
               <div class="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
-                <ng-icon name="lucideUsers" class="text-3xl opacity-20"></ng-icon>
+                <ng-icon name="lucideSearch" class="text-3xl text-muted-foreground/40"></ng-icon>
               </div>
-              <p class="font-display font-bold">No se encontraron usuarios que coincidan con los filtros</p>
+              <p class="font-display text-lg font-bold text-muted-foreground">No se encontraron usuarios</p>
+              <p class="font-body text-sm text-muted-foreground/60 max-w-[300px]">Intente ajustar los filtros de búsqueda o cree un nuevo usuario.</p>
             </div>
           </td>
         </tr>
       }
     </ng-container>
+
+    <div footer class="flex items-center justify-end gap-2 px-6 py-4">
+      <app-ui-button 
+        variant="outline" 
+        size="sm"
+        [disabled]="currentPage() === 1" 
+        (onClick)="setPage(currentPage() - 1)"
+      >
+        <ng-icon name="lucideChevronLeft" class="text-[10px]"></ng-icon>
+        Previous
+      </app-ui-button>
+      
+      <div class="flex items-center gap-1 px-2">
+        @for (page of paginatedPages(); track page) {
+          <button 
+            (click)="setPage(page)" 
+            class="w-8 h-8 rounded-lg text-xs font-bold transition-all duration-200"
+            [ngClass]="{
+              'bg-[#E8F0FE] text-[#1967D2] shadow-sm border border-[#D2E3FC]': currentPage() === page,
+              'text-[#6B7280] hover:bg-[#F3F4F6]': currentPage() !== page
+            }"
+          >
+            {{ page }}
+          </button>
+        }
+      </div>
+
+      <app-ui-button 
+        variant="outline" 
+        size="sm"
+        [disabled]="currentPage() === totalPages()" 
+        (onClick)="setPage(currentPage() + 1)"
+      >
+        Next
+        <ng-icon name="lucideChevronRight" class="text-[10px]"></ng-icon>
+      </app-ui-button>
+    </div>
   </app-ui-table>
 </div>
 
-<!-- Modal Form -->
-<app-ui-modal 
-  [isOpen]="showModal()" 
+<app-usuario-form
+  [isOpen]="showModal()"
+  [usuario]="editingUsuario()"
+  [roles]="roles()"
+  [areas]="areas()"
   (onClose)="showModal.set(false)"
-  maxWidth="max-w-xl"
-  [paddingBody]="false"
->
-  <div header class="bg-primary -m-6 mb-0 p-8 text-primary-foreground text-center relative rounded-t-2xl">
-    <div class="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mx-auto mb-4 border border-white/20 backdrop-blur-md">
-      <ng-icon name="lucideUsers" class="text-3xl"></ng-icon>
-    </div>
-    <h3 class="font-display text-2xl font-extrabold tracking-tight">
-      {{ editingUsuario() ? 'Editar Perfil' : 'Nuevo Usuario' }}
-    </h3>
-    <p class="text-white/70 text-sm font-body mt-2">Control de accesos y configuración de perfil</p>
-  </div>
-
-  <div body class="p-8 space-y-6">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <app-ui-input 
-        label="Nombre Completo" 
-        [(ngModel)]="formData.nombreCompleto" 
-        name="nombreCompleto"
-        placeholder="Ej: Juan Pérez"
-      ></app-ui-input>
-
-      <app-ui-input 
-        label="Usuario de Red" 
-        [(ngModel)]="formData.nombreUsuario" 
-        name="nombreUsuario"
-        placeholder="jperez"
-      ></app-ui-input>
-
-      <app-ui-input 
-        label="Correo Electrónico" 
-        [(ngModel)]="formData.correo" 
-        name="correo"
-        placeholder="ejemplo@fise.gob.pe"
-        class="md:col-span-2"
-      ></app-ui-input>
-
-      <app-ui-select 
-        label="Rol de Sistema" 
-        [(ngModel)]="formData.rolId" 
-        name="rolId"
-      >
-        @for (rol of roles(); track rol.id) {
-          <option [value]="rol.id">{{ rol.nombre }}</option>
-        }
-      </app-ui-select>
-
-      <app-ui-select 
-        label="Área Asignada" 
-        [(ngModel)]="formData.areaId" 
-        name="areaId"
-      >
-        @for (area of areas(); track area.id) {
-          <option [value]="area.id">{{ area.nombre }}</option>
-        }
-      </app-ui-select>
-    </div>
-
-    <div class="flex items-center gap-3 p-1 group">
-      <input 
-        type="checkbox" 
-        [(ngModel)]="formData.activo" 
-        name="activo" 
-        id="user_activo" 
-        class="w-4 h-4 rounded border-border text-primary focus:ring-primary/20"
-      >
-      <label for="user_activo" class="font-ui text-[11px] font-bold text-muted-foreground uppercase tracking-widest cursor-pointer group-hover:text-primary transition-colors">
-        Cuenta habilitada para el acceso al sistema
-      </label>
-    </div>
-  </div>
-
-  <div footer class="flex gap-3">
-    <app-ui-button variant="outline" class="flex-1" (onClick)="showModal.set(false)">
-      Cancelar
-    </app-ui-button>
-    <app-ui-button variant="primary" class="flex-1" (onClick)="saveUsuario()">
-      <ng-icon name="lucideCheck" class="mr-1"></ng-icon>
-      Guardar Usuario
-    </app-ui-button>
-  </div>
-</app-ui-modal>
+  (onSaved)="saveUsuario($event)"
+></app-usuario-form>

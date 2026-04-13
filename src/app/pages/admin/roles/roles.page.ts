@@ -17,12 +17,14 @@ import { UiInputComponent } from '../../../shared/components/ui/input/input.comp
 import { UiTableComponent } from '../../../shared/components/ui/table/table.component';
 import { UiModalComponent } from '../../../shared/components/ui/modal/modal.component';
 import { UiTextareaComponent } from '../../../shared/components/ui/textarea/textarea.component';
+import { UiDropdownComponent } from '../../../shared/components/ui/dropdown/dropdown.component';
+import { RolFormComponent } from './components/rol-form/rol-form.component';
 
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { 
   lucideHouse, lucideShield, lucidePlus, lucideSearch, lucideChevronDown, 
   lucidePencil, lucideTrash2, lucideCircleCheck, lucideCircleX, lucideArrowRight, 
-  lucideInfo, lucideListChecks, lucideCheck, lucideX
+  lucideInfo, lucideListChecks, lucideCheck, lucideX, lucideChevronLeft, lucideChevronRight
 } from '@ng-icons/lucide';
 import Swal from 'sweetalert2';
 
@@ -42,13 +44,15 @@ import Swal from 'sweetalert2';
     UiInputComponent,
     UiTableComponent,
     UiModalComponent,
-    UiTextareaComponent
+    UiTextareaComponent,
+    UiDropdownComponent,
+    RolFormComponent
   ],
   providers: [
     provideIcons({ 
       lucideHouse, lucideShield, lucidePlus, lucideSearch, lucideChevronDown, 
       lucidePencil, lucideTrash2, lucideCircleCheck, lucideCircleX, lucideArrowRight, 
-      lucideInfo, lucideListChecks, lucideCheck, lucideX
+      lucideInfo, lucideListChecks, lucideCheck, lucideX, lucideChevronLeft, lucideChevronRight
     })
   ],
   templateUrl: './roles.page.html',
@@ -57,20 +61,14 @@ import Swal from 'sweetalert2';
 export class RolesPage implements OnInit {
   private apiService = inject(ApiService);
 
-  // State
   roles = signal<RolSistema[]>([]);
   allMenus = signal<MenuSistema[]>([]);
   showModal = signal(false);
   editingRol = signal<RolSistema | null>(null);
   searchTerm = signal('');
 
-  // Form Fields
-  formData = {
-    nombre: '',
-    descripcion: '',
-    activo: true,
-    menuIds: [] as number[]
-  };
+  currentPage = signal(1);
+  pageSize = signal(10);
 
   ngOnInit(): void {
     this.loadData();
@@ -97,48 +95,59 @@ export class RolesPage implements OnInit {
     return result;
   });
 
+  totalPages = computed(() => Math.ceil(this.filteredRoles().length / this.pageSize()));
+  
+  paginatedRoles = computed(() => {
+    const start = (this.currentPage() - 1) * this.pageSize();
+    return this.filteredRoles().slice(start, start + this.pageSize());
+  });
+
+  paginatedPages = computed(() => {
+    const total = this.totalPages();
+    const pages: number[] = [];
+    for (let i = 1; i <= total; i++) pages.push(i);
+    return pages;
+  });
+
+  paginationSummary = computed(() => {
+    const total = this.filteredRoles().length;
+    const start = (this.currentPage() - 1) * this.pageSize() + 1;
+    const end = Math.min(this.currentPage() * this.pageSize(), total);
+    return `Mostrando ${start}-${end} de ${total} registros`;
+  });
+
+  setPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages()) {
+      this.currentPage.set(page);
+    }
+  }
+
+  updateFilters(value: string): void {
+    this.searchTerm.set(value);
+    this.currentPage.set(1);
+  }
+
   openCreateModal(): void {
     this.editingRol.set(null);
-    this.formData = {
-      nombre: '',
-      descripcion: '',
-      activo: true,
-      menuIds: []
-    };
     this.showModal.set(true);
   }
 
   openEditModal(rol: RolSistema): void {
     this.editingRol.set(rol);
-    const mIds = rol.menus ? rol.menus.map(m => m.id) : (rol.menuIds || []);
-    this.formData = { 
-      nombre: rol.nombre,
-      descripcion: rol.descripcion,
-      activo: rol.activo,
-      menuIds: [...mIds]
-    };
     this.showModal.set(true);
   }
 
-  toggleMenuSelection(menuId: number): void {
-    if (this.formData.menuIds.includes(menuId)) {
-      this.formData.menuIds = this.formData.menuIds.filter((id) => id !== menuId);
-    } else {
-      this.formData.menuIds.push(menuId);
-    }
-  }
-
-  saveRol(): void {
-    if (!this.formData.nombre || !this.formData.descripcion) {
+  saveRol(formData: any): void {
+    if (!formData.nombre || !formData.descripcion) {
       this.showToast('Complete los campos obligatorios', 'error');
       return;
     }
     
     const payload: Partial<RolSistema> = {
-      nombre: this.formData.nombre,
-      descripcion: this.formData.descripcion,
-      menuIds: this.formData.menuIds,
-      activo: this.formData.activo
+      nombre: formData.nombre,
+      descripcion: formData.descripcion,
+      menuIds: formData.menuIds,
+      activo: formData.activo
     };
 
     const editing = this.editingRol();
@@ -183,20 +192,6 @@ export class RolesPage implements OnInit {
         });
       }
     });
-  }
-
-  getMenuNames(rol: RolSistema): string {
-    if (rol.menus && rol.menus.length > 0) {
-      return rol.menus.map(m => m.nombre).join(', ');
-    }
-    const mIds = rol.menuIds || [];
-    if (mIds.length > 0) {
-      return this.allMenus()
-        .filter(m => mIds.includes(m.id))
-        .map(m => m.nombre)
-        .join(', ');
-    }
-    return '';
   }
 
   private showToast(message: string, icon: 'success' | 'error'): void {
