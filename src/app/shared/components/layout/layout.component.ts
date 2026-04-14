@@ -20,7 +20,8 @@ import {
   lucideInfo,
   lucideChevronDown,
   lucideSettings,
-  lucideMenu
+  lucideMenu,
+  lucideX
 } from '@ng-icons/lucide';
 
 @Component({
@@ -45,7 +46,8 @@ import {
       lucideMenu,
       lucideInfo,
       lucideChevronDown,
-      lucideSettings
+      lucideSettings,
+      lucideX
     })
   ],
   templateUrl: './layout.component.html',
@@ -65,9 +67,18 @@ export class LayoutComponent {
   );
   
   collapsed = signal(false);
+  mobileSidebarOpen = signal(false);
 
   toggleSidebar(): void {
     this.collapsed.update(v => !v);
+  }
+
+  toggleMobileSidebar(): void {
+    this.mobileSidebarOpen.update(v => !v);
+  }
+
+  closeMobileSidebar(): void {
+    this.mobileSidebarOpen.set(false);
   }
 
   logout(): void {
