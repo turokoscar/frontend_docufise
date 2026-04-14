@@ -68,20 +68,27 @@
     --accent: 202 78% 66%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 349 63% 41%;
+    --destructive: var(--fise-rojo);
     --destructive-foreground: 0 0% 100%;
 
-    --success: 161 87% 40%;
+    --success: var(--fise-verde);
     --success-foreground: 0 0% 100%;
 
-    --warning: 44 95% 48%;
+    --warning: var(--fise-amarillo);
     --warning-foreground: 0 0% 0%;
 
     --border: 214 32% 91%;
     --input: 214 32% 91%;
-    --ring: 216 60% 42%;
+    --ring: var(--fise-azul);
 
     --radius: 0.5rem;
+
+    --fise-azul: #2e5ba7;
+    --fise-celeste: #69bbea;
+    --fise-cyan: #19aebe;
+    --fise-verde: #35b18c;
+    --fise-rojo: #aa2942;
+    --fise-amarillo: #f2b907;
 
     --sidebar-background: 216 60% 42%;
     --sidebar-foreground: 0 0% 100%;

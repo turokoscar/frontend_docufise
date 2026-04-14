@@ -70,6 +70,14 @@ module.exports = {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        fise: {
+          azul: "var(--fise-azul)",
+          celeste: "var(--fise-celeste)",
+          cyan: "var(--fise-cyan)",
+          verde: "var(--fise-verde)",
+          rojo: "var(--fise-rojo)",
+          amarillo: "var(--fise-amarillo)",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
