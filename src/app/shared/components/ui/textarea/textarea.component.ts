@@ -38,7 +38,7 @@ export class UiTextareaComponent {
   }
 
   protected textareaClasses(): string {
-    const base = 'w-full p-4 rounded-xl bg-[#F8FAFC] border border-[#CBD5E1] focus:bg-white focus:border-[#2C5AAB] focus:ring-4 focus:ring-[#2C5AAB]/5 transition-all outline-none font-body text-sm min-h-[100px] resize-y disabled:opacity-50 disabled:cursor-not-allowed';
+    const base = 'w-full p-4 rounded-xl bg-[#F8FAFC] border border-[#CBD5E1] focus:bg-white focus:border-[#2e5ba7] focus:ring-4 focus:ring-[#2e5ba7]/5 transition-all outline-none font-body text-sm min-h-[100px] resize-y disabled:opacity-50 disabled:cursor-not-allowed';
     return `${base} ${this.className()}`;
   }
 }

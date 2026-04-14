@@ -9,7 +9,7 @@ import { CommonModule } from '@angular/common';
     <div class="bg-card border border-border/40 shadow-sm overflow-visible">
       <div class="overflow-x-auto overflow-y-visible">
         <table class="w-full text-left border-collapse">
-          <thead class="bg-[#2C5AAB] text-white">
+          <thead class="bg-[#2e5ba7] text-white">
             <tr class="h-11">
               <ng-content select="[headers]"></ng-content>
             </tr>

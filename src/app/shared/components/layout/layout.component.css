@@ -7,12 +7,12 @@
 }
 
 .sidebar-scroll::-webkit-scrollbar-thumb {
-  background: #2C5AAB;
+  background: #2e5ba7;
   border-radius: 10px;
 }
 
 .sidebar-scroll::-webkit-scrollbar-thumb:hover {
-  background: #0FAEBF;
+  background: #19aebe;
 }
 
 /* Transitions for sub-labels and text */
@@ -23,7 +23,7 @@
 
 /* Sidebar active link styling */
 .active-link {
-  @apply bg-[#2C5AAB]/30 text-white shadow-[inset_0_0_15px_rgba(44,90,171,0.2)];
+  @apply bg-[#2e5ba7]/30 text-white shadow-[inset_0_0_15px_rgba(44,90,171,0.2)];
   border-left: 3px solid hsl(var(--secondary));
 }
 

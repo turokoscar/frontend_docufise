@@ -164,7 +164,7 @@ export class ExpedientesPage implements OnInit {
     const data = this.allDocumentos();
     const countByState = (s: string) => data.filter((doc: Documento) => (doc.estado || '').toUpperCase() === s.toUpperCase()).length;
     return [
-      { label: "Total", value: data.length, icon: 'lucideFile', color: "#2C5AAB" },
+      { label: "Total", value: data.length, icon: 'lucideFile', color: "#2e5ba7" },
       { label: "Registrados", value: countByState(ESTADOS_EXPEDIENTE.REGISTRADO), icon: 'lucideFile', color: "#3B82F6" },
       { label: "Pendientes", value: countByState(ESTADOS_EXPEDIENTE.PENDIENTE), icon: 'lucideClock', color: "#F59E0B" },
       { label: "Firmados", value: countByState(ESTADOS_EXPEDIENTE.FIRMADO), icon: 'lucideCircleCheck', color: "#10B981" },
@@ -266,7 +266,7 @@ export class ExpedientesPage implements OnInit {
       showCancelButton: true,
       confirmButtonText: 'Eliminar',
       cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#AB2741'
+      confirmButtonColor: '#aa2942'
     }).then((result) => {
       if (result.isConfirmed) {
         this.documentoService.delete(doc.id);

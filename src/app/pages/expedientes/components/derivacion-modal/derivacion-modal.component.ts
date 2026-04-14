@@ -41,7 +41,7 @@ import { AuthService } from '../../../../core/services/auth.service';
     >
       <div header class="flex items-center gap-4">
         <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-[#E8F0FE]">
-          <ng-icon name="lucideSend" class="h-6 w-6 text-[#2C5AAB]"></ng-icon>
+          <ng-icon name="lucideSend" class="h-6 w-6 text-[#2e5ba7]"></ng-icon>
         </div>
         <div>
           <h3 class="font-display text-xl font-bold text-[#0F172A]">Derivar Expediente</h3>
@@ -60,7 +60,7 @@ import { AuthService } from '../../../../core/services/auth.service';
             <div class="grid grid-cols-2 gap-4">
               <div class="space-y-0.5">
                 <p class="text-[9px] font-ui font-bold text-muted-foreground uppercase tracking-tight">Expediente</p>
-                <p class="text-sm font-ui font-extrabold text-[#2C5AAB]">{{ documento()?.numeracion }}</p>
+                <p class="text-sm font-ui font-extrabold text-[#2e5ba7]">{{ documento()?.numeracion }}</p>
               </div>
               <div class="space-y-0.5">
                 <p class="text-[9px] font-ui font-bold text-muted-foreground uppercase tracking-tight">Tipo</p>
@@ -75,8 +75,8 @@ import { AuthService } from '../../../../core/services/auth.service';
         <!-- Destino Section -->
         <div class="space-y-4">
           <div class="flex items-center gap-2">
-            <ng-icon name="lucideSend" class="text-[#2C5AAB] text-[10px]"></ng-icon>
-            <span class="text-[10px] font-ui font-bold text-[#2C5AAB] uppercase tracking-widest">Destino de Derivación</span>
+            <ng-icon name="lucideSend" class="text-[#2e5ba7] text-[10px]"></ng-icon>
+            <span class="text-[10px] font-ui font-bold text-[#2e5ba7] uppercase tracking-widest">Destino de Derivación</span>
           </div>
 
           <app-ui-select 

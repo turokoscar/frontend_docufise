@@ -43,7 +43,7 @@ export class UiSelectComponent {
   }
 
   protected selectClasses(): string {
-    const base = 'w-full pl-4 pr-10 h-11 rounded-xl bg-[#F8FAFC] border border-[#CBD5E1] focus:bg-white focus:border-[#2C5AAB] transition-all outline-none font-body text-sm appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed';
+    const base = 'w-full pl-4 pr-10 h-11 rounded-xl bg-[#F8FAFC] border border-[#CBD5E1] focus:bg-white focus:border-[#2e5ba7] transition-all outline-none font-body text-sm appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed';
     return `${base} ${this.className()}`;
   }
 }

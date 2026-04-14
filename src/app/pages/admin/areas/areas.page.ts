@@ -184,7 +184,7 @@ export class AreasPage implements OnInit {
       showCancelButton: true,
       confirmButtonText: 'Sí, eliminar',
       cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#AB2741'
+      confirmButtonColor: '#aa2942'
     }).then((result) => {
       if (result.isConfirmed) {
         this.apiService.deleteArea(area.id).subscribe({

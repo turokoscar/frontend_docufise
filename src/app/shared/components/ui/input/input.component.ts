@@ -101,7 +101,7 @@ export class UiInputComponent implements ControlValueAccessor {
   }
 
   protected inputClasses(): string {
-    const base = 'w-full h-11 rounded-xl bg-[#F8FAFC] border border-[#CBD5E1] focus:bg-white focus:border-[#2C5AAB] focus:ring-4 focus:ring-[#2C5AAB]/5 transition-all outline-none font-body text-sm';
+    const base = 'w-full h-11 rounded-xl bg-[#F8FAFC] border border-[#CBD5E1] focus:bg-white focus:border-[#2e5ba7] focus:ring-4 focus:ring-[#2e5ba7]/5 transition-all outline-none font-body text-sm';
     const padding = this.icon() ? 'pl-11 pr-4' : 'px-4';
     return `${base} ${padding} ${this.className()}`;
   }

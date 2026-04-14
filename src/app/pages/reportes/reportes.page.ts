@@ -107,14 +107,14 @@ export class ReportesPage implements OnInit {
         { 
           data: cantidadDocs, 
           label: 'Documentos', 
-          backgroundColor: '#2C5AAB',
+          backgroundColor: '#2e5ba7',
           borderRadius: 8,
           barThickness: 24
         },
         { 
           data: cantidadFirmas, 
           label: 'Firmas', 
-          backgroundColor: '#0FBF90',
+          backgroundColor: '#35b18c',
           borderRadius: 8,
           barThickness: 24
         }
@@ -136,28 +136,28 @@ export class ReportesPage implements OnInit {
         label: 'Total Expedientes', 
         value: total, 
         icon: 'lucideFileText', 
-        color: '#2C5AAB',
+        color: '#2e5ba7',
         trend: { value: stats?.tendenciaTotalDocumentos || 0, label: 'vs mes anterior' }
       },
       { 
         label: 'Firmas Completadas', 
         value: firmados, 
         icon: 'lucidePenTool', 
-        color: '#0FBF90',
+        color: '#35b18c',
         trend: { value: stats?.tendenciaTotalFirmados || 0, label: 'vs mes anterior' }
       },
       { 
         label: 'Pendientes de Firma', 
         value: pendientes, 
         icon: 'lucideClock', 
-        color: '#F2B801',
+        color: '#f2b907',
         trend: { value: stats?.tendenciaTotalPendientes || 0, label: 'vs mes anterior', reverse: true }
       },
       { 
         label: 'Tasa de Firma', 
         value: tasaFirma + '%', 
         icon: 'lucideCircleCheck', 
-        color: '#0FAEBF',
+        color: '#19aebe',
         trend: { value: stats?.tendenciaTasaFirma || 0, label: 'vs mes anterior' }
       },
     ];
@@ -169,10 +169,10 @@ export class ReportesPage implements OnInit {
     const count = (s: string) => docs.filter(doc => (doc.estado || '').toUpperCase() === s.toUpperCase()).length;
     return [
       { estado: 'Registrados', cantidad: count(ESTADOS_EXPEDIENTE.REGISTRADO), color: '#3B7DCC' },
-      { estado: 'Ingresados', cantidad: count(ESTADOS_EXPEDIENTE.INGRESADO), color: '#2C5AAB' },
-      { estado: 'Pendientes', cantidad: count(ESTADOS_EXPEDIENTE.PENDIENTE), color: '#F2B801' },
-      { estado: 'Observados', cantidad: count(ESTADOS_EXPEDIENTE.OBSERVADO), color: '#AB2741' },
-      { estado: 'Firmados', cantidad: count(ESTADOS_EXPEDIENTE.FIRMADO), color: '#0FBF90' },
+      { estado: 'Ingresados', cantidad: count(ESTADOS_EXPEDIENTE.INGRESADO), color: '#2e5ba7' },
+      { estado: 'Pendientes', cantidad: count(ESTADOS_EXPEDIENTE.PENDIENTE), color: '#f2b907' },
+      { estado: 'Observados', cantidad: count(ESTADOS_EXPEDIENTE.OBSERVADO), color: '#aa2942' },
+      { estado: 'Firmados', cantidad: count(ESTADOS_EXPEDIENTE.FIRMADO), color: '#35b18c' },
     ];
   });
 
@@ -207,14 +207,14 @@ export class ReportesPage implements OnInit {
       { 
         data: [0, 0, 0, 0, 0, 0], 
         label: 'Documentos', 
-        backgroundColor: '#2C5AAB',
+        backgroundColor: '#2e5ba7',
         borderRadius: 8,
         barThickness: 24
       },
       { 
         data: [0, 0, 0, 0, 0, 0], 
         label: 'Firmas', 
-        backgroundColor: '#0FBF90',
+        backgroundColor: '#35b18c',
         borderRadius: 8,
         barThickness: 24
       }

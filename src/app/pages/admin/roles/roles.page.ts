@@ -180,7 +180,7 @@ export class RolesPage implements OnInit {
       showCancelButton: true,
       confirmButtonText: 'Eliminar',
       cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#AB2741'
+      confirmButtonColor: '#aa2942'
     }).then((result) => {
       if (result.isConfirmed) {
         this.apiService.deleteRol(rol.id).subscribe({

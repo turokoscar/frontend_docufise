@@ -175,7 +175,7 @@ export class MenusPage implements OnInit {
       showCancelButton: true,
       confirmButtonText: 'Eliminar',
       cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#AB2741'
+      confirmButtonColor: '#aa2942'
     }).then((result) => {
       if (result.isConfirmed) {
         this.menus.update((prev: MenuSistema[]) => prev.filter(m => m.id !== menu.id));

@@ -93,7 +93,7 @@ export class KpiCardComponent {
   @Input() label: string = '';
   @Input() value: string | number = 0;
   @Input() icon: string = 'lucideLayers';
-  @Input() color: string = '#2C5AAB';
+  @Input() color: string = '#2e5ba7';
   @Input() variant: 'left' | 'bottom' | 'mini' = 'left';
   @Input() trend?: { value: number; label: string; reverse?: boolean };
 }

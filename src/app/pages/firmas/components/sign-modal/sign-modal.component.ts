@@ -134,7 +134,7 @@ export class SignModalComponent {
           icon: 'error',
           title: 'Error al firmar',
           text: err.message || 'Ocurrió un error al procesar la firma.',
-          confirmButtonColor: '#AB2741'
+          confirmButtonColor: '#aa2942'
         });
       }
     });

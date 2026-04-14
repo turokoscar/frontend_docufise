@@ -41,11 +41,11 @@ export class UiButtonComponent {
     const baseClasses = 'inline-flex items-center justify-center rounded-lg font-ui font-bold transition-all duration-200 outline-none focus:ring-4 disabled:opacity-50 disabled:cursor-not-allowed';
     
     const variantClasses: Record<ButtonVariant, string> = {
-      primary: 'bg-[#2C5AAB] text-white hover:bg-[#204381] shadow-md shadow-[#2C5AAB]/20 focus:ring-[#2C5AAB]/10',
-      secondary: 'bg-[#0FAEBF] text-white hover:bg-[#0d9aa9] shadow-md shadow-[#0FAEBF]/20 focus:ring-[#0FAEBF]/10',
-      outline: 'bg-white border border-[#E2E8F0] text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#2C5AAB] hover:border-[#2C5AAB]/30 focus:ring-[#F1F5F9]',
-      ghost: 'bg-transparent text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#2C5AAB] focus:ring-muted',
-      destructive: 'bg-[#AB2741] text-white hover:bg-[#8B1F33] shadow-sm focus:ring-[#AB2741]/10',
+      primary: 'bg-[#2e5ba7] text-white hover:bg-[#204381] shadow-md shadow-[#2e5ba7]/20 focus:ring-[#2e5ba7]/10',
+      secondary: 'bg-[#19aebe] text-white hover:bg-[#0d9aa9] shadow-md shadow-[#19aebe]/20 focus:ring-[#19aebe]/10',
+      outline: 'bg-white border border-[#E2E8F0] text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#2e5ba7] hover:border-[#2e5ba7]/30 focus:ring-[#F1F5F9]',
+      ghost: 'bg-transparent text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#2e5ba7] focus:ring-muted',
+      destructive: 'bg-[#aa2942] text-white hover:bg-[#8B1F33] shadow-sm focus:ring-[#aa2942]/10',
       white: 'bg-white text-[#334155] hover:bg-[#F8FAFC] border border-[#E2E8F0] shadow-sm',
       warning: 'bg-[#F59E0B] text-white hover:bg-[#D97706] shadow-md shadow-[#F59E0B]/20 focus:ring-[#F59E0B]/10'
     };

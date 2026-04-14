@@ -111,7 +111,7 @@ export class FirmasPage implements OnInit {
     const data = this.allFirmas();
     const countByState = (s: string) => data.filter((f: Firma) => (f.estado || '').toUpperCase() === s.toUpperCase()).length;
     return [
-      { label: "Bandeja", value: data.length, icon: 'lucideInbox', color: "#2C5AAB" },
+      { label: "Bandeja", value: data.length, icon: 'lucideInbox', color: "#2e5ba7" },
       { label: "Ingresados", value: countByState(ESTADOS_EXPEDIENTE.INGRESADO), icon: 'lucideDownload', color: "#6366F1" },
       { label: "Pendientes", value: countByState(ESTADOS_EXPEDIENTE.PENDIENTE), icon: 'lucideClock', color: "#F59E0B" },
       { label: "Firmados", value: countByState(ESTADOS_EXPEDIENTE.FIRMADO), icon: 'lucideCircleCheck', color: "#10B981" },

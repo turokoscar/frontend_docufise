@@ -107,7 +107,7 @@
       @for (doc of paginatedDocumentos(); track doc.id; let i = $index) {
         <tr class="hover:bg-primary/5 transition-colors" [ngClass]="{'bg-muted/10': i % 2 !== 0}">
           <td class="px-6 py-4">
-            <span class="font-ui font-bold text-[#2C5AAB] text-sm hover:underline cursor-pointer">{{ doc.numeracion }}</span>
+            <span class="font-ui font-bold text-[#2e5ba7] text-sm hover:underline cursor-pointer">{{ doc.numeracion }}</span>
           </td>
           <td class="px-6 py-4">
             <div class="flex items-center gap-2">
@@ -121,7 +121,7 @@
           <td class="px-6 py-4 font-body text-[13px] text-[#64748B] font-medium">
             {{ doc.usuarioEnvia || '---' }}
           </td>
-          <td class="px-6 py-4 font-body text-[13px] text-[#2C5AAB]/80 font-semibold">
+          <td class="px-6 py-4 font-body text-[13px] text-[#2e5ba7]/80 font-semibold">
             {{ doc.areaDestino || '---' }}
           </td>
           <td class="px-6 py-4 font-body text-[13px] text-[#64748B] tabular-nums">
