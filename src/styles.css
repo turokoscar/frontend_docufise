@@ -1,4 +1,45 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap');
+@import '@fontsource/poppins/400.css';
+@import '@fontsource/poppins/500.css';
+@import '@fontsource/poppins/600.css';
+@import '@fontsource/poppins/700.css';
+@import '@fontsource/poppins/800.css';
+@import '@fontsource/poppins/900.css';
+
+@font-face {
+  font-family: 'New Order';
+  src: url('./assets/new-order-font-family/New Order Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'New Order';
+  src: url('./assets/new-order-font-family/New Order Light.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'New Order';
+  src: url('./assets/new-order-font-family/New Order Medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'New Order';
+  src: url('./assets/new-order-font-family/New Order SemiBold.otf') format('opentype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'New Order';
+  src: url('./assets/new-order-font-family/New Order Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
 
 @tailwind base;
 @tailwind components;
@@ -7,7 +48,7 @@
 @layer base {
   :root {
     --background: 210 20% 97%;
-    --foreground: 0 0% 0%;
+    --foreground: #787878;
 
     --card: 0 0% 100%;
     --card-foreground: 0 0% 0%;
@@ -54,7 +95,7 @@
 
   .dark {
     --background: 220 20% 10%;
-    --foreground: 0 0% 95%;
+    --foreground: #A8A8A8;
     --card: 220 20% 14%;
     --card-foreground: 0 0% 95%;
     --popover: 220 20% 14%;
@@ -94,8 +135,8 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Calibri', 'Segoe UI', sans-serif;
-    font-size: 11pt;
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -105,15 +146,15 @@
 
 @layer components {
   .font-display {
-    font-family: 'Poppins', sans-serif;
+    font-family: 'New Order', sans-serif;
   }
 
   .font-ui {
-    font-family: 'Century Gothic', 'Calibri', sans-serif;
+    font-family: 'Poppins', sans-serif;
   }
 
   .font-body {
-    font-family: 'Calibri', 'Segoe UI', sans-serif;
+    font-family: 'Poppins', sans-serif;
   }
 
   /* Institutional gradient header */

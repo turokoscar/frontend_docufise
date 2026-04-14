@@ -14,9 +14,9 @@ module.exports = {
     },
     extend: {
       fontFamily: {
-        display: ["Poppins", "sans-serif"],
-        ui: ["Century Gothic", "Calibri", "sans-serif"],
-        body: ["Calibri", "Segoe UI", "sans-serif"],
+        display: ["New Order", "sans-serif"],
+        ui: ["Poppins", "sans-serif"],
+        body: ["Poppins", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
