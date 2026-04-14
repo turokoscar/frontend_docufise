@@ -11,7 +11,7 @@
       <div class="flex items-center gap-3">
         <button 
           (click)="toggleSidebar()" 
-          class="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-white/10 transition-colors"
+          class="flex items-center justify-center w-8 h-8 rounded-lg transition-colors"
         >
           <ng-icon name="lucideMenu" class="h-5 w-5"></ng-icon>
         </button>
@@ -21,24 +21,24 @@
         <img src="/assets/fise-logo.png" alt="FISE" class="h-8 brightness-0 invert">
         
         <div>
-          <h1 class="font-display text-base font-bold leading-tight tracking-tight">DocuFISE</h1>
-          <p class="text-[10px] opacity-60 font-ui tracking-wide hidden sm:block">Sistema Integrado de Gestión</p>
+          <h1 class="font-display text-base font-bold leading-tight tracking-tight">Sistema de Gestión Documentaria</h1>
+          <!-- <p class="text-[10px] opacity-60 font-ui tracking-wide hidden sm:block">Sistema Integrado de Gestión</p> -->
         </div>
       </div>
       
       <!-- Derecha: Usuario + Salir -->
       <div class="flex items-center gap-3">
-        <div class="flex items-center gap-3 bg-white/10 rounded-lg px-3 py-1.5">
+        <div class="flex items-center gap-3  rounded-lg px-3 py-1.5">
           <div class="flex flex-col items-end">
             <span class="text-sm font-ui font-semibold">{{ user()?.nombre }}</span>
             <span class="text-[10px] opacity-70 font-ui">{{ user()?.rol === 'CTD' ? 'Centro de Trámite Documentario' : user()?.rol }}</span>
           </div>
-          <span 
-            class="text-[10px] px-2 py-0.5 font-ui font-semibold rounded-full"
+          <!-- <span 
+            class="text-[10px] px-2 py-0.5 font-ui font-semibold"
             [ngClass]="getRoleStyle(user()?.rol)"
           >
             {{ user()?.rol }}
-          </span>
+          </span> -->
         </div>
         
         <button 
@@ -65,8 +65,13 @@
   <div class="flex flex-1 relative overflow-hidden">
     <!-- Sidebar - COPIA EXACTA DEL PROTOTIPO -->
     <aside 
-      class="bg-[hsl(220,20%,15%)] text-white flex flex-col shrink-0 transition-all duration-300 overflow-hidden z-10"
-      [ngClass]="collapsed() ? 'w-16' : 'w-60'"
+      class="bg-[hsl(220,20%,15%)] text-white flex flex-col shrink-0 transition-all duration-300 overflow-hidden z-10 fixed lg:relative top-14 lg:top-0 left-0 h-[calc(100vh-3.5rem)] lg:h-auto"
+      [ngClass]="{
+        'w-60': !collapsed(),
+        'w-16': collapsed(),
+        'max-lg:translate-x-0': mobileSidebarOpen(),
+        'max-lg:-translate-x-full': !mobileSidebarOpen()
+      }"
     >
       <!-- Sidebar header -->
       <div 
@@ -99,6 +104,7 @@
               class="flex items-center gap-3 rounded-xl transition-all duration-200 font-ui text-sm"
               [ngClass]="collapsed() ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5 hover:bg-white/8 hover:text-white text-white/70 active'"
               [title]="collapsed() ? menu.nombre : ''"
+              (click)="closeMobileSidebarIfNeeded()"
             >
               <ng-icon [name]="getMenuIcon(menu.icono)" class="w-[18px] h-[18px] shrink-0"></ng-icon>
               @if (!collapsed()) {
@@ -130,6 +136,7 @@
                 class="flex items-center gap-3 rounded-xl transition-all duration-200 font-ui text-sm"
                 [ngClass]="collapsed() ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5 hover:bg-white/8 hover:text-white text-white/70'"
                 [title]="collapsed() ? menu.nombre : ''"
+                (click)="closeMobileSidebarIfNeeded()"
               >
                 <ng-icon [name]="getMenuIcon(menu.icono)" class="w-[18px] h-[18px] shrink-0"></ng-icon>
                 @if (!collapsed()) {
@@ -153,6 +160,13 @@
         </div>
       }
     </aside>
+
+    <!-- Mobile backdrop -->
+    <div 
+      class="fixed inset-0 bg-black/50 z-5 lg:hidden" 
+      *ngIf="mobileSidebarOpen()" 
+      (click)="mobileSidebarOpen.set(false)"
+    ></div>
 
     <!-- Main Content con scroll independiente -->
     <div class="flex-1 flex flex-col bg-background page-pattern overflow-hidden">

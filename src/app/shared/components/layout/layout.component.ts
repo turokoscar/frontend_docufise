@@ -65,9 +65,19 @@ export class LayoutComponent {
   );
   
   collapsed = signal(false);
+  mobileSidebarOpen = signal(false);
 
   toggleSidebar(): void {
-    this.collapsed.update(v => !v);
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+      this.mobileSidebarOpen.update(v => !v);
+    }
+    // On desktop, do nothing - sidebar stays visible
+  }
+
+  closeMobileSidebarIfNeeded(): void {
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+      this.mobileSidebarOpen.set(false);
+    }
   }
 
   logout(): void {
