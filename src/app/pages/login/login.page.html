@@ -31,9 +31,9 @@
   <!-- Panel Derecho (Formulario) -->
   <div class="flex-1 flex flex-col bg-background">
     <div class="flex-1 flex items-center justify-center p-8">
-      <div class="w-full max-w-md space-y-8">
+      <div class="w-full max-w-md space-y-4">
         <div class="text-center">
-          <img src="/assets/fise-logo.png" alt="FISE" class="h-32 mx-auto mb-8">
+          <img src="/assets/logo.svg" alt="FISE" class="h-32 mx-auto mb-6">
           <h1 class="font-display text-2xl font-extrabold text-foreground tracking-tight">Iniciar Sesión</h1>
           <p class="mt-1 text-muted-foreground font-body text-sm">Ingrese sus credenciales para acceder al sistema.</p>
         </div>
@@ -81,14 +81,11 @@
           </div>
 
           <div class="flex items-center justify-between px-1">
-            <label class="flex items-center gap-2 cursor-pointer group">
+            <!-- <label class="flex items-center gap-2 cursor-pointer group">
               <input type="checkbox" class="w-4 h-4 rounded border-border text-primary focus:ring-primary/20">
               <span class="text-[11px] font-ui text-muted-foreground group-hover:text-primary transition-colors">Recordar sesión</span>
-            </label>
-            <span class="text-[11px] text-primary cursor-pointer hover:underline font-ui font-semibold">¿Olvidó su contraseña?</span>
-          </div>
-
-          <app-ui-button
+            </label> -->
+            <app-ui-button
             type="submit"
             variant="primary"
             size="lg"
@@ -98,6 +95,10 @@
             Acceder al Sistema
             <ng-icon name="lucideArrowRight" class="h-4 w-4 ml-1"></ng-icon>
           </app-ui-button>
+            <span class="text-[11px] text-primary cursor-pointer hover:underline font-ui font-semibold">¿Olvidó su contraseña?</span>
+          </div>
+
+          
         </form>
 
         <!-- Accesos rápidos -->

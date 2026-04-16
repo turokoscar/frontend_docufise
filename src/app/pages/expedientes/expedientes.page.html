@@ -10,7 +10,7 @@
   </nav>
 
   <!-- Page Header -->
-  <app-ui-page-header 
+  <!-- <app-ui-page-header 
     title="Gestión de Expedientes" 
     subtitle="Registro, clasificación y derivación de documentos" 
     icon="lucideFileText"
@@ -25,10 +25,10 @@
         Añadir nuevo
       </app-ui-button>
     </div>
-  </app-ui-page-header>
+  </app-ui-page-header> -->
 
   <!-- KPI Section -->
-  <app-ui-section-label label="Resumen General"></app-ui-section-label>
+  <app-ui-section-label label="Resumen General Gestión de Expedientes"></app-ui-section-label>
   <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
     @for (kpi of kpis(); track kpi.label) {
       <app-ui-kpi-card
@@ -51,7 +51,7 @@
         (onValueChange)="updateFilters('search', $event)"
         class="flex-1 min-w-[300px]"
       >
-        <ng-icon icon name="lucideSearch" class="h-4 w-4"></ng-icon>
+      <ng-icon icon name="lucideSearch" class="h-4 w-4"></ng-icon>
       </app-ui-input>
 
       <!-- Tipo Select -->
@@ -81,6 +81,15 @@
         <option value="OBSERVADO">Observado</option>
         <option value="FIRMADO">Firmado</option>
       </app-ui-select>
+
+      <app-ui-button variant="warning" size="lg" (onClick)="exportToExcel()">
+        <ng-icon name="lucideFileSpreadsheet" class="h-4 w-4"></ng-icon>
+        Exportar Excel
+      </app-ui-button>
+      <app-ui-button variant="primary" size="lg" (onClick)="openNewForm()">
+        <ng-icon name="lucidePlus" class="h-4 w-4"></ng-icon>
+        Añadir nuevo
+      </app-ui-button>
     </app-ui-filter-panel>
   </div>
 
@@ -93,14 +102,14 @@
   <!-- Main Table -->
   <app-ui-table>
     <ng-container headers>
-      <th class="px-6 font-ui text-[10px] font-bold tracking-widest">Numeración</th>
-      <th class="px-6 font-ui text-[10px] font-bold tracking-widest">Tipo Documento</th>
-      <th class="px-6 font-ui text-[10px] font-bold tracking-widest">Elaborado por</th>
-      <th class="px-6 font-ui text-[10px] font-bold tracking-widest">Enviado por</th>
-      <th class="px-6 font-ui text-[10px] font-bold tracking-widest">Destino</th>
-      <th class="px-6 font-ui text-[10px] font-bold tracking-widest">Fecha</th>
-      <th class="px-6 font-ui text-[10px] font-bold tracking-widest text-center">Estado</th>
-      <th class="px-6 font-ui text-[10px] font-bold tracking-widest text-center">Acciones</th>
+      <th class="px-6 font-ui text-[12px] font-bold tracking-widest">Numeración</th>
+      <th class="px-6 font-ui text-[12px] font-bold tracking-widest">Tipo Documento</th>
+      <th class="px-6 font-ui text-[12px] font-bold tracking-widest">Elaborado por</th>
+      <th class="px-6 font-ui text-[12px] font-bold tracking-widest">Enviado por</th>
+      <th class="px-6 font-ui text-[12px] font-bold tracking-widest">Destino</th>
+      <th class="px-6 font-ui text-[12px] font-bold tracking-widest">Fecha</th>
+      <th class="px-6 font-ui text-[12px] font-bold tracking-widest text-center">Estado</th>
+      <th class="px-6 font-ui text-[12px] font-bold tracking-widest text-center">Acciones</th>
     </ng-container>
 
     <ng-container rows>

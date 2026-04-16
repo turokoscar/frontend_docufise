@@ -1,4 +1,4 @@
-<div class="space-y-6">
+<div class="space-y-4">
   <!-- Breadcrumb -->
   <nav class="flex items-center gap-2 text-[11px] font-ui text-muted-foreground/60">
     <a routerLink="/" class="flex items-center gap-1.5 hover:text-primary transition-colors">
@@ -13,12 +13,12 @@
   <div class="flex items-center justify-between pb-2 border-b border-border/50">
     <div>
       <h2 class="font-display text-2xl font-extrabold text-foreground tracking-tight">Panel Ejecutivo</h2>
-      <p class="text-sm text-muted-foreground font-body mt-1">Resumen general del sistema DocuFISE — Abril 2026</p>
+      <!-- <p class="text-sm text-muted-foreground font-body mt-1">Resumen general del sistema</p> -->
     </div>
-    <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-border bg-background font-ui text-[10px] font-bold uppercase tracking-widest">
+    <!-- <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-border bg-background font-ui text-[10px] font-bold uppercase tracking-widest">
       <ng-icon name="lucideActivity" class="h-3.5 w-3.5 text-success animate-pulse"></ng-icon>
       Datos en tiempo real
-    </div>
+    </div> -->
   </div>
 
   <!-- KPI Strip -->
@@ -101,7 +101,7 @@
   </div>
 
   <!-- Multi-state Summary (Mini KPIs) -->
-  <div class="space-y-0 pt-2">
+  <div class="space-y-0 pt-1">
     <app-ui-section-label label="Estado de Expedientes"></app-ui-section-label>
     <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
       @for (item of datosReporte(); track item.estado) {
